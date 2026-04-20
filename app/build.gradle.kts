@@ -68,6 +68,7 @@ dependencies {
     implementation(projects.common.preferencesStorage)
     // Feature
     implementation(projects.feature.onboarding)
+    implementation(projects.feature.main)
 
     // Dependencies
     ksp(libs.hilt.compiler)

@@ -32,6 +32,10 @@ import com.xxmrk888ytxx.apexowner.core.extension.ScreenContent
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
 import com.xxmrk888ytxx.compose.extension.setContentWithThemeAndProviders
 import com.xxmrk888ytxx.compose.theme.AppSeedColors.MustardYellow
+import com.xxmrk888ytxx.main.MainScreen
+import com.xxmrk888ytxx.main.MainViewModel
+import com.xxmrk888ytxx.main.model.MainScreenEvent
+import com.xxmrk888ytxx.main.model.ScreenState
 import com.xxmrk888ytxx.onboarding.OnboardingScreen
 import com.xxmrk888ytxx.onboarding.OnboardingViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -101,7 +105,7 @@ class MainActivity : ComponentActivity() {
                     },
                     entryProvider = entryProvider {
                         entry<Screen.MainScreen> {
-                            Text("Main Screen")
+                            ScreenContent<ScreenState, MainScreenEvent, MainViewModel>(::MainScreen)
                         }
 
                         entry<Screen.OnboardingScreen> {
