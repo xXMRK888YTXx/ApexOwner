@@ -1,6 +1,6 @@
 package com.xxmrk888ytxx.apexowner.data
 
-import com.xxmrk888ytxx.apexowner.core.Screen
+import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope

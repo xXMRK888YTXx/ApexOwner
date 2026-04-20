@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -16,8 +17,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -27,9 +30,13 @@ import androidx.navigation3.ui.NavDisplay
 import com.xxmrk888ytxx.android.ToastManager
 import com.xxmrk888ytxx.android.mvi.UiEvent
 import com.xxmrk888ytxx.android.viewModel.stub.Stub
-import com.xxmrk888ytxx.apexowner.core.Screen
+import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.core.extension.ScreenContent
+import com.xxmrk888ytxx.apexowner.core.navigation.BottomBarScreen
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
+import com.xxmrk888ytxx.apexowner.view.mainActivity.model.ApexOwnerBottomBarItem
+import com.xxmrk888ytxx.apexowner.view.mainActivity.model.MainActivityEvent
+import com.xxmrk888ytxx.apexowner.view.mainActivity.ui.ApexOwnerBottomBar
 import com.xxmrk888ytxx.compose.extension.setContentWithThemeAndProviders
 import com.xxmrk888ytxx.compose.theme.AppSeedColors.MustardYellow
 import com.xxmrk888ytxx.main.MainScreen
@@ -48,9 +55,6 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var toastManager: ToastManager
 
-    @Inject
-    lateinit var navigationManager: NavigationManager
-
     private val viewModel: MainActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,21 +63,27 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         splashScreen.setKeepOnScreenCondition { viewModel.isScreenLoading.value }
         setContentWithThemeAndProviders(
-            navigator = navigationManager,
+            navigator = viewModel.navigator,
             toastManager = toastManager,
             themeColor = MutableStateFlow(MustardYellow),
         ) {
+            val backStack by viewModel.backStack.collectAsState()
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
+                bottomBar = {
+                    BottomBar(
+                        backStack = backStack,
+                        onBottomItemClicked = { viewModel.onEvent(MainActivityEvent.BottomItemClicked(it)) }
+                    )
+                }
             ) { paddingValues ->
-                val backStack by navigationManager.backStack.collectAsState()
                 NavDisplay(
                     entryDecorators = listOf(
                         rememberSaveableStateHolderNavEntryDecorator(),
                         rememberViewModelStoreNavEntryDecorator()
                     ),
                     backStack = backStack,
-                    onBack = { navigationManager.navigateUp() },
+                    onBack = { viewModel.onEvent(MainActivityEvent.NavigationUp) },
                     predictivePopTransitionSpec = { swipeEdge ->
                         val enterTransition = fadeIn(
                             animationSpec = tween(
@@ -118,6 +128,25 @@ class MainActivity : ComponentActivity() {
                     },
                     modifier = Modifier.padding(paddingValues)
                 )
+            }
+        }
+    }
+
+    @Composable
+    private fun BottomBar(
+        backStack: List<Screen>,
+        onBottomItemClicked: (ApexOwnerBottomBarItem) -> Unit
+    ) {
+        val items = remember {
+            ApexOwnerBottomBarItem.itemList
+        }
+        val bottomBarItemOfCurrentScreen = remember(backStack.lastOrNull()) {
+            (backStack.lastOrNull() as? BottomBarScreen)?.itemId
+        }
+        AnimatedVisibility(bottomBarItemOfCurrentScreen != null) {
+            ApexOwnerBottomBar(items, bottomBarItemOfCurrentScreen ?: -1) {
+                if (it.id == bottomBarItemOfCurrentScreen) return@ApexOwnerBottomBar
+                onBottomItemClicked(it)
             }
         }
     }

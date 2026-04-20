@@ -1,6 +1,6 @@
 package com.xxmrk888ytxx.apexowner.featureContract.onboarding
 
-import com.xxmrk888ytxx.apexowner.core.Screen
+import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
 import com.xxmrk888ytxx.apexowner.domain.SettingsRepository
 import com.xxmrk888ytxx.onboarding.contract.FinishOnboardingContract
