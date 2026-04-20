@@ -9,6 +9,7 @@ import com.xxmrk888ytxx.apexowner.domain.SettingsRepository
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.MainActivityEvent
 import com.xxmrk888ytxx.core.base.android.viewModel.ApexOwnerViewModel
 import com.xxmrk888ytxx.core.base.android.viewModel.stub.Stub
+import com.xxmrk888ytxx.core.devicepolicy.DeviceOwnerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val deviceOwnerManager: DeviceOwnerManager
 ) : ApexOwnerViewModel<Stub, MainActivityEvent>(Stub) {
 
     override val state: StateFlow<Stub> = MutableStateFlow(Stub)
@@ -62,7 +64,12 @@ class MainActivityViewModel @Inject constructor(
                 // TODO
             }
             MainActivityEvent.NavigationUp -> navigationManager.navigateUp()
+            MainActivityEvent.OnResume -> updateDeviceOwnerState()
         }
+    }
+
+    private fun updateDeviceOwnerState() = viewModelScope.launch {
+        deviceOwnerManager.updateDeviceOwnerState()
     }
 
     init {

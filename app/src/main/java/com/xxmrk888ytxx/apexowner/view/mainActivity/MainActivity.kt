@@ -130,6 +130,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.onEvent(MainActivityEvent.OnResume)
+    }
+
     @Composable
     private fun BottomBar(
         backStack: List<Screen>,

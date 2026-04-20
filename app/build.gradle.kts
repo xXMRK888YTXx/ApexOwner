@@ -64,8 +64,9 @@ extensions.configure<ApplicationExtension> {
 dependencies {
     // Core
     implementation(projects.core.base.compose)
-    // Common
     implementation(projects.core.preferencesStorage)
+    implementation(projects.core.devicePolicy)
+    // Common
     // Feature
     implementation(projects.feature.onboarding)
     implementation(projects.feature.main)

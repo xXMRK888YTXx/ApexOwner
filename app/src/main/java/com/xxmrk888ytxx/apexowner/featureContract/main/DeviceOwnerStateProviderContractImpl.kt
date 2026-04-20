@@ -1,13 +1,13 @@
 package com.xxmrk888ytxx.apexowner.featureContract.main
 
+import com.xxmrk888ytxx.core.devicepolicy.DeviceOwnerManager
 import com.xxmrk888ytxx.feature.main.contract.DeviceOwnerStateProviderContract
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
 class DeviceOwnerStateProviderContractImpl @Inject constructor(
-
+    deviceOwnerManager: DeviceOwnerManager
 ) : DeviceOwnerStateProviderContract {
-    //TODO implement this
-    override val isDeviceOwner: Flow<Boolean> = flowOf(false)
+    override val isDeviceOwner: Flow<Boolean> = deviceOwnerManager.isDeviceOwner
 }
