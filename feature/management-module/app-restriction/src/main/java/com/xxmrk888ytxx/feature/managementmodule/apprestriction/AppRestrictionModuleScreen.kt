@@ -63,6 +63,15 @@ fun AppRestrictionModuleScreen(
                 isAvailable = true,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleCameraDisabled
             ),
+            Restriction(
+                id = 1,
+                iconRes = R.drawable.mic,
+                title = R.string.disable_microphone.uiText(),
+                description = R.string.prevent_all_applications_and_system_from_accessing_the_microphone_and_recording_audio.uiText(),
+                isEnabled = screenState.isMicrophoneDisabled,
+                isAvailable = true,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleMicrophoneDisabled
+            ),
         )
     }
 

@@ -12,11 +12,13 @@ class RestrictionManageContractImpl @Inject constructor(
     private val deviceOwnerManager: DeviceOwnerManager
 ) : RestrictionManageContract {
     override val isCameraDisabled: Flow<Boolean> = deviceOwnerManager.isCameraDisabled
-
-    override val isMicrophoneDisabled: Flow<Boolean>
-        get() = flowOf(false)
+    override val isMicrophoneDisabled: Flow<Boolean> = deviceOwnerManager.isMicrophoneDisabled
 
     override suspend fun setCameraDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default) {
         deviceOwnerManager.setCameraDisabled(isDisabled)
+    }
+
+    override suspend fun setMicrophoneDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default) {
+        deviceOwnerManager.setMicrophoneDisabled(isDisabled)
     }
 }

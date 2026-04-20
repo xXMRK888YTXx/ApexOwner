@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.Flow
 interface DeviceOwnerManager {
     val isDeviceOwner: Flow<Boolean>
     val isCameraDisabled: Flow<Boolean>
-    suspend fun updateDeviceOwnerState()
+    val isMicrophoneDisabled: Flow<Boolean>
     suspend fun setCameraDisabled(isDisabled: Boolean)
+    suspend fun setMicrophoneDisabled(isDisabled: Boolean)
+    suspend fun updateDeviceOwnerState()
 }
