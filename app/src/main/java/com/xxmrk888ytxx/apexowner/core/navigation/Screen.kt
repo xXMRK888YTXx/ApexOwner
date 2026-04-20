@@ -15,4 +15,7 @@ sealed interface Screen : NavKey {
         override val itemId: Int
             get() = ApexOwnerBottomBarItem.MainScreen.id
     }
+
+    @Serializable
+    data object DeviceRestrictionModuleScreen : Screen
 }

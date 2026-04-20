@@ -9,7 +9,7 @@ import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
-interface OnboardingModule {
+interface OnboardingFeatureModule {
     @Binds
     fun bindsFinishOnboardingContract(
         finishOnboardingContractImpl: FinishOnboardingContractImpl
