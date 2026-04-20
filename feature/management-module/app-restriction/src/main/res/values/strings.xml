@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_not_device_owner">App not device owner</string>
+    <string name="an_error_has_occurred">An error has occurred</string>
+    <string name="app_restriction">App Restriction</string>
+    <string name="disable_camera">Disable Camera</string>
+    <string name="prevent_all_applications_from_accessing_the_camera_hardware">Prevent all applications from accessing the camera hardware.</string>
+</resources>

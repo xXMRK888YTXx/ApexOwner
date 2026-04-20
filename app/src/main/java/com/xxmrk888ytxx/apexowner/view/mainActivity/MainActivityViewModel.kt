@@ -68,7 +68,7 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    private fun updateDeviceOwnerState() = viewModelScope.launch {
+    private fun updateDeviceOwnerState() = viewModelScope.launch(Dispatchers.Default) {
         deviceOwnerManager.updateDeviceOwnerState()
     }
 

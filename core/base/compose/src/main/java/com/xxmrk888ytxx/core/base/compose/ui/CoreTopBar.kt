@@ -11,10 +11,12 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.xxmrk888ytxx.core.base.compose.LocalNavigator
 import com.xxmrk888ytxx.core.base.compose.R
 
 
@@ -29,8 +31,12 @@ fun CoreTopBar(
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
     scrollBehavior: TopAppBarScrollBehavior? = null,
     isShouldShowBackArrow: Boolean = true,
-    onNavigateBack: () -> Unit
+    onNavigateBack: (() -> Unit)? = null
 ) {
+    val navigator = LocalNavigator.current
+    val onNavigateBack = remember {
+        onNavigateBack ?: { navigator.navigateUp() }
+    }
     CenterAlignedTopAppBar(
         title = title,
         modifier = modifier,
