@@ -91,7 +91,11 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     } catch (_: SecurityException) {
         false
     }
-    private fun isUSBDataSignalDisabled() = !devicePolicyManager.isUsbDataSignalingEnabled
+    private fun isUSBDataSignalDisabled() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        !devicePolicyManager.isUsbDataSignalingEnabled
+    } else {
+        false
+    }
 
     private fun <T> MutableStateFlow<T>.asAndroidDeviceOwnerFlow(): Flow<T> =
         asStateFlow().onSubscription { updateDeviceOwnerState() }
