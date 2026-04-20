@@ -21,14 +21,18 @@ class AppRestrictionModuleViewModel @Inject constructor(
 ) {
     override val state: StateFlow<ScreenState> = combine(
         restrictionManageContract.isCameraDisabled,
-        restrictionManageContract.isMicrophoneDisabled
+        restrictionManageContract.isMicrophoneDisabled,
+        restrictionManageContract.isUSBDataSignalDisabled
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
+        val isUSBDataSignalDisabled = flowArray[2]
 
         ScreenState(
             isCameraDisabled = isCameraDisabled,
-            isMicrophoneDisabled = isMicrophoneDisabled
+            isMicrophoneDisabled = isMicrophoneDisabled,
+            isCanDisableUSBDataSignal = restrictionManageContract.isCanDisableUSBDataSignal,
+            isUSBDataSignalDisabled = isUSBDataSignalDisabled
         )
     }.stateWhileSubscribed()
 
@@ -37,7 +41,13 @@ class AppRestrictionModuleViewModel @Inject constructor(
         when (event) {
             AppRestrictionModuleUiEvent.ToggleCameraDisabled -> toggleCameraDisabled()
             AppRestrictionModuleUiEvent.ToggleMicrophoneDisabled -> toggleMicrophoneDisabled()
+            AppRestrictionModuleUiEvent.ToggleUSBDataSignalDisable -> toggleUSBDataSignalDisable()
         }
+    }
+
+    private fun toggleUSBDataSignalDisable() = changeRestrictionState {
+        val isUSBDataSignalDisabled = state.value.isUSBDataSignalDisabled
+        restrictionManageContract.setUSBDataSignalDisabled(!isUSBDataSignalDisabled)
     }
 
     private fun toggleMicrophoneDisabled() = changeRestrictionState {

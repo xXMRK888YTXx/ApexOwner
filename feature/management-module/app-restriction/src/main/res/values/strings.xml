@@ -7,4 +7,7 @@
     <string name="prevent_all_applications_from_accessing_the_camera_hardware">Prevent all apps and system services from accessing the camera hardware.</string>
     <string name="disable_microphone">Disable Microphone</string>
     <string name="prevent_all_applications_and_system_from_accessing_the_microphone_and_recording_audio">Prevent all apps and system services from accessing the microphone and recording audio.</string>
+    <string name="restriction_usb_data_title">Disable USB Data signal</string>
+    <string name="restriction_usb_data_description">Disable USB data signaling to prevent file transfers and external connections. The port will function exclusively for charging the device.</string>
+    <string name="restriction_usb_data_unavailable">Your device hardware does not support this restriction.</string>
 </resources>

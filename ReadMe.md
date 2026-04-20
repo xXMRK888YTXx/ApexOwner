@@ -24,3 +24,8 @@ adb shell pm remove-user <Номер пользователя>
 ```
 Номер пользователя это то что идет сразу после фигурной скобки
 У основного пользователя все 0, его не трогаем, остальное удаляем
+
+# Снять Device Owner
+```adb
+adb shell dpm remove-active-admin --user 0 com.xxmrk888ytxx.apexowner/com.xxmrk888ytxx.core.devicepolicy.ApexDeviceOwnerReceiver
+```

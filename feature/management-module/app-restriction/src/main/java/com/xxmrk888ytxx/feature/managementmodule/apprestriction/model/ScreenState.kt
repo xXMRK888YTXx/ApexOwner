@@ -4,5 +4,7 @@ import com.xxmrk888ytxx.core.base.android.mvi.UiState
 
 data class ScreenState(
     val isCameraDisabled: Boolean = false,
-    val isMicrophoneDisabled: Boolean = false
+    val isMicrophoneDisabled: Boolean = false,
+    val isCanDisableUSBDataSignal: Boolean = true,
+    val isUSBDataSignalDisabled: Boolean = false
 ) : UiState

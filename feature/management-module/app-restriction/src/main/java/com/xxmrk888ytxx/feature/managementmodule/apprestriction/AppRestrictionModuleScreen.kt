@@ -72,6 +72,16 @@ fun AppRestrictionModuleScreen(
                 isAvailable = true,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleMicrophoneDisabled
             ),
+            Restriction(
+                id = 2,
+                iconRes = R.drawable.usb,
+                title = R.string.restriction_usb_data_title.uiText(),
+                description = R.string.restriction_usb_data_description.uiText(),
+                isEnabled = screenState.isUSBDataSignalDisabled,
+                isAvailable = screenState.isCanDisableUSBDataSignal,
+                unavailableMessage = R.string.restriction_usb_data_unavailable.uiText(),
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUSBDataSignalDisable
+            ),
         )
     }
 
