@@ -7,7 +7,7 @@ plugins {
 }
 
 extensions.configure<LibraryExtension> {
-    namespace = "com.xxmrk888ytxx.compose"
+    namespace = "com.xxmrk888ytxx.core.compose"
 
     buildFeatures {
         compose = true

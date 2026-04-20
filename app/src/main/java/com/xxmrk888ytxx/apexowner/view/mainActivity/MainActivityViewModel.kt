@@ -3,14 +3,12 @@
 package com.xxmrk888ytxx.apexowner.view.mainActivity
 
 import androidx.lifecycle.viewModelScope
-import com.xxmrk888ytxx.android.logs.Logger
-import com.xxmrk888ytxx.android.viewModel.ApexOwnerViewModel
-import com.xxmrk888ytxx.android.viewModel.stub.Stub
-import com.xxmrk888ytxx.android.viewModel.stub.StubViewModel
 import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
 import com.xxmrk888ytxx.apexowner.domain.SettingsRepository
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.MainActivityEvent
+import com.xxmrk888ytxx.core.android.viewModel.ApexOwnerViewModel
+import com.xxmrk888ytxx.core.android.viewModel.stub.Stub
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -56,11 +54,6 @@ class MainActivityViewModel @Inject constructor(
             isAppReady.value = true
             prepareScreenScope.cancel()
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        Logger.writeDebugLog("onCleared")
     }
 
     override fun onEvent(event: MainActivityEvent) {

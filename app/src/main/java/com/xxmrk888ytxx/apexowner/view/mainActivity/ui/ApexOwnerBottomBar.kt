@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.ApexOwnerBottomBarItem
-import com.xxmrk888ytxx.compose.asString
+import com.xxmrk888ytxx.core.compose.asString
 
 @Composable
 fun ApexOwnerBottomBar(

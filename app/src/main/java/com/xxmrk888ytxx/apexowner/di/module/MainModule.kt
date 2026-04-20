@@ -1,7 +1,7 @@
 package com.xxmrk888ytxx.apexowner.di.module
 
 import com.xxmrk888ytxx.apexowner.featureContract.main.DeviceOwnerStateProviderContractImpl
-import com.xxmrk888ytxx.main.contract.DeviceOwnerStateProviderContract
+import com.xxmrk888ytxx.feature.main.contract.DeviceOwnerStateProviderContract
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

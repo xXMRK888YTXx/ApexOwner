@@ -5,7 +5,7 @@ plugins {
 }
 
 extensions.configure<LibraryExtension> {
-    namespace = "com.xxmrk888ytxx.preferencesstorage"
+    namespace = "com.xxmrk888ytxx.common.preferencesstorage"
 }
 
 dependencies {

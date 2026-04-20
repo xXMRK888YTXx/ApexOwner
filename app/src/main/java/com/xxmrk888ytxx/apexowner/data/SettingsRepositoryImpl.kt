@@ -3,7 +3,7 @@ package com.xxmrk888ytxx.apexowner.data
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import com.xxmrk888ytxx.apexowner.domain.SettingsRepository
 import com.xxmrk888ytxx.apexowner.domain.model.ApexOwnerSettings
-import com.xxmrk888ytxx.preferencesstorage.PreferencesStorage
+import com.xxmrk888ytxx.common.preferencesstorage.PreferencesStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

@@ -2,8 +2,8 @@ package com.xxmrk888ytxx.apexowner.view.mainActivity.model
 
 import androidx.annotation.DrawableRes
 import com.xxmrk888ytxx.apexowner.R
-import com.xxmrk888ytxx.coreandroid.uiText.UiText
-import com.xxmrk888ytxx.coreandroid.uiText.uiText
+import com.xxmrk888ytxx.core.android.uiText.UiText
+import com.xxmrk888ytxx.core.android.uiText.uiText
 
 sealed class ApexOwnerBottomBarItem(
     val id: Int,

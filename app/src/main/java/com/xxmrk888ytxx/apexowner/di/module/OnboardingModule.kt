@@ -1,7 +1,7 @@
 package com.xxmrk888ytxx.apexowner.di.module
 
 import com.xxmrk888ytxx.apexowner.featureContract.onboarding.FinishOnboardingContractImpl
-import com.xxmrk888ytxx.onboarding.contract.FinishOnboardingContract
+import com.xxmrk888ytxx.feature.onboarding.contract.FinishOnboardingContract
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

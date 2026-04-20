@@ -3,5 +3,5 @@ plugins {
 }
 
 android {
-    namespace = "com.xxmrk888ytxx.main"
+    namespace = "com.xxmrk888ytxx.feature.main"
 }

@@ -26,26 +26,26 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.xxmrk888ytxx.android.ToastManager
-import com.xxmrk888ytxx.android.mvi.UiEvent
-import com.xxmrk888ytxx.android.viewModel.stub.Stub
 import com.xxmrk888ytxx.apexowner.core.extension.ScreenContent
 import com.xxmrk888ytxx.apexowner.core.navigation.BottomBarScreen
 import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.ApexOwnerBottomBarItem
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.MainActivityEvent
 import com.xxmrk888ytxx.apexowner.view.mainActivity.ui.ApexOwnerBottomBar
-import com.xxmrk888ytxx.compose.extension.setContentWithThemeAndProviders
-import com.xxmrk888ytxx.compose.theme.AppSeedColors.MustardYellow
-import com.xxmrk888ytxx.main.MainScreen
-import com.xxmrk888ytxx.main.MainViewModel
-import com.xxmrk888ytxx.main.model.MainScreenEvent
-import com.xxmrk888ytxx.main.model.ScreenState
-import com.xxmrk888ytxx.onboarding.OnboardingScreen
-import com.xxmrk888ytxx.onboarding.OnboardingViewModel
+import com.xxmrk888ytxx.core.android.ToastManager
+import com.xxmrk888ytxx.core.compose.extension.setContentWithThemeAndProviders
+import com.xxmrk888ytxx.core.compose.theme.AppSeedColors.MustardYellow
+import com.xxmrk888ytxx.feature.main.MainScreen
+import com.xxmrk888ytxx.feature.main.MainViewModel
+import com.xxmrk888ytxx.feature.main.model.MainScreenEvent
+import com.xxmrk888ytxx.feature.main.model.ScreenState
+import com.xxmrk888ytxx.feature.onboarding.OnboardingScreen
+import com.xxmrk888ytxx.feature.onboarding.OnboardingViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
+import com.xxmrk888ytxx.core.android.mvi.UiEvent
+import com.xxmrk888ytxx.core.android.viewModel.stub.Stub
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

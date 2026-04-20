@@ -3,5 +3,5 @@ plugins {
 }
 
 android {
-    namespace = "com.xxmrk888ytxx.onboarding"
+    namespace = "com.xxmrk888ytxx.feature.onboarding"
 }

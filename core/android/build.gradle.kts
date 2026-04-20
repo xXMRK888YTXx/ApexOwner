@@ -6,7 +6,7 @@ plugins {
 }
 
 extensions.configure<LibraryExtension> {
-    namespace = "com.xxmrk888ytxx.android"
+    namespace = "com.xxmrk888ytxx.core.android"
 }
 
 dependencies {
