@@ -20,7 +20,7 @@ import com.xxmrk888ytxx.compose.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CenterAlignedTopAppBarWithBackArrow(
+fun CoreTopBar(
     title: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {},
@@ -28,18 +28,21 @@ fun CenterAlignedTopAppBarWithBackArrow(
     windowInsets: WindowInsets = WindowInsets(),
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    isShouldShowBackArrow: Boolean = true,
     onNavigateBack: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         title = title,
         modifier = modifier,
         navigationIcon = {
-            IconButton(onClick = onNavigateBack) {
-                Icon(
-                    painter = painterResource(R.drawable.arrow_back),
-                    contentDescription = "Back",
-                    modifier = Modifier.size(24.dp)
-                )
+            if (isShouldShowBackArrow) {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(
+                        painter = painterResource(R.drawable.arrow_back),
+                        contentDescription = "Back",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
         },
         actions = actions,

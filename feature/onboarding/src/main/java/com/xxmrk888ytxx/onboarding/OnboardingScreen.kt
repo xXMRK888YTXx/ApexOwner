@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import com.xxmrk888ytxx.android.mvi.SideEffect
 import com.xxmrk888ytxx.android.mvi.UiEvent
 import com.xxmrk888ytxx.android.viewModel.stub.Stub
-import com.xxmrk888ytxx.compose.extension.HandleSideEffect
+import com.xxmrk888ytxx.compose.extension.HandleSideEffects
 import com.xxmrk888ytxx.onboarding.model.OnboardingScreenSideEffect
 import com.xxmrk888ytxx.onboarding.model.OnboardingScreenUiEvent
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +23,7 @@ fun OnboardingScreen(
 ) {
 
     val navigator = LocalNavigator.current
-    HandleSideEffect<OnboardingScreenSideEffect>(sideEffect) { }
+    HandleSideEffects<OnboardingScreenSideEffect>(sideEffect) { }
 
     Column(Modifier.fillMaxSize()) {
         Text("OnboardingScreen")

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="to_use_all_of_the_app_s_features_you_need_to_grant_device_owner_privileges_tap_the_button_below_to_learn_how_to_set_this_up">To use all of the app\'s features, you need to grant Device Owner privileges. Tap the button below to learn how to set this up.</string>
+    <string name="permissions_granted_successfully_you_now_have_full_access_to_manage_device_policies_using_the_modules_below">Permissions granted successfully. You now have full access to manage device policies using the modules below.</string>
+    <string name="device_owner_active">Device Owner: Active</string>
+    <string name="action_required">Action Required</string>
+    <string name="how_to_grant_permission">How to grant permission</string>
+    <string name="device_restrictions">Device Restrictions</string>
+    <string name="limit_device_features_to_enhance_your_privacy_e_g_camera_microphone_usb_data_transfer">Limit device features to enhance your privacy (e.g., camera, microphone, USB data transfer)</string>
+    <string name="device_management">Device Management</string>
+    <string name="management_modules">Management Modules</string>
+</resources>

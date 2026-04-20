@@ -16,7 +16,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,10 +29,9 @@ import androidx.navigation3.ui.NavDisplay
 import com.xxmrk888ytxx.android.ToastManager
 import com.xxmrk888ytxx.android.mvi.UiEvent
 import com.xxmrk888ytxx.android.viewModel.stub.Stub
-import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.core.extension.ScreenContent
 import com.xxmrk888ytxx.apexowner.core.navigation.BottomBarScreen
-import com.xxmrk888ytxx.apexowner.domain.NavigationManager
+import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.ApexOwnerBottomBarItem
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.MainActivityEvent
 import com.xxmrk888ytxx.apexowner.view.mainActivity.ui.ApexOwnerBottomBar

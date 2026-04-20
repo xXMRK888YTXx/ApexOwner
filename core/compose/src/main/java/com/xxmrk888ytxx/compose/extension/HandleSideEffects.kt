@@ -10,8 +10,29 @@ import kotlinx.coroutines.flow.Flow
 import com.xxmrk888ytxx.compose.LocalToastManager
 import com.xxmrk888ytxx.compose.LocalNavigator
 
+
 @Composable
-inline fun <reified EFFECT : SideEffect> HandleSideEffect(
+fun HandleSideEffects(
+    sideEffects: Flow<SideEffect>,
+) {
+    val toastManager = LocalToastManager.current
+    val context = LocalContext.current
+    val navigator = LocalNavigator.current
+
+    LaunchedEffect(sideEffects) {
+        sideEffects.collect {
+            when(it) {
+                is DefaultSideEffect.ShowToast -> toastManager.showToast(it.message.asString(context))
+                is DefaultSideEffect.NavigationBack -> navigator.navigateUp()
+                is DefaultSideEffect.NavigationAction -> it.action(navigator)
+                else -> {}
+            }
+        }
+    }
+}
+
+@Composable
+inline fun <reified EFFECT : SideEffect> HandleSideEffects(
     sideEffects: Flow<SideEffect>,
     crossinline onEffect: suspend (EFFECT) -> Unit
 ) {
