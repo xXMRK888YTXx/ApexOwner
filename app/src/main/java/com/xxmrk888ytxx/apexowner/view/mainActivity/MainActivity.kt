@@ -32,9 +32,9 @@ import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.ApexOwnerBottomBarItem
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.MainActivityEvent
 import com.xxmrk888ytxx.apexowner.view.mainActivity.ui.ApexOwnerBottomBar
-import com.xxmrk888ytxx.core.android.ToastManager
-import com.xxmrk888ytxx.core.compose.extension.setContentWithThemeAndProviders
-import com.xxmrk888ytxx.core.compose.theme.AppSeedColors.MustardYellow
+import com.xxmrk888ytxx.core.base.android.ToastManager
+import com.xxmrk888ytxx.core.base.compose.extension.setContentWithThemeAndProviders
+import com.xxmrk888ytxx.core.base.compose.theme.AppSeedColors.MustardYellow
 import com.xxmrk888ytxx.feature.main.MainScreen
 import com.xxmrk888ytxx.feature.main.MainViewModel
 import com.xxmrk888ytxx.feature.main.model.MainScreenEvent
@@ -44,8 +44,8 @@ import com.xxmrk888ytxx.feature.onboarding.OnboardingViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
-import com.xxmrk888ytxx.core.android.mvi.UiEvent
-import com.xxmrk888ytxx.core.android.viewModel.stub.Stub
+import com.xxmrk888ytxx.core.base.android.mvi.UiEvent
+import com.xxmrk888ytxx.core.base.android.viewModel.stub.Stub
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

@@ -1,6 +1,6 @@
 package com.xxmrk888ytxx.feature.main
 
-import com.xxmrk888ytxx.core.android.viewModel.ApexOwnerViewModel
+import com.xxmrk888ytxx.core.base.android.viewModel.ApexOwnerViewModel
 import com.xxmrk888ytxx.feature.main.contract.DeviceOwnerStateProviderContract
 import com.xxmrk888ytxx.feature.main.model.MainScreenEvent
 import com.xxmrk888ytxx.feature.main.model.ScreenState

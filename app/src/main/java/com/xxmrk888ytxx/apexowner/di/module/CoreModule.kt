@@ -1,7 +1,7 @@
 package com.xxmrk888ytxx.apexowner.di.module
 
 import android.content.Context
-import com.xxmrk888ytxx.core.android.ToastManager
+import com.xxmrk888ytxx.core.base.android.ToastManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

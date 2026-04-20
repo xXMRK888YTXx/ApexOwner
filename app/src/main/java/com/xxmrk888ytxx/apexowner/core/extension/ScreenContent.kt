@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.xxmrk888ytxx.core.android.mvi.SideEffect
-import com.xxmrk888ytxx.core.android.mvi.UiEvent
-import com.xxmrk888ytxx.core.android.mvi.UiState
-import com.xxmrk888ytxx.core.android.viewModel.ApexOwnerViewModel
+import com.xxmrk888ytxx.core.base.android.mvi.SideEffect
+import com.xxmrk888ytxx.core.base.android.mvi.UiEvent
+import com.xxmrk888ytxx.core.base.android.mvi.UiState
+import com.xxmrk888ytxx.core.base.android.viewModel.ApexOwnerViewModel
 import kotlinx.coroutines.flow.Flow
 
 @Composable

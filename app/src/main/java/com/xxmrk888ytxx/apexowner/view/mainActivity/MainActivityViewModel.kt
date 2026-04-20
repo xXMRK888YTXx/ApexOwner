@@ -7,8 +7,8 @@ import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
 import com.xxmrk888ytxx.apexowner.domain.SettingsRepository
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.MainActivityEvent
-import com.xxmrk888ytxx.core.android.viewModel.ApexOwnerViewModel
-import com.xxmrk888ytxx.core.android.viewModel.stub.Stub
+import com.xxmrk888ytxx.core.base.android.viewModel.ApexOwnerViewModel
+import com.xxmrk888ytxx.core.base.android.viewModel.stub.Stub
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

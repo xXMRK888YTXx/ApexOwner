@@ -1,8 +1,8 @@
 package com.xxmrk888ytxx.feature.onboarding
 
 import androidx.lifecycle.viewModelScope
-import com.xxmrk888ytxx.core.android.mvi.UiEvent
-import com.xxmrk888ytxx.core.android.viewModel.stub.StubViewModel
+import com.xxmrk888ytxx.core.base.android.mvi.UiEvent
+import com.xxmrk888ytxx.core.base.android.viewModel.stub.StubViewModel
 import com.xxmrk888ytxx.feature.onboarding.contract.FinishOnboardingContract
 import com.xxmrk888ytxx.feature.onboarding.model.OnboardingScreenSideEffect
 import com.xxmrk888ytxx.feature.onboarding.model.OnboardingScreenUiEvent

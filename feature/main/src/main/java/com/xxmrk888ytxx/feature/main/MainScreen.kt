@@ -33,9 +33,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.xxmrk888ytxx.core.android.mvi.SideEffect
-import com.xxmrk888ytxx.core.compose.extension.HandleSideEffects
-import com.xxmrk888ytxx.core.compose.ui.CoreTopBar
+import com.xxmrk888ytxx.core.base.android.mvi.SideEffect
+import com.xxmrk888ytxx.core.base.compose.extension.HandleSideEffects
+import com.xxmrk888ytxx.core.base.compose.ui.CoreTopBar
 import com.xxmrk888ytxx.feature.main.model.DeviceOwnerModule
 import com.xxmrk888ytxx.feature.main.model.MainScreenEvent
 import com.xxmrk888ytxx.feature.main.model.ScreenState
