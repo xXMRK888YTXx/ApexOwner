@@ -70,6 +70,7 @@ dependencies {
     // Feature
     implementation(projects.feature.onboarding)
     implementation(projects.feature.main)
+    implementation(projects.feature.managementModule.appRestriction)
 
     // Dependencies
     ksp(libs.hilt.compiler)

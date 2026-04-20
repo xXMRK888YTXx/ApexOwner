@@ -47,6 +47,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 import com.xxmrk888ytxx.core.base.android.mvi.UiEvent
 import com.xxmrk888ytxx.core.base.android.viewModel.stub.Stub
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.AppRestrictionModuleScreen
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.AppRestrictionModuleViewModel
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.AppRestrictionModuleUiEvent
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.ScreenState as AppRestrictionScreenState
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -72,7 +76,13 @@ class MainActivity : ComponentActivity() {
                 bottomBar = {
                     BottomBar(
                         backStack = backStack,
-                        onBottomItemClicked = { viewModel.onEvent(MainActivityEvent.BottomItemClicked(it)) }
+                        onBottomItemClicked = {
+                            viewModel.onEvent(
+                                MainActivityEvent.BottomItemClicked(
+                                    it
+                                )
+                            )
+                        }
                     )
                 }
             ) { paddingValues ->
@@ -114,7 +124,9 @@ class MainActivity : ComponentActivity() {
                     },
                     entryProvider = entryProvider {
                         entry<Screen.DeviceRestrictionModuleScreen> {
-                            Text("DeviceRestrictionModuleScreen")
+                            ScreenContent<AppRestrictionScreenState, AppRestrictionModuleUiEvent, AppRestrictionModuleViewModel>(
+                                ::AppRestrictionModuleScreen
+                            )
                         }
 
                         entry<Screen.MainScreen> {
