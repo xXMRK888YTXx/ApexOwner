@@ -8,6 +8,7 @@ import com.xxmrk888ytxx.feature.managementmodule.apprestriction.exception.AppNot
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.AppRestrictionModuleUiEvent
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -22,17 +23,20 @@ class AppRestrictionModuleViewModel @Inject constructor(
     override val state: StateFlow<ScreenState> = combine(
         restrictionManageContract.isCameraDisabled,
         restrictionManageContract.isMicrophoneDisabled,
-        restrictionManageContract.isUSBDataSignalDisabled
+        restrictionManageContract.isUSBDataSignalDisabled,
+        restrictionManageContract.isUSBFileTransferDisabled,
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
         val isUSBDataSignalDisabled = flowArray[2]
+        val isUSBFileTransferDisabled = flowArray[3]
 
         ScreenState(
             isCameraDisabled = isCameraDisabled,
             isMicrophoneDisabled = isMicrophoneDisabled,
             isCanDisableUSBDataSignal = restrictionManageContract.isCanDisableUSBDataSignal,
-            isUSBDataSignalDisabled = isUSBDataSignalDisabled
+            isUSBDataSignalDisabled = isUSBDataSignalDisabled,
+            isUSBFileTransferDisabled = isUSBFileTransferDisabled
         )
     }.stateWhileSubscribed()
 
@@ -42,7 +46,13 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleCameraDisabled -> toggleCameraDisabled()
             AppRestrictionModuleUiEvent.ToggleMicrophoneDisabled -> toggleMicrophoneDisabled()
             AppRestrictionModuleUiEvent.ToggleUSBDataSignalDisable -> toggleUSBDataSignalDisable()
+            AppRestrictionModuleUiEvent.ToggleUSBFileTransferDisabled -> toggleUSBFileTransferDisabled()
         }
+    }
+
+    private fun toggleUSBFileTransferDisabled() = changeRestrictionState {
+        val isUSBFileTransferDisabled = state.value.isUSBFileTransferDisabled
+        restrictionManageContract.setUSBFileTransferDisabled(!isUSBFileTransferDisabled)
     }
 
     private fun toggleUSBDataSignalDisable() = changeRestrictionState {

@@ -9,7 +9,7 @@ data class Restriction(
     val title: UiText,
     val description: UiText,
     val isEnabled: Boolean,
-    val isAvailable: Boolean,
+    val isAvailable: Boolean = true,
     val unavailableMessage: UiText? = null,
     val uiEventForToggle: AppRestrictionModuleUiEvent
 )

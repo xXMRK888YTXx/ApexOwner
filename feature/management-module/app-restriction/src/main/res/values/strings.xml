@@ -8,6 +8,8 @@
     <string name="disable_microphone">Disable Microphone</string>
     <string name="prevent_all_applications_and_system_from_accessing_the_microphone_and_recording_audio">Prevent all apps and system services from accessing the microphone and recording audio.</string>
     <string name="restriction_usb_data_title">Disable USB Data signal</string>
-    <string name="restriction_usb_data_description">Disable USB data signaling to prevent file transfers and external connections. The port will function exclusively for charging the device.</string>
+    <string name="restriction_usb_data_description">This feature completely disables all USB data signaling, rendering the port incapable of any communication. All peripheral devices—including storage drives, keyboards, mice, and monitors—will be blocked. The port will function exclusively as an isolated charging interface, significantly enhancing protection against BadUSB-style attacks.</string>
     <string name="restriction_usb_data_unavailable">Your device hardware does not support this restriction.</string>
+    <string name="disable_usb_file_transfer">Disable USB file transfer</string>
+    <string name="disables_file_sharing_with_other_devices_via_usb_please_note_that_only_file_transfer_protocols_mtp_ptp_are_restricted_peripherals_and_connected_accessories_will_continue_to_function_normally_this_setting_does_not_provide_protection_against_badusb_attacks">Disables file sharing with other devices via USB. Please note that only file transfer protocols (MTP/PTP) are restricted; peripherals and connected accessories will continue to function normally. This setting does not provide protection against BadUSB attacks.</string>
 </resources>

@@ -7,9 +7,11 @@ interface DeviceOwnerManager {
     val isCameraDisabled: Flow<Boolean>
     val isMicrophoneDisabled: Flow<Boolean>
     val isUSBDataSignalDisabled: Flow<Boolean>
+    val isUSBFileTransferDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     suspend fun setCameraDisabled(isDisabled: Boolean)
     suspend fun setMicrophoneDisabled(isDisabled: Boolean)
     suspend fun setUSBDataSignalDisabled(isDisabled: Boolean)
+    suspend fun setUSBFileTransferDisabled(isDisabled: Boolean)
     suspend fun updateDeviceOwnerState()
 }

@@ -6,5 +6,6 @@ data class ScreenState(
     val isCameraDisabled: Boolean = false,
     val isMicrophoneDisabled: Boolean = false,
     val isCanDisableUSBDataSignal: Boolean = true,
-    val isUSBDataSignalDisabled: Boolean = false
+    val isUSBDataSignalDisabled: Boolean = false,
+    val isUSBFileTransferDisabled: Boolean = false
 ) : UiState

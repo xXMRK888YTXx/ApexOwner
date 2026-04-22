@@ -1,6 +1,5 @@
 package com.xxmrk888ytxx.feature.managementmodule.apprestriction
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,9 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,7 +32,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.xxmrk888ytxx.core.base.android.mvi.SideEffect
-import com.xxmrk888ytxx.core.base.android.mvi.UiEvent
 import com.xxmrk888ytxx.core.base.android.uiText.uiText
 import com.xxmrk888ytxx.core.base.compose.asString
 import com.xxmrk888ytxx.core.base.compose.extension.HandleSideEffects
@@ -60,7 +56,6 @@ fun AppRestrictionModuleScreen(
                 title = R.string.disable_camera.uiText(),
                 description = R.string.prevent_all_applications_from_accessing_the_camera_hardware.uiText(),
                 isEnabled = screenState.isCameraDisabled,
-                isAvailable = true,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleCameraDisabled
             ),
             Restriction(
@@ -69,7 +64,6 @@ fun AppRestrictionModuleScreen(
                 title = R.string.disable_microphone.uiText(),
                 description = R.string.prevent_all_applications_and_system_from_accessing_the_microphone_and_recording_audio.uiText(),
                 isEnabled = screenState.isMicrophoneDisabled,
-                isAvailable = true,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleMicrophoneDisabled
             ),
             Restriction(
@@ -81,6 +75,14 @@ fun AppRestrictionModuleScreen(
                 isAvailable = screenState.isCanDisableUSBDataSignal,
                 unavailableMessage = R.string.restriction_usb_data_unavailable.uiText(),
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUSBDataSignalDisable
+            ),
+            Restriction(
+                id = 3,
+                iconRes = R.drawable.transform,
+                title = R.string.disable_usb_file_transfer.uiText(),
+                description = R.string.disables_file_sharing_with_other_devices_via_usb_please_note_that_only_file_transfer_protocols_mtp_ptp_are_restricted_peripherals_and_connected_accessories_will_continue_to_function_normally_this_setting_does_not_provide_protection_against_badusb_attacks.uiText(),
+                isEnabled = screenState.isUSBFileTransferDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUSBFileTransferDisabled
             ),
         )
     }

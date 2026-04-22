@@ -6,4 +6,5 @@ sealed interface AppRestrictionModuleUiEvent : UiEvent {
     data object ToggleCameraDisabled : AppRestrictionModuleUiEvent
     data object ToggleMicrophoneDisabled : AppRestrictionModuleUiEvent
     data object ToggleUSBDataSignalDisable: AppRestrictionModuleUiEvent
+    data object ToggleUSBFileTransferDisabled: AppRestrictionModuleUiEvent
 }

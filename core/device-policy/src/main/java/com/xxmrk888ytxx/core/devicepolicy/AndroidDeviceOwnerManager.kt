@@ -28,11 +28,15 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isCameraDisabled = MutableStateFlow(checkIsCameraDisabled())
     private val _isMicrophoneDisabled = MutableStateFlow(false)
     private val _isUSBDataSignalDisabled = MutableStateFlow(checkIsUSBDataSignalDisabled())
+    private val _isUSBFileTransferDisabled = MutableStateFlow(false)
+
 
     override val isCameraDisabled: Flow<Boolean> = _isCameraDisabled.asAndroidDeviceOwnerFlow()
-    override val isMicrophoneDisabled: Flow<Boolean> =
-        _isMicrophoneDisabled.asAndroidDeviceOwnerFlow()
-    override val isUSBDataSignalDisabled: Flow<Boolean> = _isUSBDataSignalDisabled.asStateFlow()
+    override val isMicrophoneDisabled: Flow<Boolean> = _isMicrophoneDisabled.asAndroidDeviceOwnerFlow()
+    override val isUSBDataSignalDisabled: Flow<Boolean> = _isUSBDataSignalDisabled.asAndroidDeviceOwnerFlow()
+    override val isUSBFileTransferDisabled: Flow<Boolean> = _isUSBFileTransferDisabled.asAndroidDeviceOwnerFlow()
+
+
     override val isCanDisableUSBDataSignal: Boolean
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             devicePolicyManager.canUsbDataSignalingBeDisabled()
@@ -51,6 +55,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         val userRestriction = devicePolicyManager.getUserRestrictions(deviceOwnerReceiver)
         _isMicrophoneDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE, false)
+        _isUSBFileTransferDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_USB_FILE_TRANSFER, false)
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -65,6 +70,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             devicePolicyManager.isUsbDataSignalingEnabled = !isDisabled
         }
+    }
+
+    override suspend fun setUSBFileTransferDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER, isDisabled)
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {
