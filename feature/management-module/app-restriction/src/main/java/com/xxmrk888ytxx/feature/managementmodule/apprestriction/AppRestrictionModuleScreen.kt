@@ -100,6 +100,14 @@ fun AppRestrictionModuleScreen(
                 isEnabled = screenState.isInstallAppsFromUnknownSourcesDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleInstallAppsFromUnknownSourcesDisabled
             ),
+            Restriction(
+                id = 6,
+                iconRes = R.drawable.delete,
+                title =R.string.block_app_removal.uiText(),
+                description = R.string.disables_the_ability_to_uninstall_applications_all_existing_apps_will_be_locked_against_deletion.uiText(),
+                isEnabled = screenState.isUninstallAppsDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUninstallAppsDisabled
+            ),
         )
     }
 

@@ -27,6 +27,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isUSBFileTransferDisabled,
         restrictionManageContract.isInstallAppsDisabled,
         restrictionManageContract.isInstallAppsFromUnknownSourcesDisabled,
+        restrictionManageContract.isUninstallAppsDisabled,
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -34,6 +35,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isUSBFileTransferDisabled = flowArray[3]
         val isInstallAppsDisabled = flowArray[4]
         val isInstallAppsFromUnknownSourcesDisabled = flowArray[5]
+        val isUninstallAppsDisabled = flowArray[6]
 
         ScreenState(
             isCameraDisabled = isCameraDisabled,
@@ -43,6 +45,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isUSBFileTransferDisabled = isUSBFileTransferDisabled,
             isInstallAppsDisabled = isInstallAppsDisabled,
             isInstallAppsFromUnknownSourcesDisabled = isInstallAppsFromUnknownSourcesDisabled,
+            isUninstallAppsDisabled = isUninstallAppsDisabled,
         )
     }.stateWhileSubscribed()
 
@@ -55,7 +58,13 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleUSBFileTransferDisabled -> toggleUSBFileTransferDisabled()
             AppRestrictionModuleUiEvent.ToggleInstallAppsDisabled -> toggleInstallAppsDisabled()
             AppRestrictionModuleUiEvent.ToggleInstallAppsFromUnknownSourcesDisabled -> toggleInstallAppsFromUnknownSourcesDisabled()
+            AppRestrictionModuleUiEvent.ToggleUninstallAppsDisabled -> toggleUninstallAppsDisabled()
         }
+    }
+
+    private fun toggleUninstallAppsDisabled() = changeRestrictionState {
+        val isUninstallAppsDisabled = state.value.isUninstallAppsDisabled
+        restrictionManageContract.setUninstallAppsDisabled(!isUninstallAppsDisabled)
     }
 
     private fun toggleInstallAppsFromUnknownSourcesDisabled() = changeRestrictionState {

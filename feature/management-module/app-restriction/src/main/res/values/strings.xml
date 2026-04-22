@@ -16,4 +16,6 @@
     <string name="completely_prohibits_the_installation_of_applications_from_any_source_including_official_app_stores_and_manual_package_installations_sideloading">Completely prohibits the installation of applications from any source, including official app stores and manual package installations (sideloading).</string>
     <string name="blocks_the_installation_of_third_party_packages_and_manual_sideloading_app_installations_via_authorized_stores_are_not_affected">Blocks the installation of third-party packages and manual sideloading. App installations via authorized stores are not affected.</string>
     <string name="block_installations_from_unknown_sources">Block installations from unknown sources</string>
+    <string name="disables_the_ability_to_uninstall_applications_all_existing_apps_will_be_locked_against_deletion">Disables the ability to uninstall applications. All existing apps will be locked against deletion.</string>
+    <string name="block_app_removal">Block App Removal</string>
 </resources>

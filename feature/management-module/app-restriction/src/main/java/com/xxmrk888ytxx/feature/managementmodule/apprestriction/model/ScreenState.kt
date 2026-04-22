@@ -9,5 +9,6 @@ data class ScreenState(
     val isUSBDataSignalDisabled: Boolean = false,
     val isUSBFileTransferDisabled: Boolean = false,
     val isInstallAppsDisabled: Boolean = false,
-    val isInstallAppsFromUnknownSourcesDisabled: Boolean = false
+    val isInstallAppsFromUnknownSourcesDisabled: Boolean = false,
+    val isUninstallAppsDisabled: Boolean = false,
 ) : UiState
