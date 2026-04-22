@@ -13,8 +13,10 @@ interface DeviceOwnerManager {
     val isUninstallAppsDisabled: Flow<Boolean>
     val isAppControlDisabled: Flow<Boolean>
     val isScreenContentCaptureForAIDisabled: Flow<Boolean>
+    val isContentSuggestionDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
+    val isCanDisableContentSuggestion: Boolean
     suspend fun setCameraDisabled(isDisabled: Boolean)
     suspend fun setMicrophoneDisabled(isDisabled: Boolean)
     suspend fun setUSBDataSignalDisabled(isDisabled: Boolean)
@@ -24,5 +26,6 @@ interface DeviceOwnerManager {
     suspend fun setUninstallAppsDisabled(isDisabled: Boolean)
     suspend fun setAppControlDisabled(isDisabled: Boolean)
     suspend fun setScreenContentCaptureForAIDisabled(isDisabled: Boolean)
+    suspend fun setContentSuggestionDisabled(isDisabled: Boolean)
     suspend fun updateDeviceOwnerState()
 }

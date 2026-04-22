@@ -125,6 +125,15 @@ fun AppRestrictionModuleScreen(
                 isAvailable = screenState.isCanDisableScreenContentCaptureForAI,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleScreenContentCaptureForAIDisabled
             ),
+            Restriction(
+                id = 9,
+                iconRes = R.drawable.lightbulb,
+                title = R.string.disable_contextual_content_suggestions.uiText(),
+                description = R.string.prevents_the_system_from_suggesting_actions_or_content_based_on_what_you_select_on_your_screen_this_disables_smart_suggestions_that_analyze_your_current_screen_context_to_offer_relevant_links_apps_or_information.uiText(),
+                isEnabled = screenState.isContentSuggestionDisabled,
+                isAvailable = screenState.isCanDisableContentSuggestion,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleContentSuggestionDisabled
+            ),
         )
     }
 

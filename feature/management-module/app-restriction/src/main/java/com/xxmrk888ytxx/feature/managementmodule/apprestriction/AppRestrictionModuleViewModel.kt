@@ -29,7 +29,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isInstallAppsFromUnknownSourcesDisabled,
         restrictionManageContract.isUninstallAppsDisabled,
         restrictionManageContract.isAppControlDisabled,
-        restrictionManageContract.isScreenContentCaptureForAIDisabled
+        restrictionManageContract.isScreenContentCaptureForAIDisabled,
+        restrictionManageContract.isContentSuggestionDisabled
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -40,6 +41,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isUninstallAppsDisabled = flowArray[6]
         val isAppControlDisabled = flowArray[7]
         val isScreenContentCaptureForAIDisabled = flowArray[8]
+        val isContentSuggestionDisabled = flowArray[9]
 
         ScreenState(
             isCameraDisabled = isCameraDisabled,
@@ -52,7 +54,9 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isUninstallAppsDisabled = isUninstallAppsDisabled,
             isAppControlDisabled = isAppControlDisabled,
             isCanDisableScreenContentCaptureForAI = restrictionManageContract.isCanDisableScreenContentCaptureForAI,
-            isScreenContentCaptureForAIDisabled = isScreenContentCaptureForAIDisabled
+            isScreenContentCaptureForAIDisabled = isScreenContentCaptureForAIDisabled,
+            isContentSuggestionDisabled = isContentSuggestionDisabled,
+            isCanDisableContentSuggestion = restrictionManageContract.isCanDisableContentSuggestion
         )
     }.stateWhileSubscribed()
 
@@ -68,7 +72,13 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleUninstallAppsDisabled -> toggleUninstallAppsDisabled()
             AppRestrictionModuleUiEvent.ToggleAppControlDisabled -> toggleAppControlDisabled()
             AppRestrictionModuleUiEvent.ToggleScreenContentCaptureForAIDisabled -> toggleScreenContentCaptureForAIDisabled()
+            AppRestrictionModuleUiEvent.ToggleContentSuggestionDisabled -> toggleContentSuggestionDisabled()
         }
+    }
+
+    private fun toggleContentSuggestionDisabled() = changeRestrictionState {
+        val isContentSuggestionDisabled = state.value.isContentSuggestionDisabled
+        restrictionManageContract.setContentSuggestionDisabled(!isContentSuggestionDisabled)
     }
 
     private fun toggleScreenContentCaptureForAIDisabled() = changeRestrictionState {

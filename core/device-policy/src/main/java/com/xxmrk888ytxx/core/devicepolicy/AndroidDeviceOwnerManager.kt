@@ -35,6 +35,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isUninstallAppsDisabled = MutableStateFlow(false)
     private val _isAppControlDisabled = MutableStateFlow(false)
     private val _isScreenContentCaptureForAIDisabled = MutableStateFlow(false)
+    private val _isContentSuggestionDisabled = MutableStateFlow(false)
 
 
 
@@ -47,6 +48,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     override val isUninstallAppsDisabled: Flow<Boolean> = _isUninstallAppsDisabled.asAndroidDeviceOwnerFlow()
     override val isAppControlDisabled: Flow<Boolean> = _isAppControlDisabled.asAndroidDeviceOwnerFlow()
     override val isScreenContentCaptureForAIDisabled: Flow<Boolean> = _isScreenContentCaptureForAIDisabled.asAndroidDeviceOwnerFlow()
+    override val isContentSuggestionDisabled: Flow<Boolean> = _isContentSuggestionDisabled.asAndroidDeviceOwnerFlow()
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -56,6 +58,9 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
             false
         }
     override val isCanDisableScreenContentCaptureForAI: Boolean
+        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.Q)
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+    override val isCanDisableContentSuggestion: Boolean
         @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.Q)
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
@@ -77,6 +82,9 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         _isAppControlDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_APPS_CONTROL, false)
         if (isCanDisableScreenContentCaptureForAI) {
             _isScreenContentCaptureForAIDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_CONTENT_CAPTURE, false)
+        }
+        if (isCanDisableContentSuggestion) {
+            _isContentSuggestionDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_CONTENT_SUGGESTIONS, false)
         }
     }
 
@@ -115,8 +123,14 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     }
 
     override suspend fun setScreenContentCaptureForAIDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (isCanDisableScreenContentCaptureForAI) {
             toggleUserRestriction(UserManager.DISALLOW_CONTENT_CAPTURE, isDisabled)
+        }
+    }
+
+    override suspend fun setContentSuggestionDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        if (isCanDisableContentSuggestion) {
+            toggleUserRestriction(UserManager.DISALLOW_CONTENT_SUGGESTIONS, isDisabled)
         }
     }
 
