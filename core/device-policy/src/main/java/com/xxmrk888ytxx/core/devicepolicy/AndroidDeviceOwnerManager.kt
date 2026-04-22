@@ -180,7 +180,11 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     } catch (_: SecurityException) {
         false
     }
-    private fun checkIsScreenshotsDisabled() = devicePolicyManager.getScreenCaptureDisabled(deviceOwnerReceiver)
+    private fun checkIsScreenshotsDisabled() = try {
+        devicePolicyManager.getScreenCaptureDisabled(deviceOwnerReceiver)
+    }catch (_: SecurityException) {
+        false
+    }
 
     private fun checkIsUSBDataSignalDisabled() =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
