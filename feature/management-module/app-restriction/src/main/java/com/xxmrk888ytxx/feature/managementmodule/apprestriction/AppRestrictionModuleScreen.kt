@@ -103,10 +103,18 @@ fun AppRestrictionModuleScreen(
             Restriction(
                 id = 6,
                 iconRes = R.drawable.delete,
-                title =R.string.block_app_removal.uiText(),
+                title = R.string.block_app_removal.uiText(),
                 description = R.string.disables_the_ability_to_uninstall_applications_all_existing_apps_will_be_locked_against_deletion.uiText(),
                 isEnabled = screenState.isUninstallAppsDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUninstallAppsDisabled
+            ),
+            Restriction(
+                id = 7,
+                iconRes = R.drawable.app_control,
+                title = R.string.restrict_app_controls.uiText(),
+                description = R.string.blocks_access_to_app_settings_including_uninstallation_force_stopping_and_storage_clearing_data_cache.uiText(),
+                isEnabled = screenState.isAppControlDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleAppControlDisabled
             ),
         )
     }

@@ -18,4 +18,6 @@
     <string name="block_installations_from_unknown_sources">Block installations from unknown sources</string>
     <string name="disables_the_ability_to_uninstall_applications_all_existing_apps_will_be_locked_against_deletion">Disables the ability to uninstall applications. All existing apps will be locked against deletion.</string>
     <string name="block_app_removal">Block App Removal</string>
+    <string name="blocks_access_to_app_settings_including_uninstallation_force_stopping_and_storage_clearing_data_cache"><![CDATA[Blocks access to app settings, including force stopping, and storage clearing (data & cache).]]></string>
+    <string name="restrict_app_controls">Restrict App Controls</string>
 </resources>

@@ -32,6 +32,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isInstallAppsDisabled = MutableStateFlow(false)
     private val _isInstallAppsFromUnknownSourcesDisabled = MutableStateFlow(false)
     private val _isUninstallAppsDisabled = MutableStateFlow(false)
+    private val _isAppControlDisabled = MutableStateFlow(false)
 
 
 
@@ -42,6 +43,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     override val isInstallAppsDisabled: Flow<Boolean> = _isInstallAppsDisabled.asAndroidDeviceOwnerFlow()
     override val isInstallAppsFromUnknownSourcesDisabled: Flow<Boolean> = _isInstallAppsFromUnknownSourcesDisabled.asAndroidDeviceOwnerFlow()
     override val isUninstallAppsDisabled: Flow<Boolean> = _isUninstallAppsDisabled.asAndroidDeviceOwnerFlow()
+    override val isAppControlDisabled: Flow<Boolean> = _isAppControlDisabled.asAndroidDeviceOwnerFlow()
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -66,6 +68,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         _isInstallAppsDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_INSTALL_APPS, false)
         _isInstallAppsFromUnknownSourcesDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, false)
         _isUninstallAppsDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_UNINSTALL_APPS, false)
+        _isAppControlDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_APPS_CONTROL, false)
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -96,6 +99,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 
     override suspend fun setUninstallAppsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_UNINSTALL_APPS, isDisabled)
+    }
+
+    override suspend fun setAppControlDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_APPS_CONTROL, isDisabled)
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {

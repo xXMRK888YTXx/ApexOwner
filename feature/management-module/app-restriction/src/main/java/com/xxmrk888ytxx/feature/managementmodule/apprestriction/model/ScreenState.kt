@@ -11,4 +11,5 @@ data class ScreenState(
     val isInstallAppsDisabled: Boolean = false,
     val isInstallAppsFromUnknownSourcesDisabled: Boolean = false,
     val isUninstallAppsDisabled: Boolean = false,
+    val isAppControlDisabled: Boolean = false
 ) : UiState

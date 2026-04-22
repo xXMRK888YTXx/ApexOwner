@@ -10,6 +10,7 @@ interface RestrictionManageContract {
     val isInstallAppsDisabled: Flow<Boolean>
     val isInstallAppsFromUnknownSourcesDisabled: Flow<Boolean>
     val isUninstallAppsDisabled: Flow<Boolean>
+    val isAppControlDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     suspend fun setCameraDisabled(isDisabled: Boolean) : Result<Unit>
     suspend fun setMicrophoneDisabled(isDisabled: Boolean): Result<Unit>
@@ -18,4 +19,5 @@ interface RestrictionManageContract {
     suspend fun setInstallAppsDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setInstallAppsFromUnknownSourcesDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setUninstallAppsDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setAppControlDisabled(isDisabled: Boolean): Result<Unit>
 }

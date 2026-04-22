@@ -28,6 +28,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isInstallAppsDisabled,
         restrictionManageContract.isInstallAppsFromUnknownSourcesDisabled,
         restrictionManageContract.isUninstallAppsDisabled,
+        restrictionManageContract.isAppControlDisabled,
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -36,6 +37,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isInstallAppsDisabled = flowArray[4]
         val isInstallAppsFromUnknownSourcesDisabled = flowArray[5]
         val isUninstallAppsDisabled = flowArray[6]
+        val isAppControlDisabled = flowArray[7]
 
         ScreenState(
             isCameraDisabled = isCameraDisabled,
@@ -46,6 +48,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isInstallAppsDisabled = isInstallAppsDisabled,
             isInstallAppsFromUnknownSourcesDisabled = isInstallAppsFromUnknownSourcesDisabled,
             isUninstallAppsDisabled = isUninstallAppsDisabled,
+            isAppControlDisabled = isAppControlDisabled
         )
     }.stateWhileSubscribed()
 
@@ -59,7 +62,13 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleInstallAppsDisabled -> toggleInstallAppsDisabled()
             AppRestrictionModuleUiEvent.ToggleInstallAppsFromUnknownSourcesDisabled -> toggleInstallAppsFromUnknownSourcesDisabled()
             AppRestrictionModuleUiEvent.ToggleUninstallAppsDisabled -> toggleUninstallAppsDisabled()
+            AppRestrictionModuleUiEvent.ToggleAppControlDisabled -> toggleAppControlDisabled()
         }
+    }
+
+    private fun toggleAppControlDisabled() = changeRestrictionState {
+        val isAppControlDisabled = state.value.isAppControlDisabled
+        restrictionManageContract.setAppControlDisabled(!isAppControlDisabled)
     }
 
     private fun toggleUninstallAppsDisabled() = changeRestrictionState {
