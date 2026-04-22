@@ -6,7 +6,6 @@ import com.xxmrk888ytxx.feature.managementmodule.apprestriction.contract.Restric
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.exception.AppNotDeviceOwnerException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
 class RestrictionManageContractImpl @Inject constructor(
@@ -36,6 +35,6 @@ class RestrictionManageContractImpl @Inject constructor(
         }
 
     override suspend fun setUSBDataSignalDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceOwnerManager.disableUSBDataSignal(isDisabled)
+        deviceOwnerManager.setUSBDataSignalDisabled(isDisabled)
     }
 }

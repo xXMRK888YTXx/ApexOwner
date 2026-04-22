@@ -5,16 +5,12 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.Build
 import android.os.UserManager
-import com.xxmrk888ytxx.core.base.android.logs.Logger
 import com.xxmrk888ytxx.core.devicepolicy.exception.AppNotDeviceOwnerException
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onSubscription
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,10 +24,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         ComponentName(context, ApexDeviceOwnerReceiver::class.java)
     }
 
-    private val _isDeviceOwner = MutableStateFlow(isAppDeviceOwner())
-    private val _isCameraDisabled = MutableStateFlow(isCameraDisabled())
+    private val _isDeviceOwner = MutableStateFlow(checkIsAppDeviceOwner())
+    private val _isCameraDisabled = MutableStateFlow(checkIsCameraDisabled())
     private val _isMicrophoneDisabled = MutableStateFlow(false)
-    private val _isUSBDataSignalDisabled = MutableStateFlow(isUSBDataSignalDisabled())
+    private val _isUSBDataSignalDisabled = MutableStateFlow(checkIsUSBDataSignalDisabled())
 
     override val isCameraDisabled: Flow<Boolean> = _isCameraDisabled.asAndroidDeviceOwnerFlow()
     override val isMicrophoneDisabled: Flow<Boolean> =
@@ -48,10 +44,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         .asAndroidDeviceOwnerFlow()
 
     override suspend fun updateDeviceOwnerState() {
-        if (!isAppDeviceOwner()) return
-        _isDeviceOwner.value = isAppDeviceOwner()
-        _isCameraDisabled.value = isCameraDisabled()
-        _isUSBDataSignalDisabled.value = isUSBDataSignalDisabled()
+        if (!checkIsAppDeviceOwner()) return
+        _isDeviceOwner.value = checkIsAppDeviceOwner()
+        _isCameraDisabled.value = checkIsCameraDisabled()
+        _isUSBDataSignalDisabled.value = checkIsUSBDataSignalDisabled()
         val userRestriction = devicePolicyManager.getUserRestrictions(deviceOwnerReceiver)
         _isMicrophoneDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE, false)
@@ -65,7 +61,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         toggleUserRestriction(UserManager.DISALLOW_UNMUTE_MICROPHONE, isDisabled)
     }
 
-    override suspend fun disableUSBDataSignal(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setUSBDataSignalDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             devicePolicyManager.isUsbDataSignalingEnabled = !isDisabled
         }
@@ -80,18 +76,18 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     }
 
     private suspend fun changeDeviceOwnerPolicy(block: suspend DevicePolicyManager.() -> Unit) {
-        if (!isAppDeviceOwner()) throw AppNotDeviceOwnerException()
+        if (!checkIsAppDeviceOwner()) throw AppNotDeviceOwnerException()
         devicePolicyManager.block()
         updateDeviceOwnerState()
     }
 
-    private fun isAppDeviceOwner() = devicePolicyManager.isDeviceOwnerApp(context.packageName)
-    private fun isCameraDisabled() = try {
+    private fun checkIsAppDeviceOwner() = devicePolicyManager.isDeviceOwnerApp(context.packageName)
+    private fun checkIsCameraDisabled() = try {
         devicePolicyManager.getCameraDisabled(deviceOwnerReceiver)
     } catch (_: SecurityException) {
         false
     }
-    private fun isUSBDataSignalDisabled() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    private fun checkIsUSBDataSignalDisabled() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         !devicePolicyManager.isUsbDataSignalingEnabled
     } else {
         false

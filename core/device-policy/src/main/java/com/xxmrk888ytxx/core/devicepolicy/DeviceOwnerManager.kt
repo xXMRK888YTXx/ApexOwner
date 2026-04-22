@@ -10,6 +10,6 @@ interface DeviceOwnerManager {
     val isCanDisableUSBDataSignal: Boolean
     suspend fun setCameraDisabled(isDisabled: Boolean)
     suspend fun setMicrophoneDisabled(isDisabled: Boolean)
-    suspend fun disableUSBDataSignal(isDisabled: Boolean)
+    suspend fun setUSBDataSignalDisabled(isDisabled: Boolean)
     suspend fun updateDeviceOwnerState()
 }
