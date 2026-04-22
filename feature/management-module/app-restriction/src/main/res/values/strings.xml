@@ -20,4 +20,7 @@
     <string name="block_app_removal">Block App Removal</string>
     <string name="blocks_access_to_app_settings_including_uninstallation_force_stopping_and_storage_clearing_data_cache"><![CDATA[Blocks access to app settings, including force stopping, and storage clearing (data & cache).]]></string>
     <string name="restrict_app_controls">Restrict App Controls</string>
+    <string name="prevents_your_screen_data_from_being_used_for_ai_driven_features_and_analysis">Prevents your screen data from being used for AI-driven features and analysis.</string>
+    <string name="block_ai_screen_capture">Block AI screen capture</string>
+    <string name="not_available_for_your_android_version">Not available for your Android version</string>
 </resources>

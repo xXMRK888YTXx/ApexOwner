@@ -19,10 +19,13 @@ class RestrictionManageContractImpl @Inject constructor(
     override val isInstallAppsFromUnknownSourcesDisabled: Flow<Boolean> = deviceOwnerManager.isInstallAppsFromUnknownSourcesDisabled
     override val isUninstallAppsDisabled: Flow<Boolean> = deviceOwnerManager.isUninstallAppsDisabled
     override val isAppControlDisabled: Flow<Boolean> = deviceOwnerManager.isAppControlDisabled
+    override val isScreenContentCaptureForAIDisabled: Flow<Boolean> = deviceOwnerManager.isScreenContentCaptureForAIDisabled
 
 
     override val isCanDisableUSBDataSignal: Boolean
         get() = deviceOwnerManager.isCanDisableUSBDataSignal
+    override val isCanDisableScreenContentCaptureForAI: Boolean
+        get() = deviceOwnerManager.isCanDisableScreenContentCaptureForAI
 
     private val exceptionMapper: (Throwable) -> Throwable = {
         when (it) {
@@ -63,5 +66,9 @@ class RestrictionManageContractImpl @Inject constructor(
 
     override suspend fun setAppControlDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
         deviceOwnerManager.setAppControlDisabled(isDisabled)
+    }
+
+    override suspend fun setScreenContentCaptureForAIDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceOwnerManager.setScreenContentCaptureForAIDisabled(isDisabled)
     }
 }

@@ -116,6 +116,15 @@ fun AppRestrictionModuleScreen(
                 isEnabled = screenState.isAppControlDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleAppControlDisabled
             ),
+            Restriction(
+                id = 8,
+                iconRes = R.drawable.robot,
+                title = R.string.block_ai_screen_capture.uiText(),
+                description = R.string.prevents_your_screen_data_from_being_used_for_ai_driven_features_and_analysis.uiText(),
+                isEnabled = screenState.isScreenContentCaptureForAIDisabled,
+                isAvailable = screenState.isCanDisableScreenContentCaptureForAI,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleScreenContentCaptureForAIDisabled
+            ),
         )
     }
 

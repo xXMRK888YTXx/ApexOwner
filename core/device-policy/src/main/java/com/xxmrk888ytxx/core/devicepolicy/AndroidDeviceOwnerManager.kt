@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.Build
 import android.os.UserManager
+import androidx.annotation.ChecksSdkIntAtLeast
 import com.xxmrk888ytxx.core.devicepolicy.exception.AppNotDeviceOwnerException
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -33,6 +34,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isInstallAppsFromUnknownSourcesDisabled = MutableStateFlow(false)
     private val _isUninstallAppsDisabled = MutableStateFlow(false)
     private val _isAppControlDisabled = MutableStateFlow(false)
+    private val _isScreenContentCaptureForAIDisabled = MutableStateFlow(false)
 
 
 
@@ -44,6 +46,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     override val isInstallAppsFromUnknownSourcesDisabled: Flow<Boolean> = _isInstallAppsFromUnknownSourcesDisabled.asAndroidDeviceOwnerFlow()
     override val isUninstallAppsDisabled: Flow<Boolean> = _isUninstallAppsDisabled.asAndroidDeviceOwnerFlow()
     override val isAppControlDisabled: Flow<Boolean> = _isAppControlDisabled.asAndroidDeviceOwnerFlow()
+    override val isScreenContentCaptureForAIDisabled: Flow<Boolean> = _isScreenContentCaptureForAIDisabled.asAndroidDeviceOwnerFlow()
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -52,6 +55,9 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         } else {
             false
         }
+    override val isCanDisableScreenContentCaptureForAI: Boolean
+        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.Q)
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
     override val isDeviceOwner: Flow<Boolean> = _isDeviceOwner
         .asAndroidDeviceOwnerFlow()
@@ -69,6 +75,9 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         _isInstallAppsFromUnknownSourcesDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, false)
         _isUninstallAppsDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_UNINSTALL_APPS, false)
         _isAppControlDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_APPS_CONTROL, false)
+        if (isCanDisableScreenContentCaptureForAI) {
+            _isScreenContentCaptureForAIDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_CONTENT_CAPTURE, false)
+        }
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -103,6 +112,12 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 
     override suspend fun setAppControlDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_APPS_CONTROL, isDisabled)
+    }
+
+    override suspend fun setScreenContentCaptureForAIDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            toggleUserRestriction(UserManager.DISALLOW_CONTENT_CAPTURE, isDisabled)
+        }
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {
