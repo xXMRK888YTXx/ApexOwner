@@ -84,6 +84,14 @@ fun AppRestrictionModuleScreen(
                 isEnabled = screenState.isUSBFileTransferDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUSBFileTransferDisabled
             ),
+            Restriction(
+                id = 4,
+                iconRes = R.drawable.apps,
+                title = R.string.disable_app_installation.uiText(),
+                description = R.string.completely_prohibits_the_installation_of_applications_from_any_source_including_official_app_stores_and_manual_package_installations_sideloading.uiText(),
+                isEnabled = screenState.isInstallAppsDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleInstallAppsDisabled
+            ),
         )
     }
 

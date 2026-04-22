@@ -29,12 +29,14 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isMicrophoneDisabled = MutableStateFlow(false)
     private val _isUSBDataSignalDisabled = MutableStateFlow(checkIsUSBDataSignalDisabled())
     private val _isUSBFileTransferDisabled = MutableStateFlow(false)
+    private val _isInstallAppsDisabled = MutableStateFlow(false)
 
 
     override val isCameraDisabled: Flow<Boolean> = _isCameraDisabled.asAndroidDeviceOwnerFlow()
     override val isMicrophoneDisabled: Flow<Boolean> = _isMicrophoneDisabled.asAndroidDeviceOwnerFlow()
     override val isUSBDataSignalDisabled: Flow<Boolean> = _isUSBDataSignalDisabled.asAndroidDeviceOwnerFlow()
     override val isUSBFileTransferDisabled: Flow<Boolean> = _isUSBFileTransferDisabled.asAndroidDeviceOwnerFlow()
+    override val isInstallAppsDisabled: Flow<Boolean> = _isInstallAppsDisabled.asAndroidDeviceOwnerFlow()
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -56,6 +58,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         _isMicrophoneDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE, false)
         _isUSBFileTransferDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_USB_FILE_TRANSFER, false)
+        _isInstallAppsDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_INSTALL_APPS, false)
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -74,6 +77,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 
     override suspend fun setUSBFileTransferDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER, isDisabled)
+    }
+
+    override suspend fun setInstallAppsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_INSTALL_APPS, isDisabled)
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {

@@ -25,18 +25,21 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isMicrophoneDisabled,
         restrictionManageContract.isUSBDataSignalDisabled,
         restrictionManageContract.isUSBFileTransferDisabled,
+        restrictionManageContract.isInstallAppsDisabled,
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
         val isUSBDataSignalDisabled = flowArray[2]
         val isUSBFileTransferDisabled = flowArray[3]
+        val isInstallAppsDisabled = flowArray[4]
 
         ScreenState(
             isCameraDisabled = isCameraDisabled,
             isMicrophoneDisabled = isMicrophoneDisabled,
             isCanDisableUSBDataSignal = restrictionManageContract.isCanDisableUSBDataSignal,
             isUSBDataSignalDisabled = isUSBDataSignalDisabled,
-            isUSBFileTransferDisabled = isUSBFileTransferDisabled
+            isUSBFileTransferDisabled = isUSBFileTransferDisabled,
+            isInstallAppsDisabled = isInstallAppsDisabled,
         )
     }.stateWhileSubscribed()
 
@@ -47,7 +50,13 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleMicrophoneDisabled -> toggleMicrophoneDisabled()
             AppRestrictionModuleUiEvent.ToggleUSBDataSignalDisable -> toggleUSBDataSignalDisable()
             AppRestrictionModuleUiEvent.ToggleUSBFileTransferDisabled -> toggleUSBFileTransferDisabled()
+            AppRestrictionModuleUiEvent.ToggleInstallAppsDisabled -> toggleInstallAppsDisabled()
         }
+    }
+
+    private fun toggleInstallAppsDisabled() = changeRestrictionState {
+        val isInstallAppsDisabled = state.value.isInstallAppsDisabled
+        restrictionManageContract.setInstallAppsDisabled(!isInstallAppsDisabled)
     }
 
     private fun toggleUSBFileTransferDisabled() = changeRestrictionState {
