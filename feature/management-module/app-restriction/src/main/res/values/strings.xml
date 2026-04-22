@@ -14,4 +14,6 @@
     <string name="disables_file_sharing_with_other_devices_via_usb_please_note_that_only_file_transfer_protocols_mtp_ptp_are_restricted_peripherals_and_connected_accessories_will_continue_to_function_normally_this_setting_does_not_provide_protection_against_badusb_attacks">Disables file sharing with other devices via USB. Please note that only file transfer protocols (MTP/PTP) are restricted; peripherals and connected accessories will continue to function normally. This setting does not provide protection against BadUSB attacks.</string>
     <string name="disable_app_installation">Disable App Installation</string>
     <string name="completely_prohibits_the_installation_of_applications_from_any_source_including_official_app_stores_and_manual_package_installations_sideloading">Completely prohibits the installation of applications from any source, including official app stores and manual package installations (sideloading).</string>
+    <string name="blocks_the_installation_of_third_party_packages_and_manual_sideloading_app_installations_via_authorized_stores_are_not_affected">Blocks the installation of third-party packages and manual sideloading. App installations via authorized stores are not affected.</string>
+    <string name="block_installations_from_unknown_sources">Block installations from unknown sources</string>
 </resources>

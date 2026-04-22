@@ -16,6 +16,7 @@ class RestrictionManageContractImpl @Inject constructor(
     override val isUSBDataSignalDisabled: Flow<Boolean> = deviceOwnerManager.isUSBDataSignalDisabled
     override val isUSBFileTransferDisabled: Flow<Boolean> = deviceOwnerManager.isUSBFileTransferDisabled
     override val isInstallAppsDisabled: Flow<Boolean> = deviceOwnerManager.isInstallAppsDisabled
+    override val isInstallAppsFromUnknownSourcesDisabled: Flow<Boolean> = deviceOwnerManager.isInstallAppsFromUnknownSourcesDisabled
     override val isCanDisableUSBDataSignal: Boolean
         get() = deviceOwnerManager.isCanDisableUSBDataSignal
 
@@ -46,5 +47,9 @@ class RestrictionManageContractImpl @Inject constructor(
 
     override suspend fun setInstallAppsDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
         deviceOwnerManager.setInstallAppsDisabled(isDisabled)
+    }
+
+    override suspend fun setInstallAppsFromUnknownSourcesDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceOwnerManager.setInstallAppsFromUnknownSourcesDisabled(isDisabled)
     }
 }

@@ -92,6 +92,14 @@ fun AppRestrictionModuleScreen(
                 isEnabled = screenState.isInstallAppsDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleInstallAppsDisabled
             ),
+            Restriction(
+                id = 5,
+                iconRes = R.drawable.apk_install,
+                title = R.string.block_installations_from_unknown_sources.uiText(),
+                description = R.string.blocks_the_installation_of_third_party_packages_and_manual_sideloading_app_installations_via_authorized_stores_are_not_affected.uiText(),
+                isEnabled = screenState.isInstallAppsFromUnknownSourcesDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleInstallAppsFromUnknownSourcesDisabled
+            ),
         )
     }
 

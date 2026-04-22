@@ -8,4 +8,5 @@ sealed interface AppRestrictionModuleUiEvent : UiEvent {
     data object ToggleUSBDataSignalDisable: AppRestrictionModuleUiEvent
     data object ToggleUSBFileTransferDisabled: AppRestrictionModuleUiEvent
     data object ToggleInstallAppsDisabled: AppRestrictionModuleUiEvent
+    data object ToggleInstallAppsFromUnknownSourcesDisabled: AppRestrictionModuleUiEvent
 }

@@ -26,12 +26,14 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isUSBDataSignalDisabled,
         restrictionManageContract.isUSBFileTransferDisabled,
         restrictionManageContract.isInstallAppsDisabled,
+        restrictionManageContract.isInstallAppsFromUnknownSourcesDisabled,
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
         val isUSBDataSignalDisabled = flowArray[2]
         val isUSBFileTransferDisabled = flowArray[3]
         val isInstallAppsDisabled = flowArray[4]
+        val isInstallAppsFromUnknownSourcesDisabled = flowArray[5]
 
         ScreenState(
             isCameraDisabled = isCameraDisabled,
@@ -40,6 +42,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isUSBDataSignalDisabled = isUSBDataSignalDisabled,
             isUSBFileTransferDisabled = isUSBFileTransferDisabled,
             isInstallAppsDisabled = isInstallAppsDisabled,
+            isInstallAppsFromUnknownSourcesDisabled = isInstallAppsFromUnknownSourcesDisabled,
         )
     }.stateWhileSubscribed()
 
@@ -51,7 +54,13 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleUSBDataSignalDisable -> toggleUSBDataSignalDisable()
             AppRestrictionModuleUiEvent.ToggleUSBFileTransferDisabled -> toggleUSBFileTransferDisabled()
             AppRestrictionModuleUiEvent.ToggleInstallAppsDisabled -> toggleInstallAppsDisabled()
+            AppRestrictionModuleUiEvent.ToggleInstallAppsFromUnknownSourcesDisabled -> toggleInstallAppsFromUnknownSourcesDisabled()
         }
+    }
+
+    private fun toggleInstallAppsFromUnknownSourcesDisabled() = changeRestrictionState {
+        val isInstallAppsFromUnknownSourcesDisabled = state.value.isInstallAppsFromUnknownSourcesDisabled
+        restrictionManageContract.setInstallAppsFromUnknownSourcesDisabled(!isInstallAppsFromUnknownSourcesDisabled)
     }
 
     private fun toggleInstallAppsDisabled() = changeRestrictionState {

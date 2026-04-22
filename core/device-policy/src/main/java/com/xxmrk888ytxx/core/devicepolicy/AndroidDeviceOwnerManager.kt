@@ -30,6 +30,8 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isUSBDataSignalDisabled = MutableStateFlow(checkIsUSBDataSignalDisabled())
     private val _isUSBFileTransferDisabled = MutableStateFlow(false)
     private val _isInstallAppsDisabled = MutableStateFlow(false)
+    private val _isInstallAppsFromUnknownSourcesDisabled = MutableStateFlow(false)
+
 
 
     override val isCameraDisabled: Flow<Boolean> = _isCameraDisabled.asAndroidDeviceOwnerFlow()
@@ -37,6 +39,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     override val isUSBDataSignalDisabled: Flow<Boolean> = _isUSBDataSignalDisabled.asAndroidDeviceOwnerFlow()
     override val isUSBFileTransferDisabled: Flow<Boolean> = _isUSBFileTransferDisabled.asAndroidDeviceOwnerFlow()
     override val isInstallAppsDisabled: Flow<Boolean> = _isInstallAppsDisabled.asAndroidDeviceOwnerFlow()
+    override val isInstallAppsFromUnknownSourcesDisabled: Flow<Boolean> = _isInstallAppsFromUnknownSourcesDisabled.asAndroidDeviceOwnerFlow()
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -59,6 +62,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
             userRestriction.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE, false)
         _isUSBFileTransferDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_USB_FILE_TRANSFER, false)
         _isInstallAppsDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_INSTALL_APPS, false)
+        _isInstallAppsFromUnknownSourcesDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, false)
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -81,6 +85,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 
     override suspend fun setInstallAppsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_INSTALL_APPS, isDisabled)
+    }
+
+    override suspend fun setInstallAppsFromUnknownSourcesDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, isDisabled)
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {
