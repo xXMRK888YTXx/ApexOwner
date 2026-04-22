@@ -134,6 +134,14 @@ fun AppRestrictionModuleScreen(
                 isAvailable = screenState.isCanDisableContentSuggestion,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleContentSuggestionDisabled
             ),
+            Restriction(
+                id = 10,
+                iconRes = R.drawable.screenshot,
+                title = R.string.disable_screenshots_and_screen_recording.uiText(),
+                description = R.string.prevents_capturing_the_screen_via_screenshots_or_video_recordings_this_also_blocks_screen_sharing_and_projection_to_external_displays.uiText(),
+                isEnabled = screenState.isScreenshotsDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleScreenshotsDisabled
+            ),
         )
     }
 

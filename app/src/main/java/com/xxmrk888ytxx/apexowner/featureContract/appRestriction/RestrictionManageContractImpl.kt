@@ -21,6 +21,7 @@ class RestrictionManageContractImpl @Inject constructor(
     override val isAppControlDisabled: Flow<Boolean> = deviceOwnerManager.isAppControlDisabled
     override val isScreenContentCaptureForAIDisabled: Flow<Boolean> = deviceOwnerManager.isScreenContentCaptureForAIDisabled
     override val isContentSuggestionDisabled: Flow<Boolean> = deviceOwnerManager.isContentSuggestionDisabled
+    override val isScreenshotsDisabled: Flow<Boolean> = deviceOwnerManager.isScreenshotsDisabled
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -77,5 +78,9 @@ class RestrictionManageContractImpl @Inject constructor(
 
     override suspend fun setContentSuggestionDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
         deviceOwnerManager.setContentSuggestionDisabled(isDisabled)
+    }
+
+    override suspend fun setScreenshotsDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceOwnerManager.setScreenshotsDisabled(isDisabled)
     }
 }

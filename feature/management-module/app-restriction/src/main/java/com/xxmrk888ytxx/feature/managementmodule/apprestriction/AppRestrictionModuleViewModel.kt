@@ -30,7 +30,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isUninstallAppsDisabled,
         restrictionManageContract.isAppControlDisabled,
         restrictionManageContract.isScreenContentCaptureForAIDisabled,
-        restrictionManageContract.isContentSuggestionDisabled
+        restrictionManageContract.isContentSuggestionDisabled,
+        restrictionManageContract.isScreenshotsDisabled,
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -42,6 +43,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isAppControlDisabled = flowArray[7]
         val isScreenContentCaptureForAIDisabled = flowArray[8]
         val isContentSuggestionDisabled = flowArray[9]
+        val isScreenshotsDisabled = flowArray[10]
 
         ScreenState(
             isCameraDisabled = isCameraDisabled,
@@ -56,7 +58,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isCanDisableScreenContentCaptureForAI = restrictionManageContract.isCanDisableScreenContentCaptureForAI,
             isScreenContentCaptureForAIDisabled = isScreenContentCaptureForAIDisabled,
             isContentSuggestionDisabled = isContentSuggestionDisabled,
-            isCanDisableContentSuggestion = restrictionManageContract.isCanDisableContentSuggestion
+            isCanDisableContentSuggestion = restrictionManageContract.isCanDisableContentSuggestion,
+            isScreenshotsDisabled = isScreenshotsDisabled,
         )
     }.stateWhileSubscribed()
 
@@ -73,7 +76,13 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleAppControlDisabled -> toggleAppControlDisabled()
             AppRestrictionModuleUiEvent.ToggleScreenContentCaptureForAIDisabled -> toggleScreenContentCaptureForAIDisabled()
             AppRestrictionModuleUiEvent.ToggleContentSuggestionDisabled -> toggleContentSuggestionDisabled()
+            AppRestrictionModuleUiEvent.ToggleScreenshotsDisabled -> toggleScreenshotsDisabled()
         }
+    }
+
+    private fun toggleScreenshotsDisabled() = changeRestrictionState {
+        val isScreenshotsDisabled = state.value.isScreenshotsDisabled
+        restrictionManageContract.setScreenshotsDisabled(!isScreenshotsDisabled)
     }
 
     private fun toggleContentSuggestionDisabled() = changeRestrictionState {

@@ -36,19 +36,30 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isAppControlDisabled = MutableStateFlow(false)
     private val _isScreenContentCaptureForAIDisabled = MutableStateFlow(false)
     private val _isContentSuggestionDisabled = MutableStateFlow(false)
-
+    private val _isScreenshotsDisabled = MutableStateFlow(checkIsScreenshotsDisabled())
 
 
     override val isCameraDisabled: Flow<Boolean> = _isCameraDisabled.asAndroidDeviceOwnerFlow()
-    override val isMicrophoneDisabled: Flow<Boolean> = _isMicrophoneDisabled.asAndroidDeviceOwnerFlow()
-    override val isUSBDataSignalDisabled: Flow<Boolean> = _isUSBDataSignalDisabled.asAndroidDeviceOwnerFlow()
-    override val isUSBFileTransferDisabled: Flow<Boolean> = _isUSBFileTransferDisabled.asAndroidDeviceOwnerFlow()
-    override val isInstallAppsDisabled: Flow<Boolean> = _isInstallAppsDisabled.asAndroidDeviceOwnerFlow()
-    override val isInstallAppsFromUnknownSourcesDisabled: Flow<Boolean> = _isInstallAppsFromUnknownSourcesDisabled.asAndroidDeviceOwnerFlow()
-    override val isUninstallAppsDisabled: Flow<Boolean> = _isUninstallAppsDisabled.asAndroidDeviceOwnerFlow()
-    override val isAppControlDisabled: Flow<Boolean> = _isAppControlDisabled.asAndroidDeviceOwnerFlow()
-    override val isScreenContentCaptureForAIDisabled: Flow<Boolean> = _isScreenContentCaptureForAIDisabled.asAndroidDeviceOwnerFlow()
-    override val isContentSuggestionDisabled: Flow<Boolean> = _isContentSuggestionDisabled.asAndroidDeviceOwnerFlow()
+    override val isMicrophoneDisabled: Flow<Boolean> =
+        _isMicrophoneDisabled.asAndroidDeviceOwnerFlow()
+    override val isUSBDataSignalDisabled: Flow<Boolean> =
+        _isUSBDataSignalDisabled.asAndroidDeviceOwnerFlow()
+    override val isUSBFileTransferDisabled: Flow<Boolean> =
+        _isUSBFileTransferDisabled.asAndroidDeviceOwnerFlow()
+    override val isInstallAppsDisabled: Flow<Boolean> =
+        _isInstallAppsDisabled.asAndroidDeviceOwnerFlow()
+    override val isInstallAppsFromUnknownSourcesDisabled: Flow<Boolean> =
+        _isInstallAppsFromUnknownSourcesDisabled.asAndroidDeviceOwnerFlow()
+    override val isUninstallAppsDisabled: Flow<Boolean> =
+        _isUninstallAppsDisabled.asAndroidDeviceOwnerFlow()
+    override val isAppControlDisabled: Flow<Boolean> =
+        _isAppControlDisabled.asAndroidDeviceOwnerFlow()
+    override val isScreenContentCaptureForAIDisabled: Flow<Boolean> =
+        _isScreenContentCaptureForAIDisabled.asAndroidDeviceOwnerFlow()
+    override val isContentSuggestionDisabled: Flow<Boolean> =
+        _isContentSuggestionDisabled.asAndroidDeviceOwnerFlow()
+    override val isScreenshotsDisabled: Flow<Boolean> =
+        _isScreenshotsDisabled.asAndroidDeviceOwnerFlow()
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -75,17 +86,25 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         val userRestriction = devicePolicyManager.getUserRestrictions(deviceOwnerReceiver)
         _isMicrophoneDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE, false)
-        _isUSBFileTransferDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_USB_FILE_TRANSFER, false)
-        _isInstallAppsDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_INSTALL_APPS, false)
-        _isInstallAppsFromUnknownSourcesDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, false)
-        _isUninstallAppsDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_UNINSTALL_APPS, false)
-        _isAppControlDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_APPS_CONTROL, false)
+        _isUSBFileTransferDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_USB_FILE_TRANSFER, false)
+        _isInstallAppsDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_INSTALL_APPS, false)
+        _isInstallAppsFromUnknownSourcesDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, false)
+        _isUninstallAppsDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_UNINSTALL_APPS, false)
+        _isAppControlDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_APPS_CONTROL, false)
         if (isCanDisableScreenContentCaptureForAI) {
-            _isScreenContentCaptureForAIDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_CONTENT_CAPTURE, false)
+            _isScreenContentCaptureForAIDisabled.value =
+                userRestriction.getBoolean(UserManager.DISALLOW_CONTENT_CAPTURE, false)
         }
         if (isCanDisableContentSuggestion) {
-            _isContentSuggestionDisabled.value = userRestriction.getBoolean(UserManager.DISALLOW_CONTENT_SUGGESTIONS, false)
+            _isContentSuggestionDisabled.value =
+                userRestriction.getBoolean(UserManager.DISALLOW_CONTENT_SUGGESTIONS, false)
         }
+        _isScreenshotsDisabled.value = checkIsScreenshotsDisabled()
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -110,9 +129,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         toggleUserRestriction(UserManager.DISALLOW_INSTALL_APPS, isDisabled)
     }
 
-    override suspend fun setInstallAppsFromUnknownSourcesDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
-        toggleUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, isDisabled)
-    }
+    override suspend fun setInstallAppsFromUnknownSourcesDisabled(isDisabled: Boolean) =
+        changeDeviceOwnerPolicy {
+            toggleUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, isDisabled)
+        }
 
     override suspend fun setUninstallAppsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_UNINSTALL_APPS, isDisabled)
@@ -122,16 +142,22 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         toggleUserRestriction(UserManager.DISALLOW_APPS_CONTROL, isDisabled)
     }
 
-    override suspend fun setScreenContentCaptureForAIDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
-        if (isCanDisableScreenContentCaptureForAI) {
-            toggleUserRestriction(UserManager.DISALLOW_CONTENT_CAPTURE, isDisabled)
+    override suspend fun setScreenContentCaptureForAIDisabled(isDisabled: Boolean) =
+        changeDeviceOwnerPolicy {
+            if (isCanDisableScreenContentCaptureForAI) {
+                toggleUserRestriction(UserManager.DISALLOW_CONTENT_CAPTURE, isDisabled)
+            }
         }
-    }
 
-    override suspend fun setContentSuggestionDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
-        if (isCanDisableContentSuggestion) {
-            toggleUserRestriction(UserManager.DISALLOW_CONTENT_SUGGESTIONS, isDisabled)
+    override suspend fun setContentSuggestionDisabled(isDisabled: Boolean) =
+        changeDeviceOwnerPolicy {
+            if (isCanDisableContentSuggestion) {
+                toggleUserRestriction(UserManager.DISALLOW_CONTENT_SUGGESTIONS, isDisabled)
+            }
         }
+
+    override suspend fun setScreenshotsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        devicePolicyManager.setScreenCaptureDisabled(deviceOwnerReceiver, isDisabled)
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {
@@ -154,11 +180,14 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     } catch (_: SecurityException) {
         false
     }
-    private fun checkIsUSBDataSignalDisabled() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        !devicePolicyManager.isUsbDataSignalingEnabled
-    } else {
-        false
-    }
+    private fun checkIsScreenshotsDisabled() = devicePolicyManager.getScreenCaptureDisabled(deviceOwnerReceiver)
+
+    private fun checkIsUSBDataSignalDisabled() =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            !devicePolicyManager.isUsbDataSignalingEnabled
+        } else {
+            false
+        }
 
     private fun <T> MutableStateFlow<T>.asAndroidDeviceOwnerFlow(): Flow<T> =
         asStateFlow().onSubscription { updateDeviceOwnerState() }

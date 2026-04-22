@@ -25,4 +25,6 @@
     <string name="not_available_for_your_android_version">Not available for your Android version</string>
     <string name="disable_contextual_content_suggestions">Disable Contextual Content Suggestions</string>
     <string name="prevents_the_system_from_suggesting_actions_or_content_based_on_what_you_select_on_your_screen_this_disables_smart_suggestions_that_analyze_your_current_screen_context_to_offer_relevant_links_apps_or_information">Prevents the system from suggesting actions or content based on what you select on your screen. This disables \"smart\" suggestions that analyze your current screen context to offer relevant links, apps, or information.</string>
+    <string name="disable_screenshots_and_screen_recording">Disable Screenshots and Screen Recording</string>
+    <string name="prevents_capturing_the_screen_via_screenshots_or_video_recordings_this_also_blocks_screen_sharing_and_projection_to_external_displays">Prevents capturing the screen via screenshots or video recordings. This also blocks screen sharing and projection to external displays.</string>
 </resources>

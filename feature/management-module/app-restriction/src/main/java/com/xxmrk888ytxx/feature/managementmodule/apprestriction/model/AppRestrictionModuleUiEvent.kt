@@ -13,4 +13,5 @@ sealed interface AppRestrictionModuleUiEvent : UiEvent {
     data object ToggleAppControlDisabled: AppRestrictionModuleUiEvent
     data object ToggleScreenContentCaptureForAIDisabled: AppRestrictionModuleUiEvent
     data object ToggleContentSuggestionDisabled: AppRestrictionModuleUiEvent
+    data object ToggleScreenshotsDisabled: AppRestrictionModuleUiEvent
 }
