@@ -8,7 +8,6 @@ import com.xxmrk888ytxx.feature.managementmodule.apprestriction.exception.AppNot
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.AppRestrictionModuleUiEvent
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -32,6 +31,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isScreenContentCaptureForAIDisabled,
         restrictionManageContract.isContentSuggestionDisabled,
         restrictionManageContract.isScreenshotsDisabled,
+        restrictionManageContract.isDebugFeaturesDisabled
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -44,6 +44,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isScreenContentCaptureForAIDisabled = flowArray[8]
         val isContentSuggestionDisabled = flowArray[9]
         val isScreenshotsDisabled = flowArray[10]
+        val isDebugFeaturesDisabled = flowArray[11]
 
         ScreenState(
             isCameraDisabled = isCameraDisabled,
@@ -60,6 +61,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isContentSuggestionDisabled = isContentSuggestionDisabled,
             isCanDisableContentSuggestion = restrictionManageContract.isCanDisableContentSuggestion,
             isScreenshotsDisabled = isScreenshotsDisabled,
+            isDebugFeaturesDisabled = isDebugFeaturesDisabled
         )
     }.stateWhileSubscribed()
 
@@ -77,7 +79,13 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleScreenContentCaptureForAIDisabled -> toggleScreenContentCaptureForAIDisabled()
             AppRestrictionModuleUiEvent.ToggleContentSuggestionDisabled -> toggleContentSuggestionDisabled()
             AppRestrictionModuleUiEvent.ToggleScreenshotsDisabled -> toggleScreenshotsDisabled()
+            AppRestrictionModuleUiEvent.ToggleDebugFeaturesDisabled -> toggleDebugFeaturesDisabled()
         }
+    }
+
+    private fun toggleDebugFeaturesDisabled() = changeRestrictionState {
+        val isDebugFeaturesDisabled = state.value.isDebugFeaturesDisabled
+        restrictionManageContract.setDebugFeaturesDisabled(!isDebugFeaturesDisabled)
     }
 
     private fun toggleScreenshotsDisabled() = changeRestrictionState {

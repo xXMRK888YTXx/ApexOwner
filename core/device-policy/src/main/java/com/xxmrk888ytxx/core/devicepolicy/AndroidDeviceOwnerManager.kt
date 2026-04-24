@@ -37,6 +37,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isScreenContentCaptureForAIDisabled = MutableStateFlow(false)
     private val _isContentSuggestionDisabled = MutableStateFlow(false)
     private val _isScreenshotsDisabled = MutableStateFlow(checkIsScreenshotsDisabled())
+    private val _isDebugFeaturesDisabled = MutableStateFlow(false)
 
 
     override val isCameraDisabled: Flow<Boolean> = _isCameraDisabled.asAndroidDeviceOwnerFlow()
@@ -60,6 +61,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         _isContentSuggestionDisabled.asAndroidDeviceOwnerFlow()
     override val isScreenshotsDisabled: Flow<Boolean> =
         _isScreenshotsDisabled.asAndroidDeviceOwnerFlow()
+    override val isDebugFeaturesDisabled: Flow<Boolean> = _isDebugFeaturesDisabled.asAndroidDeviceOwnerFlow()
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -105,6 +107,8 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
                 userRestriction.getBoolean(UserManager.DISALLOW_CONTENT_SUGGESTIONS, false)
         }
         _isScreenshotsDisabled.value = checkIsScreenshotsDisabled()
+        _isDebugFeaturesDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_DEBUGGING_FEATURES, false)
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -158,6 +162,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 
     override suspend fun setScreenshotsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         devicePolicyManager.setScreenCaptureDisabled(deviceOwnerReceiver, isDisabled)
+    }
+
+    override suspend fun setDebugFeaturesDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, isDisabled)
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {

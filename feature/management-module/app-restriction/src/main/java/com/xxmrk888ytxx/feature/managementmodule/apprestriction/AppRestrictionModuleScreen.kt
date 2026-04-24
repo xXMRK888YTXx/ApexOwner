@@ -142,6 +142,14 @@ fun AppRestrictionModuleScreen(
                 isEnabled = screenState.isScreenshotsDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleScreenshotsDisabled
             ),
+            Restriction(
+                id = 11,
+                iconRes = R.drawable.adb,
+                title = R.string.disable_debugging_features.uiText(),
+                description = R.string.enabling_or_accessing_any_debugging_features_including_usb_debugging_is_prohibited_this_restriction_prevents_all_advanced_developer_actions_such_as_app_installations_via_adb_access_to_system_logs_and_direct_service_calls.uiText(),
+                isEnabled = screenState.isDebugFeaturesDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleDebugFeaturesDisabled
+            ),
         )
     }
 
