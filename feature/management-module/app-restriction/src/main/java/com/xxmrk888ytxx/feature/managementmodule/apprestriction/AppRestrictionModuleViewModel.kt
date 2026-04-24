@@ -37,6 +37,9 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isAddUserDisabled,
         restrictionManageContract.isRemoveUserDisabled,
         restrictionManageContract.isSwitchUserDisabled,
+        restrictionManageContract.isBluetoothDisabled,
+        restrictionManageContract.isBluetoothConfigDisabled,
+        restrictionManageContract.isMountPhysicalMediaDisabled,
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -55,6 +58,10 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isAddUserDisabled = flowArray[14]
         val isRemoveUserDisabled = flowArray[15]
         val isSwitchUserDisabled = flowArray[16]
+        val isBluetoothDisabled = flowArray[17]
+        val isBluetoothConfigDisabled = flowArray[18]
+        val isMountPhysicalMediaDisabled = flowArray[19]
+
 
 
 
@@ -79,6 +86,9 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isAddUserDisabled = isAddUserDisabled,
             isRemoveUserDisabled = isRemoveUserDisabled,
             isSwitchUserDisabled = isSwitchUserDisabled,
+            isBluetoothDisabled = isBluetoothDisabled,
+            isBluetoothConfigDisabled = isBluetoothConfigDisabled,
+            isMountPhysicalMediaDisabled = isMountPhysicalMediaDisabled
         )
     }.stateWhileSubscribed()
 
@@ -102,7 +112,25 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleAddUserDisabled -> toggleAddUserDisabled()
             AppRestrictionModuleUiEvent.ToggleRemoveUserDisabled -> toggleRemoveUserDisabled()
             AppRestrictionModuleUiEvent.ToggleSwitchUserDisabled -> toggleSwitchUserDisabled()
+            AppRestrictionModuleUiEvent.ToggleBluetoothConfigDisabled -> toggleBluetoothConfigDisabled()
+            AppRestrictionModuleUiEvent.ToggleBluetoothDisabled -> toggleBluetoothDisabled()
+            AppRestrictionModuleUiEvent.ToggleMountPhysicalMediaDisabled -> toggleMountPhysicalMediaDisabled()
         }
+    }
+
+    private fun toggleMountPhysicalMediaDisabled() = changeRestrictionState {
+        val isMountPhysicalMediaDisabled = state.value.isMountPhysicalMediaDisabled
+        restrictionManageContract.setMountPhysicalMediaDisabled(!isMountPhysicalMediaDisabled)
+    }
+
+    private fun toggleBluetoothDisabled() = changeRestrictionState {
+        val isBluetoothDisabled = state.value.isBluetoothDisabled
+        restrictionManageContract.setBluetoothDisabled(!isBluetoothDisabled)
+    }
+
+    private fun toggleBluetoothConfigDisabled() = changeRestrictionState {
+        val isBluetoothConfigDisabled = state.value.isBluetoothConfigDisabled
+        restrictionManageContract.setBluetoothConfigDisabled(!isBluetoothConfigDisabled)
     }
 
     private fun toggleSwitchUserDisabled() = changeRestrictionState {

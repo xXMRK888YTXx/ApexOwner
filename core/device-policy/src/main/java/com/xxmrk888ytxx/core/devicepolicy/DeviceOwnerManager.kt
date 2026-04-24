@@ -21,6 +21,9 @@ interface DeviceOwnerManager {
     val isAddUserDisabled: Flow<Boolean>
     val isRemoveUserDisabled: Flow<Boolean>
     val isSwitchUserDisabled: Flow<Boolean>
+    val isBluetoothDisabled: Flow<Boolean>
+    val isBluetoothConfigDisabled: Flow<Boolean>
+    val isMountPhysicalMediaDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
     val isCanDisableContentSuggestion: Boolean
@@ -41,5 +44,8 @@ interface DeviceOwnerManager {
     suspend fun setAddUserDisabled(isDisabled: Boolean)
     suspend fun setRemoveUserDisabled(isDisabled: Boolean)
     suspend fun setSwitchUserDisabled(isDisabled: Boolean)
+    suspend fun setBluetoothDisabled(isDisabled: Boolean)
+    suspend fun setBluetoothConfigDisabled(isDisabled: Boolean)
+    suspend fun setMountPhysicalMediaDisabled(isDisabled: Boolean)
     suspend fun updateDeviceOwnerState()
 }

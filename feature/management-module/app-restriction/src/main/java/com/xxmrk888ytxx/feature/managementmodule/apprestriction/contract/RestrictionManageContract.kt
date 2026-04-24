@@ -20,6 +20,9 @@ interface RestrictionManageContract {
     val isAddUserDisabled: Flow<Boolean>
     val isRemoveUserDisabled: Flow<Boolean>
     val isSwitchUserDisabled: Flow<Boolean>
+    val isMountPhysicalMediaDisabled: Flow<Boolean>
+    val isBluetoothDisabled: Flow<Boolean>
+    val isBluetoothConfigDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
     val isCanDisableContentSuggestion: Boolean
@@ -40,4 +43,7 @@ interface RestrictionManageContract {
     suspend fun setAddUserDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setRemoveUserDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setSwitchUserDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setMountPhysicalMediaDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setBluetoothDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setBluetoothConfigDisabled(isDisabled: Boolean): Result<Unit>
 }

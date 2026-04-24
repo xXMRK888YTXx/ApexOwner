@@ -28,6 +28,9 @@ class RestrictionManageContractImpl @Inject constructor(
     override val isAddUserDisabled: Flow<Boolean> = deviceOwnerManager.isAddUserDisabled
     override val isRemoveUserDisabled: Flow<Boolean> = deviceOwnerManager.isRemoveUserDisabled
     override val isSwitchUserDisabled: Flow<Boolean> = deviceOwnerManager.isSwitchUserDisabled
+    override val isMountPhysicalMediaDisabled: Flow<Boolean> = deviceOwnerManager.isMountPhysicalMediaDisabled
+    override val isBluetoothDisabled: Flow<Boolean> = deviceOwnerManager.isBluetoothDisabled
+    override val isBluetoothConfigDisabled: Flow<Boolean> = deviceOwnerManager.isBluetoothConfigDisabled
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -113,5 +116,17 @@ class RestrictionManageContractImpl @Inject constructor(
 
     override suspend fun setSwitchUserDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
         deviceOwnerManager.setSwitchUserDisabled(isDisabled)
+    }
+
+    override suspend fun setMountPhysicalMediaDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceOwnerManager.setMountPhysicalMediaDisabled(isDisabled)
+    }
+
+    override suspend fun setBluetoothDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceOwnerManager.setBluetoothDisabled(isDisabled)
+    }
+
+    override suspend fun setBluetoothConfigDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceOwnerManager.setBluetoothConfigDisabled(isDisabled)
     }
 }

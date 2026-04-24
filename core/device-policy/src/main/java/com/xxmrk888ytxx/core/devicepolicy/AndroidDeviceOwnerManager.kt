@@ -43,6 +43,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isAddUserDisabled = MutableStateFlow(false)
     private val _isRemoveUserDisabled = MutableStateFlow(false)
     private val _isSwitchUserDisabled = MutableStateFlow(false)
+    private val _isBluetoothDisabled = MutableStateFlow(false)
+    private val _isBluetoothConfigDisabled = MutableStateFlow(false)
+    private val _isMountPhysicalMediaDisabled = MutableStateFlow(false)
+
 
 
 
@@ -74,6 +78,9 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     override val isAddUserDisabled: Flow<Boolean> = _isAddUserDisabled.asAndroidDeviceOwnerFlow()
     override val isRemoveUserDisabled: Flow<Boolean> = _isRemoveUserDisabled.asAndroidDeviceOwnerFlow()
     override val isSwitchUserDisabled: Flow<Boolean> = _isSwitchUserDisabled.asAndroidDeviceOwnerFlow()
+    override val isBluetoothDisabled: Flow<Boolean> = _isBluetoothDisabled.asAndroidDeviceOwnerFlow()
+    override val isBluetoothConfigDisabled: Flow<Boolean> = _isBluetoothConfigDisabled.asAndroidDeviceOwnerFlow()
+    override val isMountPhysicalMediaDisabled: Flow<Boolean> = _isMountPhysicalMediaDisabled.asAndroidDeviceOwnerFlow()
 
     override val isCanDisableUSBDataSignal: Boolean
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -130,6 +137,12 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
             userRestriction.getBoolean(UserManager.DISALLOW_REMOVE_USER, false)
         _isSwitchUserDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_USER_SWITCH, false)
+        _isBluetoothDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_BLUETOOTH, false)
+        _isBluetoothConfigDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_CONFIG_BLUETOOTH, false)
+        _isMountPhysicalMediaDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, false)
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -207,6 +220,18 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 
     override suspend fun setSwitchUserDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_USER_SWITCH, isDisabled)
+    }
+
+    override suspend fun setBluetoothDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_BLUETOOTH, isDisabled)
+    }
+
+    override suspend fun setBluetoothConfigDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_CONFIG_BLUETOOTH, isDisabled)
+    }
+
+    override suspend fun setMountPhysicalMediaDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, isDisabled)
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {

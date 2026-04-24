@@ -39,4 +39,10 @@
     <string name="removal_of_secondary_user_profiles_from_the_device_is_prohibited">Removal of secondary user profiles from the device is prohibited.</string>
     <string name="block_user_switching">Block User Switching</string>
     <string name="the_ability_to_switch_between_different_user_accounts_on_the_device_is_disabled">The ability to switch between different user accounts on the device is disabled.</string>
+    <string name="disable_bluetooth">Disable Bluetooth</string>
+    <string name="bluetooth_is_completely_disabled_turning_on_using_or_configuring_bluetooth_connections_via_settings_is_prohibited">Bluetooth is completely disabled. Turning on, using, or configuring Bluetooth connections via Settings is prohibited.</string>
+    <string name="restrict_bluetooth_configuration">Restrict Bluetooth Configuration</string>
+    <string name="bluetooth_settings_and_device_pairing_via_the_settings_menu_are_disabled_this_restriction_does_not_prevent_turning_bluetooth_on_or_off_and_does_not_block_the_use_of_already_paired_devices">Bluetooth settings and device pairing via the Settings menu are disabled. This restriction does not prevent turning Bluetooth on or off and does not block the use of already paired devices.</string>
+    <string name="disable_external_media_mounting">Disable External Media Mounting</string>
+    <string name="connecting_and_accessing_physical_external_storage_such_as_usb_drives_or_sd_cards_is_prohibited_the_device_will_not_mount_or_recognize_any_external_media">Connecting and accessing physical external storage, such as USB drives or SD cards, is prohibited. The device will not mount or recognize any external media. This restriction applies only after a device restart.</string>
 </resources>

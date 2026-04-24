@@ -190,6 +190,30 @@ fun AppRestrictionModuleScreen(
                 isEnabled = screenState.isSwitchUserDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleSwitchUserDisabled
             ),
+            Restriction(
+                id = 17,
+                iconRes = R.drawable.bluetooth,
+                title = R.string.disable_bluetooth.uiText(),
+                description = R.string.bluetooth_is_completely_disabled_turning_on_using_or_configuring_bluetooth_connections_via_settings_is_prohibited.uiText(),
+                isEnabled = screenState.isBluetoothDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleBluetoothDisabled
+            ),
+            Restriction(
+                id = 18,
+                iconRes = R.drawable.settings_bluetooth,
+                title = R.string.restrict_bluetooth_configuration.uiText(),
+                description = R.string.bluetooth_settings_and_device_pairing_via_the_settings_menu_are_disabled_this_restriction_does_not_prevent_turning_bluetooth_on_or_off_and_does_not_block_the_use_of_already_paired_devices.uiText(),
+                isEnabled = screenState.isBluetoothConfigDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleBluetoothConfigDisabled
+            ),
+            Restriction(
+                id = 19,
+                iconRes = R.drawable.hard_disk,
+                title = R.string.disable_external_media_mounting.uiText(),
+                description = R.string.connecting_and_accessing_physical_external_storage_such_as_usb_drives_or_sd_cards_is_prohibited_the_device_will_not_mount_or_recognize_any_external_media.uiText(),
+                isEnabled = screenState.isMountPhysicalMediaDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleMountPhysicalMediaDisabled
+            ),
         )
     }
 
