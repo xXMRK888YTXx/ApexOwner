@@ -24,6 +24,7 @@ class RestrictionManageContractImpl @Inject constructor(
     override val isScreenshotsDisabled: Flow<Boolean> = deviceOwnerManager.isScreenshotsDisabled
     override val isDebugFeaturesDisabled: Flow<Boolean> = deviceOwnerManager.isDebugFeaturesDisabled
     override val isFactoryResetDisabled: Flow<Boolean> = deviceOwnerManager.isFactoryResetDisabled
+    override val isSafeBootDisabled: Flow<Boolean> = deviceOwnerManager.isSafeBootDisabled
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -94,4 +95,8 @@ class RestrictionManageContractImpl @Inject constructor(
         coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
             deviceOwnerManager.setFactoryResetDisabled(isDisabled)
         }
+
+    override suspend fun setSafeBootDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper)  {
+        deviceOwnerManager.setSafeBootDisabled(isDisabled)
+    }
 }

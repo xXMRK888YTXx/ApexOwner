@@ -16,6 +16,7 @@ interface RestrictionManageContract {
     val isScreenshotsDisabled: Flow<Boolean>
     val isDebugFeaturesDisabled: Flow<Boolean>
     val isFactoryResetDisabled: Flow<Boolean>
+    val isSafeBootDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
     val isCanDisableContentSuggestion: Boolean
@@ -32,4 +33,5 @@ interface RestrictionManageContract {
     suspend fun setScreenshotsDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setDebugFeaturesDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setFactoryResetDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setSafeBootDisabled(isDisabled: Boolean): Result<Unit>
 }

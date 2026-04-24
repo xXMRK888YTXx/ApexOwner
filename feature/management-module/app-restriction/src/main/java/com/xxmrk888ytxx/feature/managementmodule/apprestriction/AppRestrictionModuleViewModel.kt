@@ -32,7 +32,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isContentSuggestionDisabled,
         restrictionManageContract.isScreenshotsDisabled,
         restrictionManageContract.isDebugFeaturesDisabled,
-        restrictionManageContract.isFactoryResetDisabled
+        restrictionManageContract.isFactoryResetDisabled,
+        restrictionManageContract.isSafeBootDisabled,
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -47,6 +48,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isScreenshotsDisabled = flowArray[10]
         val isDebugFeaturesDisabled = flowArray[11]
         val isFactoryResetDisabled = flowArray[12]
+        val isSafeBootDisabled = flowArray[13]
+
 
         ScreenState(
             isCameraDisabled = isCameraDisabled,
@@ -64,7 +67,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isCanDisableContentSuggestion = restrictionManageContract.isCanDisableContentSuggestion,
             isScreenshotsDisabled = isScreenshotsDisabled,
             isDebugFeaturesDisabled = isDebugFeaturesDisabled,
-            isFactoryResetDisabled = isFactoryResetDisabled
+            isFactoryResetDisabled = isFactoryResetDisabled,
+            isSafeBootDisabled = isSafeBootDisabled
         )
     }.stateWhileSubscribed()
 
@@ -84,7 +88,13 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleScreenshotsDisabled -> toggleScreenshotsDisabled()
             AppRestrictionModuleUiEvent.ToggleDebugFeaturesDisabled -> toggleDebugFeaturesDisabled()
             AppRestrictionModuleUiEvent.ToggleFactoryResetDisabled -> toggleFactoryResetDisabled()
+            AppRestrictionModuleUiEvent.ToggleSafeBootDisabled -> toggleSafeBootDisabled()
         }
+    }
+
+    private fun toggleSafeBootDisabled() = changeRestrictionState {
+        val isSafeBootDisabled = state.value.isSafeBootDisabled
+        restrictionManageContract.setSafeBootDisabled(!isSafeBootDisabled)
     }
 
     private fun toggleFactoryResetDisabled() = changeRestrictionState {

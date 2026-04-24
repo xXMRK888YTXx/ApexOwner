@@ -158,6 +158,14 @@ fun AppRestrictionModuleScreen(
                 isEnabled = screenState.isFactoryResetDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleFactoryResetDisabled
             ),
+            Restriction(
+                id = 13,
+                iconRes = R.drawable.shield_locked,
+                title = R.string.disable_safe_mode.uiText(),
+                description = R.string.access_to_safe_mode_is_blocked_this_prevents_bypassing_security_restrictions_or_disabling_protection_by_starting_the_device_in_a_limited_state.uiText(),
+                isEnabled = screenState.isSafeBootDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleSafeBootDisabled
+            ),
         )
     }
 

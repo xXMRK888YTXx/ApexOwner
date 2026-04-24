@@ -31,4 +31,6 @@
     <string name="enabling_or_accessing_any_debugging_features_including_usb_debugging_is_prohibited_this_restriction_prevents_all_advanced_developer_actions_such_as_app_installations_via_adb_access_to_system_logs_and_direct_service_calls">Enabling or accessing any debugging features, including USB Debugging, is prohibited. This restriction prevents all advanced developer actions, such as app installations via ADB, access to system logs, and direct service calls.</string>
     <string name="block_factory_reset">Block Factory Reset</string>
     <string name="the_ability_to_perform_a_factory_reset_is_disabled">The ability to perform a factory reset is disabled.</string>
+    <string name="disable_safe_mode">Disable Safe Mode</string>
+    <string name="access_to_safe_mode_is_blocked_this_prevents_bypassing_security_restrictions_or_disabling_protection_by_starting_the_device_in_a_limited_state">Access to Safe Mode is blocked. This prevents bypassing security restrictions or disabling protection by starting the device in a limited state.</string>
 </resources>

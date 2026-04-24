@@ -18,5 +18,6 @@ data class ScreenState(
     val isCanDisableContentSuggestion: Boolean = true,
     val isScreenshotsDisabled: Boolean = false,
     val isDebugFeaturesDisabled: Boolean = false,
-    val isFactoryResetDisabled: Boolean = false
+    val isFactoryResetDisabled: Boolean = false,
+    val isSafeBootDisabled: Boolean = false,
 ) : UiState

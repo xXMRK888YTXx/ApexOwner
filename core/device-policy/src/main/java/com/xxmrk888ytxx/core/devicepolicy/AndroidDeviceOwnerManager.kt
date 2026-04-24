@@ -39,6 +39,8 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isScreenshotsDisabled = MutableStateFlow(checkIsScreenshotsDisabled())
     private val _isDebugFeaturesDisabled = MutableStateFlow(false)
     private val _isFactoryResetDisabled = MutableStateFlow(false)
+    private val _isSafeBootDisabled = MutableStateFlow(false)
+
 
 
     override val isCameraDisabled: Flow<Boolean> = _isCameraDisabled.asAndroidDeviceOwnerFlow()
@@ -64,6 +66,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         _isScreenshotsDisabled.asAndroidDeviceOwnerFlow()
     override val isDebugFeaturesDisabled: Flow<Boolean> = _isDebugFeaturesDisabled.asAndroidDeviceOwnerFlow()
     override val isFactoryResetDisabled: Flow<Boolean> = _isFactoryResetDisabled.asAndroidDeviceOwnerFlow()
+    override val isSafeBootDisabled: Flow<Boolean> = _isSafeBootDisabled.asAndroidDeviceOwnerFlow()
 
     override val isCanDisableUSBDataSignal: Boolean
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -112,6 +115,8 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
             userRestriction.getBoolean(UserManager.DISALLOW_DEBUGGING_FEATURES, false)
         _isFactoryResetDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_FACTORY_RESET, false)
+        _isSafeBootDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_SAFE_BOOT, false)
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -173,6 +178,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 
     override suspend fun setFactoryResetDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_FACTORY_RESET, isDisabled)
+    }
+
+    override suspend fun setSafeBootDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_SAFE_BOOT, isDisabled)
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {
