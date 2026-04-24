@@ -150,6 +150,14 @@ fun AppRestrictionModuleScreen(
                 isEnabled = screenState.isDebugFeaturesDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleDebugFeaturesDisabled
             ),
+            Restriction(
+                id = 12,
+                iconRes = R.drawable.lock_reset,
+                title = R.string.block_factory_reset.uiText(),
+                description = R.string.the_ability_to_perform_a_factory_reset_is_disabled.uiText(),
+                isEnabled = screenState.isFactoryResetDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleFactoryResetDisabled
+            ),
         )
     }
 

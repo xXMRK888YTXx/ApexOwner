@@ -31,7 +31,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isScreenContentCaptureForAIDisabled,
         restrictionManageContract.isContentSuggestionDisabled,
         restrictionManageContract.isScreenshotsDisabled,
-        restrictionManageContract.isDebugFeaturesDisabled
+        restrictionManageContract.isDebugFeaturesDisabled,
+        restrictionManageContract.isFactoryResetDisabled
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -45,6 +46,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isContentSuggestionDisabled = flowArray[9]
         val isScreenshotsDisabled = flowArray[10]
         val isDebugFeaturesDisabled = flowArray[11]
+        val isFactoryResetDisabled = flowArray[12]
 
         ScreenState(
             isCameraDisabled = isCameraDisabled,
@@ -61,7 +63,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isContentSuggestionDisabled = isContentSuggestionDisabled,
             isCanDisableContentSuggestion = restrictionManageContract.isCanDisableContentSuggestion,
             isScreenshotsDisabled = isScreenshotsDisabled,
-            isDebugFeaturesDisabled = isDebugFeaturesDisabled
+            isDebugFeaturesDisabled = isDebugFeaturesDisabled,
+            isFactoryResetDisabled = isFactoryResetDisabled
         )
     }.stateWhileSubscribed()
 
@@ -80,7 +83,13 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleContentSuggestionDisabled -> toggleContentSuggestionDisabled()
             AppRestrictionModuleUiEvent.ToggleScreenshotsDisabled -> toggleScreenshotsDisabled()
             AppRestrictionModuleUiEvent.ToggleDebugFeaturesDisabled -> toggleDebugFeaturesDisabled()
+            AppRestrictionModuleUiEvent.ToggleFactoryResetDisabled -> toggleFactoryResetDisabled()
         }
+    }
+
+    private fun toggleFactoryResetDisabled() = changeRestrictionState {
+        val isFactoryResetDisabled = state.value.isFactoryResetDisabled
+        restrictionManageContract.setFactoryResetDisabled(!isFactoryResetDisabled)
     }
 
     private fun toggleDebugFeaturesDisabled() = changeRestrictionState {

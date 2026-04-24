@@ -16,6 +16,7 @@ interface DeviceOwnerManager {
     val isContentSuggestionDisabled: Flow<Boolean>
     val isScreenshotsDisabled: Flow<Boolean>
     val isDebugFeaturesDisabled: Flow<Boolean>
+    val isFactoryResetDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
     val isCanDisableContentSuggestion: Boolean
@@ -31,5 +32,6 @@ interface DeviceOwnerManager {
     suspend fun setContentSuggestionDisabled(isDisabled: Boolean)
     suspend fun setScreenshotsDisabled(isDisabled: Boolean)
     suspend fun setDebugFeaturesDisabled(isDisabled: Boolean)
+    suspend fun setFactoryResetDisabled(isDisabled: Boolean)
     suspend fun updateDeviceOwnerState()
 }

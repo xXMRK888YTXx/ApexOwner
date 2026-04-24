@@ -29,4 +29,6 @@
     <string name="prevents_capturing_the_screen_via_screenshots_or_video_recordings_this_also_blocks_screen_sharing_and_projection_to_external_displays">Prevents capturing the screen via screenshots or video recordings. This also blocks screen sharing and projection to external displays.</string>
     <string name="disable_debugging_features">Disable Debugging Features</string>
     <string name="enabling_or_accessing_any_debugging_features_including_usb_debugging_is_prohibited_this_restriction_prevents_all_advanced_developer_actions_such_as_app_installations_via_adb_access_to_system_logs_and_direct_service_calls">Enabling or accessing any debugging features, including USB Debugging, is prohibited. This restriction prevents all advanced developer actions, such as app installations via ADB, access to system logs, and direct service calls.</string>
+    <string name="block_factory_reset">Block Factory Reset</string>
+    <string name="the_ability_to_perform_a_factory_reset_is_disabled">The ability to perform a factory reset is disabled.</string>
 </resources>
