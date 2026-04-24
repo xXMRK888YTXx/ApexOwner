@@ -33,4 +33,10 @@
     <string name="the_ability_to_perform_a_factory_reset_is_disabled">The ability to perform a factory reset is disabled.</string>
     <string name="disable_safe_mode">Disable Safe Mode</string>
     <string name="access_to_safe_mode_is_blocked_this_prevents_bypassing_security_restrictions_or_disabling_protection_by_starting_the_device_in_a_limited_state">Access to Safe Mode is blocked. This prevents bypassing security restrictions or disabling protection by starting the device in a limited state.</string>
+    <string name="disable_adding_new_users">Disable Adding New Users</string>
+    <string name="creation_of_new_user_profiles_on_the_device_is_prohibited">Creation of new user profiles on the device is prohibited.</string>
+    <string name="disable_user_removal">Disable User Removal</string>
+    <string name="removal_of_secondary_user_profiles_from_the_device_is_prohibited">Removal of secondary user profiles from the device is prohibited.</string>
+    <string name="block_user_switching">Block User Switching</string>
+    <string name="the_ability_to_switch_between_different_user_accounts_on_the_device_is_disabled">The ability to switch between different user accounts on the device is disabled.</string>
 </resources>

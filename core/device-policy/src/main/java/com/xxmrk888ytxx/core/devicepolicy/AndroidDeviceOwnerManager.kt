@@ -40,6 +40,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isDebugFeaturesDisabled = MutableStateFlow(false)
     private val _isFactoryResetDisabled = MutableStateFlow(false)
     private val _isSafeBootDisabled = MutableStateFlow(false)
+    private val _isAddUserDisabled = MutableStateFlow(false)
+    private val _isRemoveUserDisabled = MutableStateFlow(false)
+    private val _isSwitchUserDisabled = MutableStateFlow(false)
+
 
 
 
@@ -67,6 +71,9 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     override val isDebugFeaturesDisabled: Flow<Boolean> = _isDebugFeaturesDisabled.asAndroidDeviceOwnerFlow()
     override val isFactoryResetDisabled: Flow<Boolean> = _isFactoryResetDisabled.asAndroidDeviceOwnerFlow()
     override val isSafeBootDisabled: Flow<Boolean> = _isSafeBootDisabled.asAndroidDeviceOwnerFlow()
+    override val isAddUserDisabled: Flow<Boolean> = _isAddUserDisabled.asAndroidDeviceOwnerFlow()
+    override val isRemoveUserDisabled: Flow<Boolean> = _isRemoveUserDisabled.asAndroidDeviceOwnerFlow()
+    override val isSwitchUserDisabled: Flow<Boolean> = _isSwitchUserDisabled.asAndroidDeviceOwnerFlow()
 
     override val isCanDisableUSBDataSignal: Boolean
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -117,6 +124,12 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
             userRestriction.getBoolean(UserManager.DISALLOW_FACTORY_RESET, false)
         _isSafeBootDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_SAFE_BOOT, false)
+        _isAddUserDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_ADD_USER, false)
+        _isRemoveUserDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_REMOVE_USER, false)
+        _isSwitchUserDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_USER_SWITCH, false)
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -182,6 +195,18 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 
     override suspend fun setSafeBootDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_SAFE_BOOT, isDisabled)
+    }
+
+    override suspend fun setAddUserDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_ADD_USER, isDisabled)
+    }
+
+    override suspend fun setRemoveUserDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_REMOVE_USER, isDisabled)
+    }
+
+    override suspend fun setSwitchUserDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_USER_SWITCH, isDisabled)
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {

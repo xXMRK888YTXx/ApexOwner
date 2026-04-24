@@ -166,6 +166,30 @@ fun AppRestrictionModuleScreen(
                 isEnabled = screenState.isSafeBootDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleSafeBootDisabled
             ),
+            Restriction(
+                id = 14,
+                iconRes = R.drawable.add,
+                title = R.string.disable_adding_new_users.uiText(),
+                description = R.string.creation_of_new_user_profiles_on_the_device_is_prohibited.uiText(),
+                isEnabled = screenState.isAddUserDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleAddUserDisabled
+            ),
+            Restriction(
+                id = 15,
+                iconRes = R.drawable.remove,
+                title = R.string.disable_user_removal.uiText(),
+                description = R.string.removal_of_secondary_user_profiles_from_the_device_is_prohibited.uiText(),
+                isEnabled = screenState.isRemoveUserDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleRemoveUserDisabled
+            ),
+            Restriction(
+                id = 16,
+                iconRes = R.drawable.switch_user,
+                title = R.string.block_user_switching.uiText(),
+                description = R.string.the_ability_to_switch_between_different_user_accounts_on_the_device_is_disabled.uiText(),
+                isEnabled = screenState.isSwitchUserDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleSwitchUserDisabled
+            ),
         )
     }
 

@@ -20,4 +20,7 @@ data class ScreenState(
     val isDebugFeaturesDisabled: Boolean = false,
     val isFactoryResetDisabled: Boolean = false,
     val isSafeBootDisabled: Boolean = false,
+    val isAddUserDisabled: Boolean = false,
+    val isRemoveUserDisabled: Boolean = false,
+    val isSwitchUserDisabled: Boolean = false,
 ) : UiState

@@ -17,4 +17,7 @@ sealed interface AppRestrictionModuleUiEvent : UiEvent {
     data object ToggleDebugFeaturesDisabled: AppRestrictionModuleUiEvent
     data object ToggleFactoryResetDisabled: AppRestrictionModuleUiEvent
     data object ToggleSafeBootDisabled: AppRestrictionModuleUiEvent
+    data object ToggleAddUserDisabled: AppRestrictionModuleUiEvent
+    data object ToggleRemoveUserDisabled: AppRestrictionModuleUiEvent
+    data object ToggleSwitchUserDisabled: AppRestrictionModuleUiEvent
 }

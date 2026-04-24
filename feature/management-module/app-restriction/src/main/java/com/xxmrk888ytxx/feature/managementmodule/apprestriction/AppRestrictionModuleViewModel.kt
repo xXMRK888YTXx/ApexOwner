@@ -34,6 +34,9 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isDebugFeaturesDisabled,
         restrictionManageContract.isFactoryResetDisabled,
         restrictionManageContract.isSafeBootDisabled,
+        restrictionManageContract.isAddUserDisabled,
+        restrictionManageContract.isRemoveUserDisabled,
+        restrictionManageContract.isSwitchUserDisabled,
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -49,6 +52,10 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isDebugFeaturesDisabled = flowArray[11]
         val isFactoryResetDisabled = flowArray[12]
         val isSafeBootDisabled = flowArray[13]
+        val isAddUserDisabled = flowArray[14]
+        val isRemoveUserDisabled = flowArray[15]
+        val isSwitchUserDisabled = flowArray[16]
+
 
 
         ScreenState(
@@ -68,7 +75,10 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isScreenshotsDisabled = isScreenshotsDisabled,
             isDebugFeaturesDisabled = isDebugFeaturesDisabled,
             isFactoryResetDisabled = isFactoryResetDisabled,
-            isSafeBootDisabled = isSafeBootDisabled
+            isSafeBootDisabled = isSafeBootDisabled,
+            isAddUserDisabled = isAddUserDisabled,
+            isRemoveUserDisabled = isRemoveUserDisabled,
+            isSwitchUserDisabled = isSwitchUserDisabled,
         )
     }.stateWhileSubscribed()
 
@@ -89,7 +99,25 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleDebugFeaturesDisabled -> toggleDebugFeaturesDisabled()
             AppRestrictionModuleUiEvent.ToggleFactoryResetDisabled -> toggleFactoryResetDisabled()
             AppRestrictionModuleUiEvent.ToggleSafeBootDisabled -> toggleSafeBootDisabled()
+            AppRestrictionModuleUiEvent.ToggleAddUserDisabled -> toggleAddUserDisabled()
+            AppRestrictionModuleUiEvent.ToggleRemoveUserDisabled -> toggleRemoveUserDisabled()
+            AppRestrictionModuleUiEvent.ToggleSwitchUserDisabled -> toggleSwitchUserDisabled()
         }
+    }
+
+    private fun toggleSwitchUserDisabled() = changeRestrictionState {
+        val isSwitchUserDisabled = state.value.isSwitchUserDisabled
+        restrictionManageContract.setSwitchUserDisabled(!isSwitchUserDisabled)
+    }
+
+    private fun toggleRemoveUserDisabled() = changeRestrictionState {
+        val isRemoveUserDisabled = state.value.isRemoveUserDisabled
+        restrictionManageContract.setRemoveUserDisabled(!isRemoveUserDisabled)
+    }
+
+    private fun toggleAddUserDisabled() = changeRestrictionState {
+        val isAddUserDisabled = state.value.isAddUserDisabled
+        restrictionManageContract.setAddUserDisabled(!isAddUserDisabled)
     }
 
     private fun toggleSafeBootDisabled() = changeRestrictionState {

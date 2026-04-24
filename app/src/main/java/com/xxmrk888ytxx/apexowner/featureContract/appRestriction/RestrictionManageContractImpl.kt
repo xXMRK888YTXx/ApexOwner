@@ -25,6 +25,9 @@ class RestrictionManageContractImpl @Inject constructor(
     override val isDebugFeaturesDisabled: Flow<Boolean> = deviceOwnerManager.isDebugFeaturesDisabled
     override val isFactoryResetDisabled: Flow<Boolean> = deviceOwnerManager.isFactoryResetDisabled
     override val isSafeBootDisabled: Flow<Boolean> = deviceOwnerManager.isSafeBootDisabled
+    override val isAddUserDisabled: Flow<Boolean> = deviceOwnerManager.isAddUserDisabled
+    override val isRemoveUserDisabled: Flow<Boolean> = deviceOwnerManager.isRemoveUserDisabled
+    override val isSwitchUserDisabled: Flow<Boolean> = deviceOwnerManager.isSwitchUserDisabled
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -98,5 +101,17 @@ class RestrictionManageContractImpl @Inject constructor(
 
     override suspend fun setSafeBootDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper)  {
         deviceOwnerManager.setSafeBootDisabled(isDisabled)
+    }
+
+    override suspend fun setAddUserDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceOwnerManager.setAddUserDisabled(isDisabled)
+    }
+
+    override suspend fun setRemoveUserDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceOwnerManager.setRemoveUserDisabled(isDisabled)
+    }
+
+    override suspend fun setSwitchUserDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceOwnerManager.setSwitchUserDisabled(isDisabled)
     }
 }
