@@ -23,4 +23,6 @@ sealed interface AppRestrictionModuleUiEvent : UiEvent {
     data object ToggleBluetoothDisabled : AppRestrictionModuleUiEvent
     data object ToggleBluetoothConfigDisabled : AppRestrictionModuleUiEvent
     data object ToggleMountPhysicalMediaDisabled : AppRestrictionModuleUiEvent
+    data object ToggleLocationDisabled : AppRestrictionModuleUiEvent
+    data object ToggleNFCDisabled : AppRestrictionModuleUiEvent
 }

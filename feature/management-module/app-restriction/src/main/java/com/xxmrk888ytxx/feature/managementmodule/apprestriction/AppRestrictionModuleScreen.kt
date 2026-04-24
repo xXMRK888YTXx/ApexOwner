@@ -214,6 +214,24 @@ fun AppRestrictionModuleScreen(
                 isEnabled = screenState.isMountPhysicalMediaDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleMountPhysicalMediaDisabled
             ),
+
+            Restriction(
+                id = 20,
+                iconRes = R.drawable.location,
+                title = R.string.disable_location_sharing.uiText(),
+                description = R.string.turning_on_location_sharing_features_is_prohibited.uiText(),
+                isEnabled = screenState.isLocationDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleLocationDisabled
+            ),
+            Restriction(
+                id = 21,
+                iconRes = R.drawable.nfc,
+                title = R.string.disable_nfc.uiText(),
+                description = R.string.nfc_is_completely_disabled.uiText(),
+                isEnabled = screenState.isNFCDisabled,
+                isAvailable = screenState.isCanDisableNFC,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleNFCDisabled
+            ),
         )
     }
 

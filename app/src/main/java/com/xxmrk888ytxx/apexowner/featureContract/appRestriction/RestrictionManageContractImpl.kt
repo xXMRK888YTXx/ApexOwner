@@ -31,6 +31,8 @@ class RestrictionManageContractImpl @Inject constructor(
     override val isMountPhysicalMediaDisabled: Flow<Boolean> = deviceOwnerManager.isMountPhysicalMediaDisabled
     override val isBluetoothDisabled: Flow<Boolean> = deviceOwnerManager.isBluetoothDisabled
     override val isBluetoothConfigDisabled: Flow<Boolean> = deviceOwnerManager.isBluetoothConfigDisabled
+    override val isNFCDisabled: Flow<Boolean> = deviceOwnerManager.isNFCDisabled
+    override val isLocationDisabled: Flow<Boolean> = deviceOwnerManager.isLocationDisabled
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -39,6 +41,8 @@ class RestrictionManageContractImpl @Inject constructor(
         get() = deviceOwnerManager.isCanDisableScreenContentCaptureForAI
     override val isCanDisableContentSuggestion: Boolean
         get() = deviceOwnerManager.isCanDisableContentSuggestion
+    override val isCanDisableNFC: Boolean
+        get() = deviceOwnerManager.isCanDisableNFC
 
     private val exceptionMapper: (Throwable) -> Throwable = {
         when (it) {
@@ -128,5 +132,13 @@ class RestrictionManageContractImpl @Inject constructor(
 
     override suspend fun setBluetoothConfigDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
         deviceOwnerManager.setBluetoothConfigDisabled(isDisabled)
+    }
+
+    override suspend fun setNFCDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceOwnerManager.setNFCDisabled(isDisabled)
+    }
+
+    override suspend fun setLocationDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceOwnerManager.setLocationDisabled(isDisabled)
     }
 }

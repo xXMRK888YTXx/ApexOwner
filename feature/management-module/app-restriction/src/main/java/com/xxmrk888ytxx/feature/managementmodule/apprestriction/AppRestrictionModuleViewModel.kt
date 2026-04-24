@@ -40,6 +40,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isBluetoothDisabled,
         restrictionManageContract.isBluetoothConfigDisabled,
         restrictionManageContract.isMountPhysicalMediaDisabled,
+        restrictionManageContract.isNFCDisabled,
+        restrictionManageContract.isLocationDisabled
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -61,6 +63,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isBluetoothDisabled = flowArray[17]
         val isBluetoothConfigDisabled = flowArray[18]
         val isMountPhysicalMediaDisabled = flowArray[19]
+        val isNFCDisabled = flowArray[20]
+        val isLocationDisabled = flowArray[21]
 
 
 
@@ -88,7 +92,10 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isSwitchUserDisabled = isSwitchUserDisabled,
             isBluetoothDisabled = isBluetoothDisabled,
             isBluetoothConfigDisabled = isBluetoothConfigDisabled,
-            isMountPhysicalMediaDisabled = isMountPhysicalMediaDisabled
+            isMountPhysicalMediaDisabled = isMountPhysicalMediaDisabled,
+            isNFCDisabled = isNFCDisabled,
+            isLocationDisabled = isLocationDisabled,
+            isCanDisableNFC = restrictionManageContract.isCanDisableNFC
         )
     }.stateWhileSubscribed()
 
@@ -115,7 +122,19 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleBluetoothConfigDisabled -> toggleBluetoothConfigDisabled()
             AppRestrictionModuleUiEvent.ToggleBluetoothDisabled -> toggleBluetoothDisabled()
             AppRestrictionModuleUiEvent.ToggleMountPhysicalMediaDisabled -> toggleMountPhysicalMediaDisabled()
+            AppRestrictionModuleUiEvent.ToggleLocationDisabled -> toggleLocationDisabled()
+            AppRestrictionModuleUiEvent.ToggleNFCDisabled -> toggleNFCDisabled()
         }
+    }
+
+    private fun toggleNFCDisabled() = changeRestrictionState {
+        val isNFCDisabled = state.value.isNFCDisabled
+        restrictionManageContract.setNFCDisabled(!isNFCDisabled)
+    }
+
+    private fun toggleLocationDisabled() = changeRestrictionState {
+        val isLocationDisabled = state.value.isLocationDisabled
+        restrictionManageContract.setLocationDisabled(!isLocationDisabled)
     }
 
     private fun toggleMountPhysicalMediaDisabled() = changeRestrictionState {

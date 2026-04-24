@@ -23,9 +23,12 @@ interface RestrictionManageContract {
     val isMountPhysicalMediaDisabled: Flow<Boolean>
     val isBluetoothDisabled: Flow<Boolean>
     val isBluetoothConfigDisabled: Flow<Boolean>
+    val isNFCDisabled: Flow<Boolean>
+    val isLocationDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
     val isCanDisableContentSuggestion: Boolean
+    val isCanDisableNFC: Boolean
     suspend fun setCameraDisabled(isDisabled: Boolean) : Result<Unit>
     suspend fun setMicrophoneDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setUSBDataSignalDisabled(isDisabled: Boolean): Result<Unit>
@@ -46,4 +49,6 @@ interface RestrictionManageContract {
     suspend fun setMountPhysicalMediaDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setBluetoothDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setBluetoothConfigDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setNFCDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setLocationDisabled(isDisabled: Boolean): Result<Unit>
 }

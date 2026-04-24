@@ -46,6 +46,9 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isBluetoothDisabled = MutableStateFlow(false)
     private val _isBluetoothConfigDisabled = MutableStateFlow(false)
     private val _isMountPhysicalMediaDisabled = MutableStateFlow(false)
+    private val _isLocationDisabled = MutableStateFlow(false)
+    private val _isNFCDisabled = MutableStateFlow(false)
+
 
 
 
@@ -81,6 +84,8 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     override val isBluetoothDisabled: Flow<Boolean> = _isBluetoothDisabled.asAndroidDeviceOwnerFlow()
     override val isBluetoothConfigDisabled: Flow<Boolean> = _isBluetoothConfigDisabled.asAndroidDeviceOwnerFlow()
     override val isMountPhysicalMediaDisabled: Flow<Boolean> = _isMountPhysicalMediaDisabled.asAndroidDeviceOwnerFlow()
+    override val isLocationDisabled: Flow<Boolean> = _isLocationDisabled.asAndroidDeviceOwnerFlow()
+    override val isNFCDisabled: Flow<Boolean> = _isNFCDisabled.asAndroidDeviceOwnerFlow()
 
     override val isCanDisableUSBDataSignal: Boolean
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -94,6 +99,9 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     override val isCanDisableContentSuggestion: Boolean
         @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.Q)
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+    override val isCanDisableNFC: Boolean
+        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
 
     override val isDeviceOwner: Flow<Boolean> = _isDeviceOwner
         .asAndroidDeviceOwnerFlow()
@@ -143,6 +151,12 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
             userRestriction.getBoolean(UserManager.DISALLOW_CONFIG_BLUETOOTH, false)
         _isMountPhysicalMediaDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, false)
+        _isLocationDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_SHARE_LOCATION, false)
+        if (isCanDisableNFC) {
+            _isNFCDisabled.value =
+                userRestriction.getBoolean(UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO, false)
+        }
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -232,6 +246,16 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 
     override suspend fun setMountPhysicalMediaDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, isDisabled)
+    }
+
+    override suspend fun setLocationDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_SHARE_LOCATION, isDisabled)
+    }
+
+    override suspend fun setNFCDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        if (isCanDisableNFC) {
+            toggleUserRestriction(UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO, isDisabled)
+        }
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {

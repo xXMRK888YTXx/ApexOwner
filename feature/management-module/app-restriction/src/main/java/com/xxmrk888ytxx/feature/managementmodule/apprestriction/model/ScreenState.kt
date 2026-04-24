@@ -25,5 +25,8 @@ data class ScreenState(
     val isSwitchUserDisabled: Boolean = false,
     val isBluetoothDisabled: Boolean = false,
     val isBluetoothConfigDisabled: Boolean = false,
-    val isMountPhysicalMediaDisabled: Boolean = false
+    val isMountPhysicalMediaDisabled: Boolean = false,
+    val isLocationDisabled: Boolean = false,
+    val isNFCDisabled: Boolean = false,
+    val isCanDisableNFC: Boolean = true,
 ) : UiState
