@@ -33,6 +33,8 @@ class RestrictionManageContractImpl @Inject constructor(
     override val isBluetoothConfigDisabled: Flow<Boolean> = deviceRestrictionManager.isBluetoothConfigDisabled
     override val isNFCDisabled: Flow<Boolean> = deviceRestrictionManager.isNFCDisabled
     override val isLocationDisabled: Flow<Boolean> = deviceRestrictionManager.isLocationDisabled
+    override val isOutgoingCallsDisabled: Flow<Boolean> = deviceRestrictionManager.isOutgoingCallsDisabled
+    override val isSMSDisabled: Flow<Boolean> = deviceRestrictionManager.isSMSDisabled
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -140,5 +142,13 @@ class RestrictionManageContractImpl @Inject constructor(
 
     override suspend fun setLocationDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
         deviceRestrictionManager.setLocationDisabled(isDisabled)
+    }
+
+    override suspend fun setOutgoingCallsDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceRestrictionManager.setOutgoingCallsDisabled(isDisabled)
+    }
+
+    override suspend fun setSMSDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceRestrictionManager.setSMSDisabled(isDisabled)
     }
 }

@@ -49,4 +49,8 @@
     <string name="turning_on_location_sharing_features_is_prohibited">Turning on location sharing features is prohibited.</string>
     <string name="disable_nfc">Disable NFC</string>
     <string name="nfc_is_completely_disabled">NFC is completely disabled.</string>
+    <string name="disable_outgoing_calls">Disable Outgoing Calls</string>
+    <string name="making_outgoing_phone_calls_is_prohibited_this_restriction_does_not_affect_the_ability_to_make_emergency_calls">Making outgoing phone calls is prohibited. This restriction does not affect the ability to make emergency calls.</string>
+    <string name="disable_sms_messaging">Disable SMS Messaging</string>
+    <string name="sending_and_receiving_sms_messages_is_prohibited_all_text_messaging_functionality_via_the_cellular_network_is_completely_disabled">Sending and receiving SMS messages is prohibited. All text messaging functionality via the cellular network is completely disabled.</string>
 </resources>

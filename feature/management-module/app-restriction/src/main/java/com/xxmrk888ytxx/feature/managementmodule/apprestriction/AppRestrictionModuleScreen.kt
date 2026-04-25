@@ -232,6 +232,22 @@ fun AppRestrictionModuleScreen(
                 isAvailable = screenState.isCanDisableNFC,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleNFCDisabled
             ),
+            Restriction(
+                id = 22,
+                iconRes = R.drawable.call,
+                title = R.string.disable_outgoing_calls.uiText(),
+                description = R.string.making_outgoing_phone_calls_is_prohibited_this_restriction_does_not_affect_the_ability_to_make_emergency_calls.uiText(),
+                isEnabled = screenState.isOutgoingCallsDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleOutgoingCallsDisabled
+            ),
+            Restriction(
+                id = 23,
+                iconRes = R.drawable.sms,
+                title = R.string.disable_sms_messaging.uiText(),
+                description = R.string.sending_and_receiving_sms_messages_is_prohibited_all_text_messaging_functionality_via_the_cellular_network_is_completely_disabled.uiText(),
+                isEnabled = screenState.isSMSDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleSMSDisabled
+            ),
         )
     }
 

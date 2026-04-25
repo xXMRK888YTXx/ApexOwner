@@ -48,6 +48,9 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isMountPhysicalMediaDisabled = MutableStateFlow(false)
     private val _isLocationDisabled = MutableStateFlow(false)
     private val _isNFCDisabled = MutableStateFlow(false)
+    private val _isOutgoingCallsDisabled = MutableStateFlow(false)
+    private val _isSMSDisabled = MutableStateFlow(false)
+
 
 
 
@@ -86,6 +89,8 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     override val isMountPhysicalMediaDisabled: Flow<Boolean> = _isMountPhysicalMediaDisabled.asAndroidDeviceOwnerFlow()
     override val isLocationDisabled: Flow<Boolean> = _isLocationDisabled.asAndroidDeviceOwnerFlow()
     override val isNFCDisabled: Flow<Boolean> = _isNFCDisabled.asAndroidDeviceOwnerFlow()
+    override val isOutgoingCallsDisabled: Flow<Boolean> = _isOutgoingCallsDisabled.asAndroidDeviceOwnerFlow()
+    override val isSMSDisabled: Flow<Boolean> = _isSMSDisabled.asAndroidDeviceOwnerFlow()
 
     override val isCanDisableUSBDataSignal: Boolean
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -157,6 +162,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
             _isNFCDisabled.value =
                 userRestriction.getBoolean(UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO, false)
         }
+        _isOutgoingCallsDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_OUTGOING_CALLS, false)
+        _isSMSDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_SMS, false)
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -250,6 +259,14 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 
     override suspend fun setLocationDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_SHARE_LOCATION, isDisabled)
+    }
+
+    override suspend fun setOutgoingCallsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, isDisabled)
+    }
+
+    override suspend fun setSMSDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_SMS, isDisabled)
     }
 
     override suspend fun setNFCDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {

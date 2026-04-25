@@ -41,7 +41,9 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isBluetoothConfigDisabled,
         restrictionManageContract.isMountPhysicalMediaDisabled,
         restrictionManageContract.isNFCDisabled,
-        restrictionManageContract.isLocationDisabled
+        restrictionManageContract.isLocationDisabled,
+        restrictionManageContract.isOutgoingCallsDisabled,
+        restrictionManageContract.isSMSDisabled,
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -65,6 +67,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isMountPhysicalMediaDisabled = flowArray[19]
         val isNFCDisabled = flowArray[20]
         val isLocationDisabled = flowArray[21]
+        val isOutgoingCallsDisabled = flowArray[22]
+        val isSMSDisabled = flowArray[23]
 
 
 
@@ -95,7 +99,9 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isMountPhysicalMediaDisabled = isMountPhysicalMediaDisabled,
             isNFCDisabled = isNFCDisabled,
             isLocationDisabled = isLocationDisabled,
-            isCanDisableNFC = restrictionManageContract.isCanDisableNFC
+            isCanDisableNFC = restrictionManageContract.isCanDisableNFC,
+            isOutgoingCallsDisabled = isOutgoingCallsDisabled,
+            isSMSDisabled = isSMSDisabled,
         )
     }.stateWhileSubscribed()
 
@@ -124,7 +130,19 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleMountPhysicalMediaDisabled -> toggleMountPhysicalMediaDisabled()
             AppRestrictionModuleUiEvent.ToggleLocationDisabled -> toggleLocationDisabled()
             AppRestrictionModuleUiEvent.ToggleNFCDisabled -> toggleNFCDisabled()
+            AppRestrictionModuleUiEvent.ToggleOutgoingCallsDisabled -> toggleOutgoingCallsDisabled()
+            AppRestrictionModuleUiEvent.ToggleSMSDisabled -> toggleSMSDisabled()
         }
+    }
+
+    private fun toggleOutgoingCallsDisabled() = changeRestrictionState {
+        val isOutgoingCallsDisabled = state.value.isOutgoingCallsDisabled
+        restrictionManageContract.setOutgoingCallsDisabled(!isOutgoingCallsDisabled)
+    }
+
+    private fun toggleSMSDisabled() = changeRestrictionState {
+        val isSMSDisabled = state.value.isSMSDisabled
+        restrictionManageContract.setSMSDisabled(!isSMSDisabled)
     }
 
     private fun toggleNFCDisabled() = changeRestrictionState {

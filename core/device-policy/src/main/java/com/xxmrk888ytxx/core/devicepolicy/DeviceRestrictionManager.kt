@@ -26,6 +26,8 @@ interface DeviceRestrictionManager {
     val isMountPhysicalMediaDisabled: Flow<Boolean>
     val isLocationDisabled: Flow<Boolean>
     val isNFCDisabled: Flow<Boolean>
+    val isOutgoingCallsDisabled: Flow<Boolean>
+    val isSMSDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
     val isCanDisableContentSuggestion: Boolean
@@ -51,5 +53,7 @@ interface DeviceRestrictionManager {
     suspend fun setBluetoothConfigDisabled(isDisabled: Boolean)
     suspend fun setMountPhysicalMediaDisabled(isDisabled: Boolean)
     suspend fun setLocationDisabled(isDisabled: Boolean)
+    suspend fun setOutgoingCallsDisabled(isDisabled: Boolean)
+    suspend fun setSMSDisabled(isDisabled: Boolean)
     suspend fun setNFCDisabled(isDisabled: Boolean)
 }

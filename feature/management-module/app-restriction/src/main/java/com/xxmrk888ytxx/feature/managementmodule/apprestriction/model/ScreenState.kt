@@ -29,4 +29,6 @@ data class ScreenState(
     val isLocationDisabled: Boolean = false,
     val isNFCDisabled: Boolean = false,
     val isCanDisableNFC: Boolean = true,
+    val isOutgoingCallsDisabled: Boolean = false,
+    val isSMSDisabled: Boolean = false,
 ) : UiState
