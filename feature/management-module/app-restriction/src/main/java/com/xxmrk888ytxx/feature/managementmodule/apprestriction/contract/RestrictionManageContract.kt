@@ -29,10 +29,25 @@ interface RestrictionManageContract {
     val isSMSDisabled: Flow<Boolean>
     val isWallpaperChangeDisabled: Flow<Boolean>
     val isFunDisabled: Flow<Boolean>
+    val isWifiConfigDisabled: Flow<Boolean>
+    val isWifiStateChangeDisabled: Flow<Boolean>
+    val isHotspotDisabled: Flow<Boolean>
+    val isAddNewWifiNetworksDisabled: Flow<Boolean>
+    val isAirplaneModeDisabled: Flow<Boolean>
+    val isConfigVPNDisabled: Flow<Boolean>
+    val isConfigPrivateDNSDisabled: Flow<Boolean>
+    val isRoamingDisabled: Flow<Boolean>
+    val isConfigMobileDataDisabled: Flow<Boolean>
+    val is2GNetworkDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
     val isCanDisableContentSuggestion: Boolean
     val isCanDisableNFC: Boolean
+    val isCanDisableChangeWifiState: Boolean
+    val isCanDisableHotspot: Boolean
+    val isCanDisableAddNewWifiNetworks: Boolean
+    val isCanDisableConfigPrivateDNS: Boolean
+    val isCanDisable2GNetwork: Boolean
     suspend fun setCameraDisabled(isDisabled: Boolean) : Result<Unit>
     suspend fun setMicrophoneDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setUSBDataSignalDisabled(isDisabled: Boolean): Result<Unit>
@@ -59,4 +74,14 @@ interface RestrictionManageContract {
     suspend fun setSMSDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setWallpaperChangeDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setFunDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setWifiStateChangeDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setWifiConfigDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setRoamingDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setMobileDataDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setHotspotDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setConfigVPNDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setConfigPrivateDNSDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setAirplaneModeDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setAddNewWifiNetworksDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun set2GNetworkDisabled(isDisabled: Boolean): Result<Unit>
 }

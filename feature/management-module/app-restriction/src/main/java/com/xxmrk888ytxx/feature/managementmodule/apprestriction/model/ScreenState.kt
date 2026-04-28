@@ -33,4 +33,21 @@ data class ScreenState(
     val isSMSDisabled: Boolean = false,
     val isWallpaperChangeDisabled: Boolean = false,
     val isFunDisabled: Boolean = false,
+
+    val isWifiStateChangeDisabled: Boolean = false,
+    val isWifiConfigDisabled: Boolean = false,
+    val isHotspotDisabled: Boolean = false,
+    val isAddNewWifiNetworksDisabled: Boolean = false,
+    val isAirplaneModeDisabled: Boolean = false,
+    val isConfigVPNDisabled: Boolean = false,
+    val isConfigPrivateDNSDisabled: Boolean = false,
+    val isRoamingDisabled: Boolean = false,
+    val isConfigMobileDataDisabled: Boolean = false,
+    val is2GNetworkDisabled: Boolean = false,
+
+    val isCanDisableChangeWifiState: Boolean = true,
+    val isCanDisableHotspot: Boolean = true,
+    val isCanDisableAddNewWifiNetworks: Boolean = true,
+    val isCanDisableConfigPrivateDNS: Boolean = true,
+    val isCanDisable2GNetwork: Boolean = true,
 ) : UiState

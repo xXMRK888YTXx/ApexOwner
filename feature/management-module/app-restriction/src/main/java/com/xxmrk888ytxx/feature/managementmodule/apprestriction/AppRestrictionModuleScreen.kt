@@ -264,6 +264,95 @@ fun AppRestrictionModuleScreen(
                 isEnabled = screenState.isFunDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleFunDisabled
             ),
+            ///
+
+
+
+            Restriction(
+                id = 26,
+                iconRes = R.drawable.wifi_device,
+                title = R.string.restrict_wi_fi_networks_configuration.uiText(),
+                description = R.string.changing_wi_fi_networks_settings_is_prohibited_this_restriction_does_not_affect_wi_fi_tethering_settings.uiText(),
+                isEnabled = screenState.isWifiConfigDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleWifiConfigDisabled
+            ),
+            Restriction(
+                id = 27,
+                iconRes = R.drawable.wifi,
+                title = R.string.disable_wi_fi_control.uiText(),
+                description = R.string.turning_wi_fi_on_or_off_is_prohibited_this_restriction_applies_globally_and_prevents_changing_the_wi_fi_state_even_through_airplane_mode.uiText(),
+                isEnabled = screenState.isWifiStateChangeDisabled,
+                isAvailable = screenState.isCanDisableChangeWifiState,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleWifiStateChangeDisabled
+            ),
+            Restriction(
+                id = 28,
+                iconRes = R.drawable.compass,
+                title = R.string.disable_wi_fi_tethering.uiText(),
+                description = R.string.using_the_device_as_a_wi_fi_hotspot_is_prohibited_this_restriction_does_not_affect_other_types_of_tethering_or_the_ability_to_connect_to_regular_wi_fi_networks.uiText(),
+                isEnabled = screenState.isHotspotDisabled,
+                isAvailable = screenState.isCanDisableHotspot,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleHotspotDisabled
+            ),
+            Restriction(
+                id = 29,
+                iconRes = R.drawable.wifi_plus,
+                title = R.string.disable_adding_wi_fi_networks.uiText(),
+                description = R.string.adding_new_wi_fi_configurations_is_prohibited_this_restriction_prevents_the_setup_of_new_wireless_connections_while_allowing_the_use_of_existing_ones.uiText(),
+                isEnabled = screenState.isAddNewWifiNetworksDisabled,
+                isAvailable = screenState.isCanDisableAddNewWifiNetworks,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleAddNewWifiNetworksDisabled
+            ),
+            Restriction(
+                id = 30,
+                iconRes = R.drawable.flight,
+                title = R.string.disable_airplane_mode.uiText(),
+                description = R.string.turning_on_airplane_mode_is_prohibited_this_restriction_applies_globally_ensuring_that_all_wireless_radios_remain_active_and_the_device_cannot_be_disconnected_from_networks_via_this_mode.uiText(),
+                isEnabled = screenState.isAirplaneModeDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleAirplaneModeDisabled
+            ),
+            Restriction(
+                id = 31,
+                iconRes = R.drawable.vpn,
+                title = R.string.disable_vpn_configuration.uiText(),
+                description = R.string.configuration_of_vpn_connections_is_prohibited_this_restriction_prevents_starting_manual_vpns_and_automatically_disconnects_any_existing_user_configured_vpn_services.uiText(),
+                isEnabled = screenState.isConfigVPNDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleConfigVPNDisabled
+            ),
+            Restriction(
+                id = 32,
+                iconRes = R.drawable.dns,
+                title = R.string.disable_private_dns_configuration.uiText(),
+                description = R.string.modification_of_private_dns_settings_is_prohibited_this_restriction_applies_globally_preventing_any_changes_to_dns_over_tls_configurations_in_the_network_settings.uiText(),
+                isEnabled = screenState.isConfigPrivateDNSDisabled,
+                isAvailable = screenState.isCanDisableConfigPrivateDNS,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleConfigPrivateDNSDisabled
+            ),
+            Restriction(
+                id = 33,
+                iconRes = R.drawable.cell,
+                title = R.string.disable_data_roaming.uiText(),
+                description = R.string.use_of_cellular_data_while_roaming_is_prohibited_this_restriction_prevents_the_device_from_connecting_to_the_internet_via_mobile_networks_when_outside_the_home_carrier_s_coverage_area.uiText(),
+                isEnabled = screenState.isRoamingDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleRoamingDisabled
+            ),
+            Restriction(
+                id = 34,
+                iconRes = R.drawable.mobiledata_arrows,
+                title = R.string.restrict_mobile_network_configuration.uiText(),
+                description = R.string.modification_of_mobile_network_settings_is_prohibited_this_restriction_prevents_the_user_from_changing_apn_settings_selecting_network_operators_or_adjusting_other_cellular_data_configurations.uiText(),
+                isEnabled = screenState.isConfigMobileDataDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleMobileDataDisabled
+            ),
+            Restriction(
+                id = 35,
+                iconRes = R.drawable.signal_cellular,
+                title = R.string.disable_2g_networks.uiText(),
+                description = R.string.the_use_of_2g_cellular_networks_is_prohibited_to_prevent_security_attacks_like_communication_interception_or_modification_the_device_will_only_connect_to_3g_or_newer_networks_except_for_emergency_calls_which_remain_unaffected.uiText(),
+                isEnabled = screenState.is2GNetworkDisabled,
+                isAvailable = screenState.isCanDisable2GNetwork,
+                uiEventForToggle = AppRestrictionModuleUiEvent.Toggle2GNetworkDisabled
+            ),
         )
     }
 

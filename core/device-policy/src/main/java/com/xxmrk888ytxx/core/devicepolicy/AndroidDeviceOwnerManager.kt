@@ -52,6 +52,17 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isSMSDisabled = MutableStateFlow(false)
     private val _isWallpaperChangeDisabled = MutableStateFlow(false)
     private val _isFunDisabled = MutableStateFlow(false)
+    private val _isWifiConfigDisabled = MutableStateFlow(false)
+    private val _isWifiStateChangeDisabled = MutableStateFlow(false)
+    private val _isHotspotDisabled = MutableStateFlow(false)
+    private val _isAddNewWifiNetworksDisabled = MutableStateFlow(false)
+    private val _isAirplaneModeDisabled = MutableStateFlow(false)
+    private val _isConfigVPNDisabled = MutableStateFlow(false)
+    private val _isConfigPrivateDNSDisabled = MutableStateFlow(false)
+    private val _isRoamingDisabled = MutableStateFlow(false)
+    private val _isConfigMobileDataDisabled = MutableStateFlow(false)
+    private val _is2GNetworkDisabled = MutableStateFlow(false)
+
 
 
     override val isCameraDisabled: Flow<Boolean> = _isCameraDisabled.asAndroidDeviceOwnerFlow()
@@ -99,6 +110,16 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     override val isWallpaperChangeDisabled: Flow<Boolean> =
         _isWallpaperChangeDisabled.asAndroidDeviceOwnerFlow()
     override val isFunDisabled: Flow<Boolean> = _isFunDisabled.asAndroidDeviceOwnerFlow()
+    override val isWifiConfigDisabled: Flow<Boolean> = _isWifiConfigDisabled.asAndroidDeviceOwnerFlow()
+    override val isWifiStateChangeDisabled: Flow<Boolean> = _isWifiStateChangeDisabled.asAndroidDeviceOwnerFlow()
+    override val isHotspotDisabled: Flow<Boolean> = _isHotspotDisabled.asAndroidDeviceOwnerFlow()
+    override val isAddNewWifiNetworksDisabled: Flow<Boolean> = _isAddNewWifiNetworksDisabled.asAndroidDeviceOwnerFlow()
+    override val isAirplaneModeDisabled: Flow<Boolean> = _isAirplaneModeDisabled.asAndroidDeviceOwnerFlow()
+    override val isConfigVPNDisabled: Flow<Boolean> = _isConfigVPNDisabled.asAndroidDeviceOwnerFlow()
+    override val isConfigPrivateDNSDisabled: Flow<Boolean> = _isConfigPrivateDNSDisabled.asAndroidDeviceOwnerFlow()
+    override val isRoamingDisabled: Flow<Boolean> = _isRoamingDisabled.asAndroidDeviceOwnerFlow()
+    override val isConfigMobileDataDisabled: Flow<Boolean> = _isConfigMobileDataDisabled.asAndroidDeviceOwnerFlow()
+    override val is2GNetworkDisabled: Flow<Boolean> = _is2GNetworkDisabled.asAndroidDeviceOwnerFlow()
 
     override val isCanDisableUSBDataSignal: Boolean
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -115,6 +136,21 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     override val isCanDisableNFC: Boolean
         @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.VANILLA_ICE_CREAM)
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
+    override val isCanDisableChangeWifiState: Boolean
+        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.TIRAMISU)
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    override val isCanDisableHotspot: Boolean
+        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.TIRAMISU)
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    override val isCanDisableAddNewWifiNetworks: Boolean
+        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.TIRAMISU)
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    override val isCanDisableConfigPrivateDNS: Boolean
+        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.Q)
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+    override val isCanDisable2GNetwork: Boolean
+        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
 
     override val isDeviceOwner: Flow<Boolean> = _isDeviceOwner
         .asAndroidDeviceOwnerFlow()
@@ -181,6 +217,36 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
             userRestriction.getBoolean(UserManager.DISALLOW_SET_WALLPAPER, false)
         _isFunDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_FUN, false)
+        _isWifiConfigDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_CONFIG_WIFI, false)
+        if (isCanDisableChangeWifiState) {
+            _isWifiStateChangeDisabled.value =
+                userRestriction.getBoolean(UserManager.DISALLOW_CHANGE_WIFI_STATE, false)
+        }
+        if (isCanDisableHotspot) {
+            _isHotspotDisabled.value =
+                userRestriction.getBoolean(UserManager.DISALLOW_WIFI_TETHERING, false)
+        }
+        if (isCanDisableAddNewWifiNetworks) {
+            _isAddNewWifiNetworksDisabled.value =
+                userRestriction.getBoolean(UserManager.DISALLOW_ADD_WIFI_CONFIG, false)
+        }
+        _isAirplaneModeDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_AIRPLANE_MODE, false)
+        _isConfigVPNDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_CONFIG_VPN, false)
+        if (isCanDisableConfigPrivateDNS) {
+            _isConfigPrivateDNSDisabled.value =
+                userRestriction.getBoolean(UserManager.DISALLOW_CONFIG_PRIVATE_DNS, false)
+        }
+        _isRoamingDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_DATA_ROAMING, false)
+        _isConfigMobileDataDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS, false)
+        if (isCanDisable2GNetwork) {
+            _is2GNetworkDisabled.value =
+                userRestriction.getBoolean(UserManager.DISALLOW_CELLULAR_2G, false)
+        }
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -297,6 +363,56 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 
     override suspend fun setFunDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_FUN, isDisabled)
+    }
+
+    override suspend fun setWifiConfigDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, isDisabled)
+    }
+
+    override suspend fun setWifiStateChangeDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        if (isCanDisableChangeWifiState) {
+            toggleUserRestriction(UserManager.DISALLOW_CHANGE_WIFI_STATE, isDisabled)
+        }
+    }
+
+    override suspend fun setHotspotDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        if(isCanDisableHotspot) {
+            toggleUserRestriction(UserManager.DISALLOW_WIFI_TETHERING, isDisabled)
+        }
+    }
+
+    override suspend fun setAddNewWifiNetworksDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        if (isCanDisableAddNewWifiNetworks) {
+            toggleUserRestriction(UserManager.DISALLOW_ADD_WIFI_CONFIG, isDisabled)
+        }
+    }
+
+    override suspend fun setAirplaneModeDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_AIRPLANE_MODE, isDisabled)
+    }
+
+    override suspend fun setConfigVPNDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_CONFIG_VPN, isDisabled)
+    }
+
+    override suspend fun setConfigPrivateDNSDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        if (isCanDisableConfigPrivateDNS) {
+            toggleUserRestriction(UserManager.DISALLOW_CONFIG_PRIVATE_DNS, isDisabled)
+        }
+    }
+
+    override suspend fun setRoamingDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_DATA_ROAMING, isDisabled)
+    }
+
+    override suspend fun setConfigMobileDataDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS, isDisabled)
+    }
+
+    override suspend fun set2GNetworkDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        if (isCanDisable2GNetwork) {
+            toggleUserRestriction(UserManager.DISALLOW_CELLULAR_2G, isDisabled)
+        }
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {

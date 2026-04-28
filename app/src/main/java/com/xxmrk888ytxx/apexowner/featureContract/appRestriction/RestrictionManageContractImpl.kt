@@ -13,30 +13,54 @@ class RestrictionManageContractImpl @Inject constructor(
 ) : RestrictionManageContract {
     override val isCameraDisabled: Flow<Boolean> = deviceRestrictionManager.isCameraDisabled
     override val isMicrophoneDisabled: Flow<Boolean> = deviceRestrictionManager.isMicrophoneDisabled
-    override val isUSBDataSignalDisabled: Flow<Boolean> = deviceRestrictionManager.isUSBDataSignalDisabled
-    override val isUSBFileTransferDisabled: Flow<Boolean> = deviceRestrictionManager.isUSBFileTransferDisabled
-    override val isInstallAppsDisabled: Flow<Boolean> = deviceRestrictionManager.isInstallAppsDisabled
-    override val isInstallAppsFromUnknownSourcesDisabled: Flow<Boolean> = deviceRestrictionManager.isInstallAppsFromUnknownSourcesDisabled
-    override val isUninstallAppsDisabled: Flow<Boolean> = deviceRestrictionManager.isUninstallAppsDisabled
+    override val isUSBDataSignalDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isUSBDataSignalDisabled
+    override val isUSBFileTransferDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isUSBFileTransferDisabled
+    override val isInstallAppsDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isInstallAppsDisabled
+    override val isInstallAppsFromUnknownSourcesDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isInstallAppsFromUnknownSourcesDisabled
+    override val isUninstallAppsDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isUninstallAppsDisabled
     override val isAppControlDisabled: Flow<Boolean> = deviceRestrictionManager.isAppControlDisabled
-    override val isScreenContentCaptureForAIDisabled: Flow<Boolean> = deviceRestrictionManager.isScreenContentCaptureForAIDisabled
-    override val isContentSuggestionDisabled: Flow<Boolean> = deviceRestrictionManager.isContentSuggestionDisabled
-    override val isScreenshotsDisabled: Flow<Boolean> = deviceRestrictionManager.isScreenshotsDisabled
-    override val isDebugFeaturesDisabled: Flow<Boolean> = deviceRestrictionManager.isDebugFeaturesDisabled
-    override val isFactoryResetDisabled: Flow<Boolean> = deviceRestrictionManager.isFactoryResetDisabled
+    override val isScreenContentCaptureForAIDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isScreenContentCaptureForAIDisabled
+    override val isContentSuggestionDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isContentSuggestionDisabled
+    override val isScreenshotsDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isScreenshotsDisabled
+    override val isDebugFeaturesDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isDebugFeaturesDisabled
+    override val isFactoryResetDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isFactoryResetDisabled
     override val isSafeBootDisabled: Flow<Boolean> = deviceRestrictionManager.isSafeBootDisabled
     override val isAddUserDisabled: Flow<Boolean> = deviceRestrictionManager.isAddUserDisabled
     override val isRemoveUserDisabled: Flow<Boolean> = deviceRestrictionManager.isRemoveUserDisabled
     override val isSwitchUserDisabled: Flow<Boolean> = deviceRestrictionManager.isSwitchUserDisabled
-    override val isMountPhysicalMediaDisabled: Flow<Boolean> = deviceRestrictionManager.isMountPhysicalMediaDisabled
+    override val isMountPhysicalMediaDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isMountPhysicalMediaDisabled
     override val isBluetoothDisabled: Flow<Boolean> = deviceRestrictionManager.isBluetoothDisabled
-    override val isBluetoothConfigDisabled: Flow<Boolean> = deviceRestrictionManager.isBluetoothConfigDisabled
+    override val isBluetoothConfigDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isBluetoothConfigDisabled
     override val isNFCDisabled: Flow<Boolean> = deviceRestrictionManager.isNFCDisabled
     override val isLocationDisabled: Flow<Boolean> = deviceRestrictionManager.isLocationDisabled
-    override val isOutgoingCallsDisabled: Flow<Boolean> = deviceRestrictionManager.isOutgoingCallsDisabled
+    override val isOutgoingCallsDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isOutgoingCallsDisabled
     override val isSMSDisabled: Flow<Boolean> = deviceRestrictionManager.isSMSDisabled
-    override val isWallpaperChangeDisabled: Flow<Boolean> = deviceRestrictionManager.isWallpaperChangeDisabled
+    override val isWallpaperChangeDisabled: Flow<Boolean> =
+        deviceRestrictionManager.isWallpaperChangeDisabled
     override val isFunDisabled: Flow<Boolean> = deviceRestrictionManager.isFunDisabled
+    override val isWifiConfigDisabled: Flow<Boolean> = deviceRestrictionManager.isWifiConfigDisabled
+    override val isWifiStateChangeDisabled: Flow<Boolean> = deviceRestrictionManager.isWifiStateChangeDisabled
+    override val isHotspotDisabled: Flow<Boolean> = deviceRestrictionManager.isHotspotDisabled
+    override val isAddNewWifiNetworksDisabled: Flow<Boolean> = deviceRestrictionManager.isAddNewWifiNetworksDisabled
+    override val isAirplaneModeDisabled: Flow<Boolean> = deviceRestrictionManager.isAirplaneModeDisabled
+    override val isConfigVPNDisabled: Flow<Boolean> = deviceRestrictionManager.isConfigVPNDisabled
+    override val isConfigPrivateDNSDisabled: Flow<Boolean> = deviceRestrictionManager.isConfigPrivateDNSDisabled
+    override val isRoamingDisabled: Flow<Boolean> = deviceRestrictionManager.isRoamingDisabled
+    override val isConfigMobileDataDisabled: Flow<Boolean> = deviceRestrictionManager.isConfigMobileDataDisabled
+    override val is2GNetworkDisabled: Flow<Boolean> = deviceRestrictionManager.is2GNetworkDisabled
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -47,6 +71,16 @@ class RestrictionManageContractImpl @Inject constructor(
         get() = deviceRestrictionManager.isCanDisableContentSuggestion
     override val isCanDisableNFC: Boolean
         get() = deviceRestrictionManager.isCanDisableNFC
+    override val isCanDisableChangeWifiState: Boolean
+        get()  = deviceRestrictionManager.isCanDisableChangeWifiState
+    override val isCanDisableHotspot: Boolean
+        get() = deviceRestrictionManager.isCanDisableHotspot
+    override val isCanDisableAddNewWifiNetworks: Boolean
+        get() = deviceRestrictionManager.isCanDisableAddNewWifiNetworks
+    override val isCanDisableConfigPrivateDNS: Boolean
+        get() = deviceRestrictionManager.isCanDisableConfigPrivateDNS
+    override val isCanDisable2GNetwork: Boolean
+        get() = deviceRestrictionManager.isCanDisable2GNetwork
 
     private val exceptionMapper: (Throwable) -> Throwable = {
         when (it) {
@@ -65,100 +99,173 @@ class RestrictionManageContractImpl @Inject constructor(
             deviceRestrictionManager.setMicrophoneDisabled(isDisabled)
         }
 
-    override suspend fun setUSBDataSignalDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setUSBDataSignalDisabled(isDisabled)
-    }
+    override suspend fun setUSBDataSignalDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setUSBDataSignalDisabled(isDisabled)
+        }
 
-    override suspend fun setUSBFileTransferDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setUSBFileTransferDisabled(isDisabled)
-    }
+    override suspend fun setUSBFileTransferDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setUSBFileTransferDisabled(isDisabled)
+        }
 
-    override suspend fun setInstallAppsDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setInstallAppsDisabled(isDisabled)
-    }
+    override suspend fun setInstallAppsDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setInstallAppsDisabled(isDisabled)
+        }
 
-    override suspend fun setInstallAppsFromUnknownSourcesDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setInstallAppsFromUnknownSourcesDisabled(isDisabled)
-    }
+    override suspend fun setInstallAppsFromUnknownSourcesDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setInstallAppsFromUnknownSourcesDisabled(isDisabled)
+        }
 
-    override suspend fun setUninstallAppsDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setUninstallAppsDisabled(isDisabled)
-    }
+    override suspend fun setUninstallAppsDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setUninstallAppsDisabled(isDisabled)
+        }
 
-    override suspend fun setAppControlDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setAppControlDisabled(isDisabled)
-    }
+    override suspend fun setAppControlDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setAppControlDisabled(isDisabled)
+        }
 
-    override suspend fun setScreenContentCaptureForAIDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setScreenContentCaptureForAIDisabled(isDisabled)
-    }
+    override suspend fun setScreenContentCaptureForAIDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setScreenContentCaptureForAIDisabled(isDisabled)
+        }
 
-    override suspend fun setContentSuggestionDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setContentSuggestionDisabled(isDisabled)
-    }
+    override suspend fun setContentSuggestionDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setContentSuggestionDisabled(isDisabled)
+        }
 
-    override suspend fun setScreenshotsDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setScreenshotsDisabled(isDisabled)
-    }
+    override suspend fun setScreenshotsDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setScreenshotsDisabled(isDisabled)
+        }
 
-    override suspend fun setDebugFeaturesDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setDebugFeaturesDisabled(isDisabled)
-    }
+    override suspend fun setDebugFeaturesDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setDebugFeaturesDisabled(isDisabled)
+        }
 
     override suspend fun setFactoryResetDisabled(isDisabled: Boolean): Result<Unit> =
         coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
             deviceRestrictionManager.setFactoryResetDisabled(isDisabled)
         }
 
-    override suspend fun setSafeBootDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper)  {
-        deviceRestrictionManager.setSafeBootDisabled(isDisabled)
-    }
+    override suspend fun setSafeBootDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setSafeBootDisabled(isDisabled)
+        }
 
-    override suspend fun setAddUserDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setAddUserDisabled(isDisabled)
-    }
+    override suspend fun setAddUserDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setAddUserDisabled(isDisabled)
+        }
 
-    override suspend fun setRemoveUserDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setRemoveUserDisabled(isDisabled)
-    }
+    override suspend fun setRemoveUserDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setRemoveUserDisabled(isDisabled)
+        }
 
-    override suspend fun setSwitchUserDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setSwitchUserDisabled(isDisabled)
-    }
+    override suspend fun setSwitchUserDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setSwitchUserDisabled(isDisabled)
+        }
 
-    override suspend fun setMountPhysicalMediaDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setMountPhysicalMediaDisabled(isDisabled)
-    }
+    override suspend fun setMountPhysicalMediaDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setMountPhysicalMediaDisabled(isDisabled)
+        }
 
-    override suspend fun setBluetoothDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setBluetoothDisabled(isDisabled)
-    }
+    override suspend fun setBluetoothDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setBluetoothDisabled(isDisabled)
+        }
 
-    override suspend fun setBluetoothConfigDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setBluetoothConfigDisabled(isDisabled)
-    }
+    override suspend fun setBluetoothConfigDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setBluetoothConfigDisabled(isDisabled)
+        }
 
-    override suspend fun setNFCDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setNFCDisabled(isDisabled)
-    }
+    override suspend fun setNFCDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setNFCDisabled(isDisabled)
+        }
 
-    override suspend fun setLocationDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setLocationDisabled(isDisabled)
-    }
+    override suspend fun setLocationDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setLocationDisabled(isDisabled)
+        }
 
-    override suspend fun setOutgoingCallsDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setOutgoingCallsDisabled(isDisabled)
-    }
+    override suspend fun setOutgoingCallsDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setOutgoingCallsDisabled(isDisabled)
+        }
 
-    override suspend fun setSMSDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setSMSDisabled(isDisabled)
-    }
+    override suspend fun setSMSDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setSMSDisabled(isDisabled)
+        }
 
-    override suspend fun setWallpaperChangeDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setWallpaperChangeDisabled(isDisabled)
-    }
+    override suspend fun setWallpaperChangeDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setWallpaperChangeDisabled(isDisabled)
+        }
 
-    override suspend fun setFunDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
-        deviceRestrictionManager.setFunDisabled(isDisabled)
-    }
+    override suspend fun setFunDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setFunDisabled(isDisabled)
+        }
+
+    override suspend fun setWifiStateChangeDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setWifiStateChangeDisabled(isDisabled)
+        }
+
+    override suspend fun setWifiConfigDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setWifiConfigDisabled(isDisabled)
+        }
+
+    override suspend fun setRoamingDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setRoamingDisabled(isDisabled)
+        }
+
+    override suspend fun setMobileDataDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setConfigMobileDataDisabled(isDisabled)
+        }
+
+    override suspend fun setHotspotDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setHotspotDisabled(isDisabled)
+        }
+
+    override suspend fun setConfigVPNDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setConfigVPNDisabled(isDisabled)
+        }
+
+    override suspend fun setConfigPrivateDNSDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setConfigPrivateDNSDisabled(isDisabled)
+        }
+
+    override suspend fun setAirplaneModeDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setAirplaneModeDisabled(isDisabled)
+        }
+
+    override suspend fun setAddNewWifiNetworksDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.setAddNewWifiNetworksDisabled(isDisabled)
+        }
+
+    override suspend fun set2GNetworkDisabled(isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionManager.set2GNetworkDisabled(isDisabled)
+        }
 }

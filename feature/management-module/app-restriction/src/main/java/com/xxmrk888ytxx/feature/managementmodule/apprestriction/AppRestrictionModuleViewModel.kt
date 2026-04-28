@@ -46,6 +46,17 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isSMSDisabled,
         restrictionManageContract.isWallpaperChangeDisabled,
         restrictionManageContract.isFunDisabled,
+        //
+        restrictionManageContract.isWifiStateChangeDisabled,
+        restrictionManageContract.isWifiConfigDisabled,
+        restrictionManageContract.isHotspotDisabled,
+        restrictionManageContract.isAddNewWifiNetworksDisabled,
+        restrictionManageContract.isAirplaneModeDisabled,
+        restrictionManageContract.isConfigVPNDisabled,
+        restrictionManageContract.isConfigPrivateDNSDisabled,
+        restrictionManageContract.isRoamingDisabled,
+        restrictionManageContract.isConfigMobileDataDisabled,
+        restrictionManageContract.is2GNetworkDisabled,
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -73,7 +84,16 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isSMSDisabled = flowArray[23]
         val isWallpaperChangeDisabled = flowArray[24]
         val isFunDisabled = flowArray[25]
-
+        val isWifiStateChangeDisabled = flowArray[26]
+        val isWifiConfigDisabled = flowArray[27]
+        val isHotspotDisabled = flowArray[28]
+        val isAddNewWifiNetworksDisabled = flowArray[29]
+        val isAirplaneModeDisabled = flowArray[30]
+        val isConfigVPNDisabled = flowArray[31]
+        val isConfigPrivateDNSDisabled = flowArray[32]
+        val isRoamingDisabled = flowArray[33]
+        val isConfigMobileDataDisabled = flowArray[34]
+        val is2GNetworkDisabled = flowArray[35]
 
 
 
@@ -108,6 +128,21 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isSMSDisabled = isSMSDisabled,
             isWallpaperChangeDisabled = isWallpaperChangeDisabled,
             isFunDisabled = isFunDisabled,
+            isWifiStateChangeDisabled = isWifiStateChangeDisabled,
+            isWifiConfigDisabled = isWifiConfigDisabled,
+            isHotspotDisabled = isHotspotDisabled,
+            isAddNewWifiNetworksDisabled = isAddNewWifiNetworksDisabled,
+            isAirplaneModeDisabled = isAirplaneModeDisabled,
+            isConfigVPNDisabled = isConfigVPNDisabled,
+            isConfigPrivateDNSDisabled = isConfigPrivateDNSDisabled,
+            isRoamingDisabled = isRoamingDisabled,
+            isConfigMobileDataDisabled = isConfigMobileDataDisabled,
+            is2GNetworkDisabled = is2GNetworkDisabled,
+            isCanDisableChangeWifiState = restrictionManageContract.isCanDisableChangeWifiState,
+            isCanDisableHotspot = restrictionManageContract.isCanDisableHotspot,
+            isCanDisableAddNewWifiNetworks = restrictionManageContract.isCanDisableAddNewWifiNetworks,
+            isCanDisableConfigPrivateDNS = restrictionManageContract.isCanDisableConfigPrivateDNS,
+            isCanDisable2GNetwork = restrictionManageContract.isCanDisable2GNetwork,
         )
     }.stateWhileSubscribed()
 
@@ -140,7 +175,67 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleSMSDisabled -> toggleSMSDisabled()
             AppRestrictionModuleUiEvent.ToggleFunDisabled -> toggleFunDisabled()
             AppRestrictionModuleUiEvent.ToggleWallpaperChangeDisabled -> toggleWallpaperChangeDisabled()
+            AppRestrictionModuleUiEvent.Toggle2GNetworkDisabled -> toggle2GNetworkDisabled()
+            AppRestrictionModuleUiEvent.ToggleAddNewWifiNetworksDisabled -> toggleAddNewWifiNetworksDisabled()
+            AppRestrictionModuleUiEvent.ToggleAirplaneModeDisabled -> toggleAirplaneModeDisabled()
+            AppRestrictionModuleUiEvent.ToggleConfigPrivateDNSDisabled -> toggleConfigPrivateDNSDisabled()
+            AppRestrictionModuleUiEvent.ToggleConfigVPNDisabled -> toggleConfigVPNDisabled()
+            AppRestrictionModuleUiEvent.ToggleHotspotDisabled -> toggleHotspotDisabled()
+            AppRestrictionModuleUiEvent.ToggleMobileDataDisabled ->  toggleMobileDataDisabled()
+            AppRestrictionModuleUiEvent.ToggleRoamingDisabled -> toggleRoamingDisabled()
+            AppRestrictionModuleUiEvent.ToggleWifiConfigDisabled -> toggleWifiConfigDisabled()
+            AppRestrictionModuleUiEvent.ToggleWifiStateChangeDisabled -> toggleWifiStateChangeDisabled()
         }
+    }
+
+    private fun toggleWifiStateChangeDisabled() = changeRestrictionState {
+        val isWifiStateChangeDisabled = state.value.isWifiStateChangeDisabled
+        restrictionManageContract.setWifiStateChangeDisabled(!isWifiStateChangeDisabled)
+    }
+
+    private fun toggleWifiConfigDisabled() = changeRestrictionState {
+        val isWifiConfigDisabled = state.value.isWifiConfigDisabled
+        restrictionManageContract.setWifiConfigDisabled(!isWifiConfigDisabled)
+    }
+
+    private fun toggleRoamingDisabled() = changeRestrictionState {
+        val isRoamingDisabled = state.value.isRoamingDisabled
+        restrictionManageContract.setRoamingDisabled(!isRoamingDisabled)
+    }
+
+    private fun toggleMobileDataDisabled() = changeRestrictionState {
+        val isConfigMobileDataDisabled = state.value.isConfigMobileDataDisabled
+        restrictionManageContract.setMobileDataDisabled(!isConfigMobileDataDisabled)
+    }
+
+    private fun toggleHotspotDisabled() = changeRestrictionState {
+        val isHotspotDisabled = state.value.isHotspotDisabled
+        restrictionManageContract.setHotspotDisabled(!isHotspotDisabled)
+    }
+
+    private fun toggleConfigVPNDisabled() = changeRestrictionState {
+        val isConfigVPNDisabled = state.value.isConfigVPNDisabled
+        restrictionManageContract.setConfigVPNDisabled(!isConfigVPNDisabled)
+    }
+
+    private fun toggleConfigPrivateDNSDisabled() = changeRestrictionState {
+        val isConfigPrivateDNSDisabled = state.value.isConfigPrivateDNSDisabled
+        restrictionManageContract.setConfigPrivateDNSDisabled(!isConfigPrivateDNSDisabled)
+    }
+
+    private fun toggleAirplaneModeDisabled() = changeRestrictionState {
+        val isAirplaneModeDisabled = state.value.isAirplaneModeDisabled
+        restrictionManageContract.setAirplaneModeDisabled(!isAirplaneModeDisabled)
+    }
+
+    private fun toggleAddNewWifiNetworksDisabled() = changeRestrictionState {
+        val isAddNewWifiNetworksDisabled = state.value.isAddNewWifiNetworksDisabled
+        restrictionManageContract.setAddNewWifiNetworksDisabled(!isAddNewWifiNetworksDisabled)
+    }
+
+    private fun toggle2GNetworkDisabled() = changeRestrictionState {
+        val is2GNetworkDisabled = state.value.is2GNetworkDisabled
+        restrictionManageContract.set2GNetworkDisabled(!is2GNetworkDisabled)
     }
 
     private fun toggleWallpaperChangeDisabled() = changeRestrictionState {

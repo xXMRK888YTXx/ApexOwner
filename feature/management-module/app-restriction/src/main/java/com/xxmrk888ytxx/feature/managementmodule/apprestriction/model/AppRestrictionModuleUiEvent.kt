@@ -29,4 +29,14 @@ sealed interface AppRestrictionModuleUiEvent : UiEvent {
     data object ToggleSMSDisabled : AppRestrictionModuleUiEvent
     data object ToggleWallpaperChangeDisabled : AppRestrictionModuleUiEvent
     data object ToggleFunDisabled : AppRestrictionModuleUiEvent
+    data object ToggleWifiConfigDisabled : AppRestrictionModuleUiEvent
+    data object ToggleWifiStateChangeDisabled : AppRestrictionModuleUiEvent
+    data object ToggleHotspotDisabled : AppRestrictionModuleUiEvent
+    data object ToggleAddNewWifiNetworksDisabled : AppRestrictionModuleUiEvent
+    data object ToggleAirplaneModeDisabled : AppRestrictionModuleUiEvent
+    data object ToggleConfigVPNDisabled : AppRestrictionModuleUiEvent
+    data object ToggleConfigPrivateDNSDisabled : AppRestrictionModuleUiEvent
+    data object ToggleRoamingDisabled : AppRestrictionModuleUiEvent
+    data object ToggleMobileDataDisabled: AppRestrictionModuleUiEvent
+    data object Toggle2GNetworkDisabled : AppRestrictionModuleUiEvent
 }

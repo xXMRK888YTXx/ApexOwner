@@ -30,10 +30,25 @@ interface DeviceRestrictionManager {
     val isSMSDisabled: Flow<Boolean>
     val isWallpaperChangeDisabled: Flow<Boolean>
     val isFunDisabled: Flow<Boolean>
+    val isWifiConfigDisabled: Flow<Boolean>
+    val isWifiStateChangeDisabled: Flow<Boolean>
+    val isHotspotDisabled: Flow<Boolean>
+    val isAddNewWifiNetworksDisabled: Flow<Boolean>
+    val isAirplaneModeDisabled: Flow<Boolean>
+    val isConfigVPNDisabled: Flow<Boolean>
+    val isConfigPrivateDNSDisabled: Flow<Boolean>
+    val isRoamingDisabled: Flow<Boolean>
+    val isConfigMobileDataDisabled: Flow<Boolean>
+    val is2GNetworkDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
     val isCanDisableContentSuggestion: Boolean
     val isCanDisableNFC: Boolean
+    val isCanDisableChangeWifiState: Boolean
+    val isCanDisableHotspot: Boolean
+    val isCanDisableAddNewWifiNetworks: Boolean
+    val isCanDisableConfigPrivateDNS: Boolean
+    val isCanDisable2GNetwork: Boolean
     suspend fun setCameraDisabled(isDisabled: Boolean)
     suspend fun setMicrophoneDisabled(isDisabled: Boolean)
     suspend fun setUSBDataSignalDisabled(isDisabled: Boolean)
@@ -60,4 +75,14 @@ interface DeviceRestrictionManager {
     suspend fun setNFCDisabled(isDisabled: Boolean)
     suspend fun setWallpaperChangeDisabled(isDisabled: Boolean)
     suspend fun setFunDisabled(isDisabled: Boolean)
+    suspend fun setWifiConfigDisabled(isDisabled: Boolean)
+    suspend fun setWifiStateChangeDisabled(isDisabled: Boolean)
+    suspend fun setHotspotDisabled(isDisabled: Boolean)
+    suspend fun setAddNewWifiNetworksDisabled(isDisabled: Boolean)
+    suspend fun setAirplaneModeDisabled(isDisabled: Boolean)
+    suspend fun setConfigVPNDisabled(isDisabled: Boolean)
+    suspend fun setConfigPrivateDNSDisabled(isDisabled: Boolean)
+    suspend fun setRoamingDisabled(isDisabled: Boolean)
+    suspend fun setConfigMobileDataDisabled(isDisabled: Boolean)
+    suspend fun set2GNetworkDisabled(isDisabled: Boolean)
 }
