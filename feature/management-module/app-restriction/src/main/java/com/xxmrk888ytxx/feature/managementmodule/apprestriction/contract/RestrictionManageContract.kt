@@ -27,6 +27,8 @@ interface RestrictionManageContract {
     val isLocationDisabled: Flow<Boolean>
     val isOutgoingCallsDisabled: Flow<Boolean>
     val isSMSDisabled: Flow<Boolean>
+    val isWallpaperChangeDisabled: Flow<Boolean>
+    val isFunDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
     val isCanDisableContentSuggestion: Boolean
@@ -55,4 +57,6 @@ interface RestrictionManageContract {
     suspend fun setLocationDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setOutgoingCallsDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setSMSDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setWallpaperChangeDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setFunDisabled(isDisabled: Boolean): Result<Unit>
 }

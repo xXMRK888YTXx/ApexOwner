@@ -27,4 +27,6 @@ sealed interface AppRestrictionModuleUiEvent : UiEvent {
     data object ToggleNFCDisabled : AppRestrictionModuleUiEvent
     data object ToggleOutgoingCallsDisabled : AppRestrictionModuleUiEvent
     data object ToggleSMSDisabled : AppRestrictionModuleUiEvent
+    data object ToggleWallpaperChangeDisabled : AppRestrictionModuleUiEvent
+    data object ToggleFunDisabled : AppRestrictionModuleUiEvent
 }

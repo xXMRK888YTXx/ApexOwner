@@ -44,6 +44,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isLocationDisabled,
         restrictionManageContract.isOutgoingCallsDisabled,
         restrictionManageContract.isSMSDisabled,
+        restrictionManageContract.isWallpaperChangeDisabled,
+        restrictionManageContract.isFunDisabled,
     ) { flowArray ->
         val isCameraDisabled = flowArray[0]
         val isMicrophoneDisabled = flowArray[1]
@@ -69,6 +71,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isLocationDisabled = flowArray[21]
         val isOutgoingCallsDisabled = flowArray[22]
         val isSMSDisabled = flowArray[23]
+        val isWallpaperChangeDisabled = flowArray[24]
+        val isFunDisabled = flowArray[25]
 
 
 
@@ -102,6 +106,8 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isCanDisableNFC = restrictionManageContract.isCanDisableNFC,
             isOutgoingCallsDisabled = isOutgoingCallsDisabled,
             isSMSDisabled = isSMSDisabled,
+            isWallpaperChangeDisabled = isWallpaperChangeDisabled,
+            isFunDisabled = isFunDisabled,
         )
     }.stateWhileSubscribed()
 
@@ -132,7 +138,19 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleNFCDisabled -> toggleNFCDisabled()
             AppRestrictionModuleUiEvent.ToggleOutgoingCallsDisabled -> toggleOutgoingCallsDisabled()
             AppRestrictionModuleUiEvent.ToggleSMSDisabled -> toggleSMSDisabled()
+            AppRestrictionModuleUiEvent.ToggleFunDisabled -> toggleFunDisabled()
+            AppRestrictionModuleUiEvent.ToggleWallpaperChangeDisabled -> toggleWallpaperChangeDisabled()
         }
+    }
+
+    private fun toggleWallpaperChangeDisabled() = changeRestrictionState {
+        val isWallpaperChangeDisabled = state.value.isWallpaperChangeDisabled
+        restrictionManageContract.setWallpaperChangeDisabled(!isWallpaperChangeDisabled)
+    }
+
+    private fun toggleFunDisabled() = changeRestrictionState {
+        val isFunDisabled = state.value.isFunDisabled
+        restrictionManageContract.setFunDisabled(!isFunDisabled)
     }
 
     private fun toggleOutgoingCallsDisabled() = changeRestrictionState {

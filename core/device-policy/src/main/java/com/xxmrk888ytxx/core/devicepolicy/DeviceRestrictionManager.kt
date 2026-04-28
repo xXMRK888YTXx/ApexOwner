@@ -28,6 +28,8 @@ interface DeviceRestrictionManager {
     val isNFCDisabled: Flow<Boolean>
     val isOutgoingCallsDisabled: Flow<Boolean>
     val isSMSDisabled: Flow<Boolean>
+    val isWallpaperChangeDisabled: Flow<Boolean>
+    val isFunDisabled: Flow<Boolean>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
     val isCanDisableContentSuggestion: Boolean
@@ -56,4 +58,6 @@ interface DeviceRestrictionManager {
     suspend fun setOutgoingCallsDisabled(isDisabled: Boolean)
     suspend fun setSMSDisabled(isDisabled: Boolean)
     suspend fun setNFCDisabled(isDisabled: Boolean)
+    suspend fun setWallpaperChangeDisabled(isDisabled: Boolean)
+    suspend fun setFunDisabled(isDisabled: Boolean)
 }

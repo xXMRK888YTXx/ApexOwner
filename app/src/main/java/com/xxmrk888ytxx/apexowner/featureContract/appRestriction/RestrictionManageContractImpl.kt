@@ -35,6 +35,8 @@ class RestrictionManageContractImpl @Inject constructor(
     override val isLocationDisabled: Flow<Boolean> = deviceRestrictionManager.isLocationDisabled
     override val isOutgoingCallsDisabled: Flow<Boolean> = deviceRestrictionManager.isOutgoingCallsDisabled
     override val isSMSDisabled: Flow<Boolean> = deviceRestrictionManager.isSMSDisabled
+    override val isWallpaperChangeDisabled: Flow<Boolean> = deviceRestrictionManager.isWallpaperChangeDisabled
+    override val isFunDisabled: Flow<Boolean> = deviceRestrictionManager.isFunDisabled
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -150,5 +152,13 @@ class RestrictionManageContractImpl @Inject constructor(
 
     override suspend fun setSMSDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
         deviceRestrictionManager.setSMSDisabled(isDisabled)
+    }
+
+    override suspend fun setWallpaperChangeDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceRestrictionManager.setWallpaperChangeDisabled(isDisabled)
+    }
+
+    override suspend fun setFunDisabled(isDisabled: Boolean): Result<Unit> = coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+        deviceRestrictionManager.setFunDisabled(isDisabled)
     }
 }

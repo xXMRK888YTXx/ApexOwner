@@ -248,6 +248,22 @@ fun AppRestrictionModuleScreen(
                 isEnabled = screenState.isSMSDisabled,
                 uiEventForToggle = AppRestrictionModuleUiEvent.ToggleSMSDisabled
             ),
+            Restriction(
+                id = 24,
+                iconRes = R.drawable.wallpaper,
+                title = R.string.disable_wallpaper_modification.uiText(),
+                description = R.string.changing_the_home_screen_or_lock_screen_wallpaper_is_prohibited.uiText(),
+                isEnabled = screenState.isWallpaperChangeDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleWallpaperChangeDisabled
+            ),
+            Restriction(
+                id = 25,
+                iconRes = R.drawable.`fun`,
+                title = R.string.disable_fun_features.uiText(),
+                description = R.string.access_to_entertainment_applications_and_amusement_features_is_prohibited_this_restriction_prevents_the_use_of_the_device_for_non_productive_purposes_or_leisure_activities_no_more_fun_allowed.uiText(),
+                isEnabled = screenState.isFunDisabled,
+                uiEventForToggle = AppRestrictionModuleUiEvent.ToggleFunDisabled
+            ),
         )
     }
 

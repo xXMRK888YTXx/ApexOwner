@@ -50,11 +50,8 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val _isNFCDisabled = MutableStateFlow(false)
     private val _isOutgoingCallsDisabled = MutableStateFlow(false)
     private val _isSMSDisabled = MutableStateFlow(false)
-
-
-
-
-
+    private val _isWallpaperChangeDisabled = MutableStateFlow(false)
+    private val _isFunDisabled = MutableStateFlow(false)
 
 
     override val isCameraDisabled: Flow<Boolean> = _isCameraDisabled.asAndroidDeviceOwnerFlow()
@@ -78,19 +75,30 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         _isContentSuggestionDisabled.asAndroidDeviceOwnerFlow()
     override val isScreenshotsDisabled: Flow<Boolean> =
         _isScreenshotsDisabled.asAndroidDeviceOwnerFlow()
-    override val isDebugFeaturesDisabled: Flow<Boolean> = _isDebugFeaturesDisabled.asAndroidDeviceOwnerFlow()
-    override val isFactoryResetDisabled: Flow<Boolean> = _isFactoryResetDisabled.asAndroidDeviceOwnerFlow()
+    override val isDebugFeaturesDisabled: Flow<Boolean> =
+        _isDebugFeaturesDisabled.asAndroidDeviceOwnerFlow()
+    override val isFactoryResetDisabled: Flow<Boolean> =
+        _isFactoryResetDisabled.asAndroidDeviceOwnerFlow()
     override val isSafeBootDisabled: Flow<Boolean> = _isSafeBootDisabled.asAndroidDeviceOwnerFlow()
     override val isAddUserDisabled: Flow<Boolean> = _isAddUserDisabled.asAndroidDeviceOwnerFlow()
-    override val isRemoveUserDisabled: Flow<Boolean> = _isRemoveUserDisabled.asAndroidDeviceOwnerFlow()
-    override val isSwitchUserDisabled: Flow<Boolean> = _isSwitchUserDisabled.asAndroidDeviceOwnerFlow()
-    override val isBluetoothDisabled: Flow<Boolean> = _isBluetoothDisabled.asAndroidDeviceOwnerFlow()
-    override val isBluetoothConfigDisabled: Flow<Boolean> = _isBluetoothConfigDisabled.asAndroidDeviceOwnerFlow()
-    override val isMountPhysicalMediaDisabled: Flow<Boolean> = _isMountPhysicalMediaDisabled.asAndroidDeviceOwnerFlow()
+    override val isRemoveUserDisabled: Flow<Boolean> =
+        _isRemoveUserDisabled.asAndroidDeviceOwnerFlow()
+    override val isSwitchUserDisabled: Flow<Boolean> =
+        _isSwitchUserDisabled.asAndroidDeviceOwnerFlow()
+    override val isBluetoothDisabled: Flow<Boolean> =
+        _isBluetoothDisabled.asAndroidDeviceOwnerFlow()
+    override val isBluetoothConfigDisabled: Flow<Boolean> =
+        _isBluetoothConfigDisabled.asAndroidDeviceOwnerFlow()
+    override val isMountPhysicalMediaDisabled: Flow<Boolean> =
+        _isMountPhysicalMediaDisabled.asAndroidDeviceOwnerFlow()
     override val isLocationDisabled: Flow<Boolean> = _isLocationDisabled.asAndroidDeviceOwnerFlow()
     override val isNFCDisabled: Flow<Boolean> = _isNFCDisabled.asAndroidDeviceOwnerFlow()
-    override val isOutgoingCallsDisabled: Flow<Boolean> = _isOutgoingCallsDisabled.asAndroidDeviceOwnerFlow()
+    override val isOutgoingCallsDisabled: Flow<Boolean> =
+        _isOutgoingCallsDisabled.asAndroidDeviceOwnerFlow()
     override val isSMSDisabled: Flow<Boolean> = _isSMSDisabled.asAndroidDeviceOwnerFlow()
+    override val isWallpaperChangeDisabled: Flow<Boolean> =
+        _isWallpaperChangeDisabled.asAndroidDeviceOwnerFlow()
+    override val isFunDisabled: Flow<Boolean> = _isFunDisabled.asAndroidDeviceOwnerFlow()
 
     override val isCanDisableUSBDataSignal: Boolean
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -160,12 +168,19 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
             userRestriction.getBoolean(UserManager.DISALLOW_SHARE_LOCATION, false)
         if (isCanDisableNFC) {
             _isNFCDisabled.value =
-                userRestriction.getBoolean(UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO, false)
+                userRestriction.getBoolean(
+                    UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
+                    false
+                )
         }
         _isOutgoingCallsDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_OUTGOING_CALLS, false)
         _isSMSDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_SMS, false)
+        _isWallpaperChangeDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_SET_WALLPAPER, false)
+        _isFunDisabled.value =
+            userRestriction.getBoolean(UserManager.DISALLOW_FUN, false)
     }
 
     override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -253,9 +268,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         toggleUserRestriction(UserManager.DISALLOW_CONFIG_BLUETOOTH, isDisabled)
     }
 
-    override suspend fun setMountPhysicalMediaDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
-        toggleUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, isDisabled)
-    }
+    override suspend fun setMountPhysicalMediaDisabled(isDisabled: Boolean) =
+        changeDeviceOwnerPolicy {
+            toggleUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, isDisabled)
+        }
 
     override suspend fun setLocationDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_SHARE_LOCATION, isDisabled)
@@ -273,6 +289,14 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
         if (isCanDisableNFC) {
             toggleUserRestriction(UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO, isDisabled)
         }
+    }
+
+    override suspend fun setWallpaperChangeDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_SET_WALLPAPER, isDisabled)
+    }
+
+    override suspend fun setFunDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_FUN, isDisabled)
     }
 
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {
@@ -295,9 +319,10 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     } catch (_: SecurityException) {
         false
     }
+
     private fun checkIsScreenshotsDisabled() = try {
         devicePolicyManager.getScreenCaptureDisabled(deviceOwnerReceiver)
-    }catch (_: SecurityException) {
+    } catch (_: SecurityException) {
         false
     }
 
