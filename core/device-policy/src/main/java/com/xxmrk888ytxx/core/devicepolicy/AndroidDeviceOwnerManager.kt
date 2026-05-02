@@ -4,6 +4,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import com.xxmrk888ytxx.core.devicepolicy.ownerComponent.BaseOwnerComponent
 import com.xxmrk888ytxx.core.devicepolicy.ownerComponent.DeviceRestrictionOwnerComponentManagerImpl
+import com.xxmrk888ytxx.core.devicepolicy.ownerComponent.WorkProfileOwnerComponentManagerImpl
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +17,11 @@ import javax.inject.Singleton
 internal class AndroidDeviceOwnerManager @Inject constructor(
     devicePolicyManager: DevicePolicyManager,
     @ApplicationContext context: Context,
-    deviceRestrictionOwnerComponentManagerImpl: DeviceRestrictionOwnerComponentManagerImpl
-) : BaseOwnerComponent(devicePolicyManager,context), DeviceOwnerManager, DeviceRestrictionOwnerComponentManager by deviceRestrictionOwnerComponentManagerImpl {
+    deviceRestrictionOwnerComponentManagerImpl: DeviceRestrictionOwnerComponentManagerImpl,
+    workProfileOwnerComponentManagerImpl: WorkProfileOwnerComponentManagerImpl
+) : BaseOwnerComponent(devicePolicyManager, context), DeviceOwnerManager,
+    DeviceRestrictionOwnerComponentManager by deviceRestrictionOwnerComponentManagerImpl,
+    WorkProfileOwnerComponentManager by workProfileOwnerComponentManagerImpl {
     private val _isDeviceOwner = MutableStateFlow(checkIsAppDeviceOwner())
 
     override val isDeviceOwner: Flow<Boolean> = _isDeviceOwner
