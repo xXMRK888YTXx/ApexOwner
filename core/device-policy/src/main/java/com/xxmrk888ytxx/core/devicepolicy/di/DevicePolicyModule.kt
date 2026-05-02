@@ -5,7 +5,7 @@ import android.content.Context
 import androidx.core.content.getSystemService
 import com.xxmrk888ytxx.core.devicepolicy.AndroidDeviceOwnerManager
 import com.xxmrk888ytxx.core.devicepolicy.DeviceOwnerManager
-import com.xxmrk888ytxx.core.devicepolicy.DeviceRestrictionManager
+import com.xxmrk888ytxx.core.devicepolicy.DeviceRestrictionOwnerComponentManager
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -23,7 +23,7 @@ internal interface DevicePolicyModule {
     fun bindsDeviceOwnerManager(androidDeviceOwnerManager: AndroidDeviceOwnerManager): DeviceOwnerManager
 
     @Binds
-    fun bindsRestrictionManager(deviceOwnerManager: DeviceOwnerManager): DeviceRestrictionManager
+    fun bindsRestrictionManager(deviceOwnerManager: DeviceOwnerManager): DeviceRestrictionOwnerComponentManager
 
     companion object {
         @Provides

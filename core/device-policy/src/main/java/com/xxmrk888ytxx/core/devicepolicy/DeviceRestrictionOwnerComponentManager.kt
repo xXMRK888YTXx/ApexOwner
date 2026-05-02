@@ -2,8 +2,7 @@ package com.xxmrk888ytxx.core.devicepolicy
 
 import kotlinx.coroutines.flow.Flow
 
-interface DeviceRestrictionManager {
-    val isDeviceOwner: Flow<Boolean>
+interface DeviceRestrictionOwnerComponentManager {
     val isCameraDisabled: Flow<Boolean>
     val isMicrophoneDisabled: Flow<Boolean>
     val isUSBDataSignalDisabled: Flow<Boolean>
@@ -85,4 +84,5 @@ interface DeviceRestrictionManager {
     suspend fun setRoamingDisabled(isDisabled: Boolean)
     suspend fun setConfigMobileDataDisabled(isDisabled: Boolean)
     suspend fun set2GNetworkDisabled(isDisabled: Boolean)
+    suspend fun updateRestrictionState()
 }
