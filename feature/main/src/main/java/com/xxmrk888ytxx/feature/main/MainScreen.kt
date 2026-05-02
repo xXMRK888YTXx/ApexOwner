@@ -3,7 +3,6 @@ package com.xxmrk888ytxx.feature.main
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -105,9 +104,9 @@ fun MainScreen(
         ) {
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                DeviceOwnerStatusCard(
-                    isGranted = screenState.isOwnerPermissionGranted,
-                    onGrantClick = { onEvent(MainScreenEvent.OnHowGrantPermissionClicked) }
+                ProfileStatusCard(
+                   isWorkProfile = screenState.isWorkProfile,
+                    onCreateWorkProfileClick = { onEvent(MainScreenEvent.OnWorkProfileButtonClicked) }
                 )
             }
 
@@ -138,35 +137,26 @@ fun MainScreen(
 }
 
 @Composable
-fun DeviceOwnerStatusCard(
-    isGranted: Boolean,
-    onGrantClick: () -> Unit
+fun ProfileStatusCard(
+    isWorkProfile: Boolean,
+    onCreateWorkProfileClick: () -> Unit
 ) {
-    val containerColor = if (isGranted) {
+    val containerColor = if (isWorkProfile) {
         MaterialTheme.colorScheme.primaryContainer
     } else {
         MaterialTheme.colorScheme.surfaceVariant
     }
 
-    val contentColor = if (isGranted) {
+    val contentColor = if (isWorkProfile) {
         MaterialTheme.colorScheme.onPrimaryContainer
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
 
-    val statusIconTint = if (isGranted) {
+    val statusIconTint = if (isWorkProfile) {
         MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colorScheme.error
-    }
-
-    val borderStroke = if (isGranted) {
-        null
-    } else {
-        BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.error
-        )
+        MaterialTheme.colorScheme.secondary
     }
 
     Card(
@@ -177,8 +167,7 @@ fun DeviceOwnerStatusCard(
         colors = CardDefaults.cardColors(
             containerColor = containerColor,
             contentColor = contentColor
-        ),
-        border = borderStroke
+        )
     ) {
         Column(
             modifier = Modifier
@@ -189,45 +178,48 @@ fun DeviceOwnerStatusCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(id = if (isGranted) R.drawable.shield else R.drawable.shield_lock),
+                    painter = painterResource(id = if (isWorkProfile) R.drawable.work else R.drawable.person),
                     contentDescription = null,
                     tint = statusIconTint,
                     modifier = Modifier.size(28.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = if (isGranted) stringResource(R.string.device_owner_active) else stringResource(
-                        R.string.action_required),
+                    text = if (isWorkProfile) {
+                        stringResource(R.string.you_are_in_work_profile)
+                    } else {
+                        stringResource(R.string.you_are_in_personal_profile)
+                    },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = if (!isGranted) MaterialTheme.colorScheme.error else contentColor
+                    color = contentColor
                 )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            if (isGranted) {
-                Text(
-                    text = stringResource(R.string.permissions_granted_successfully_you_now_have_full_access_to_manage_device_policies_using_the_modules_below),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            } else {
-                Text(
-                    text = stringResource(R.string.to_use_all_of_the_app_s_features_you_need_to_grant_device_owner_privileges_tap_the_button_below_to_learn_how_to_set_this_up),
-                    style = MaterialTheme.typography.bodyMedium
-                )
+            Text(
+                text = if (isWorkProfile) {
+                    stringResource(R.string.work_profile_status_ok)
+                } else {
+                    stringResource(R.string.personal_profile_cannot_manage)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = contentColor
+            )
 
+            if (!isWorkProfile) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = onGrantClick,
+                    onClick = onCreateWorkProfileClick,
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Text(stringResource(R.string.how_to_grant_permission))
+                    Text(stringResource(R.string.create_work_profile))
                 }
             }
         }
