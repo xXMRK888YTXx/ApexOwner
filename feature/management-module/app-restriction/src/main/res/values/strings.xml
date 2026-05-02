@@ -77,4 +77,12 @@
     <string name="modification_of_mobile_network_settings_is_prohibited_this_restriction_prevents_the_user_from_changing_apn_settings_selecting_network_operators_or_adjusting_other_cellular_data_configurations">Modification of mobile network settings is prohibited. This restriction prevents the user from changing APN settings, selecting network operators, or adjusting other cellular data configurations.</string>
     <string name="disable_2g_networks">Disable 2G Networks</string>
     <string name="the_use_of_2g_cellular_networks_is_prohibited_to_prevent_security_attacks_like_communication_interception_or_modification_the_device_will_only_connect_to_3g_or_newer_networks_except_for_emergency_calls_which_remain_unaffected">The use of 2G cellular networks is prohibited to prevent security attacks like communication interception or modification. The device will only connect to 3G or newer networks, except for emergency calls, which remain unaffected.</string>
+    <string name="category_hardware_and_media">Hardware</string>
+    <string name="category_applications">Applications</string>
+    <string name="category_security_and_system">Security</string>
+    <string name="category_users_and_accounts">Users</string>
+    <string name="category_network_and_connectivity">Network</string>
+    <string name="category_telephony">Telephony</string>
+    <string name="show_less">Show less</string>
+    <string name="show_more">Show more</string>
 </resources>
