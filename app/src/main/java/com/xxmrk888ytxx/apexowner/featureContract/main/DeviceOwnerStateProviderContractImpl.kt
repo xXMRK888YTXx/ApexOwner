@@ -8,5 +8,5 @@ import javax.inject.Inject
 class DeviceOwnerStateProviderContractImpl @Inject constructor(
     deviceOwnerManager: DeviceOwnerManager
 ) : DeviceOwnerStateProviderContract {
-    override val isDeviceOwner: Flow<Boolean> = deviceOwnerManager.isDeviceOwner
+    override val isDeviceOwner: Flow<Boolean> = deviceOwnerManager.isProfileOwner
 }
