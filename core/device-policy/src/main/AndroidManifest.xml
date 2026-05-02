@@ -6,7 +6,7 @@
             android:label="Apex Device Owner"
             android:description="@string/receiver_description"
             android:permission="android.permission.BIND_DEVICE_ADMIN"
-            android:exported="true">
+            android:exported="false">
             <meta-data
                 android:name="android.app.device_admin"
                 android:resource="@xml/device_admin_policy" />
