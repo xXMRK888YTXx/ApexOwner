@@ -26,7 +26,7 @@ extensions.configure<ApplicationExtension> {
         applicationId = "com.xxmrk888ytxx.apexowner"
         minSdk = catalogMinSdk
         targetSdk = catalogCompileSdk
-        versionCode = 4
+        versionCode = 5
         versionName = "WIP"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
