@@ -1,10 +1,13 @@
 package com.xxmrk888ytxx.feature.main
 
 import androidx.lifecycle.viewModelScope
+import com.xxmrk888ytxx.core.base.android.uiText.uiText
 import com.xxmrk888ytxx.core.base.android.viewModel.ApexOwnerViewModel
 import com.xxmrk888ytxx.feature.main.contract.DeviceOwnerStateProviderContract
 import com.xxmrk888ytxx.feature.main.contract.NavigateToModuleContract
+import com.xxmrk888ytxx.feature.main.contract.ProvideIntentForWorkProfileCreationContract
 import com.xxmrk888ytxx.feature.main.model.MainScreenEvent
+import com.xxmrk888ytxx.feature.main.model.MainScreenSideEffect
 import com.xxmrk888ytxx.feature.main.model.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     deviceOwnerStateProvider: DeviceOwnerStateProviderContract,
-    private val navigateToModuleContract: NavigateToModuleContract
+    private val navigateToModuleContract: NavigateToModuleContract,
+    private val provideIntentForWorkProfileCreationContract: ProvideIntentForWorkProfileCreationContract
 ) : ApexOwnerViewModel<ScreenState, MainScreenEvent>(ScreenState()) {
 
     override val state: StateFlow<ScreenState> =
@@ -29,6 +33,15 @@ class MainViewModel @Inject constructor(
             MainScreenEvent.OnHowGrantPermissionClicked -> {
                 // TODO
             }
+
+            MainScreenEvent.OnWorkProfileButtonClicked -> sendSideEffect(
+                MainScreenSideEffect.SendIntentForCreateWorkProfile(
+                    provideIntentForWorkProfileCreationContract.intentForWorkProfileCreation
+                )
+            )
+
+            MainScreenEvent.OnWorkProfileCreatedSuccessfully -> sendToastSideEffect(R.string.work_profile_created_successfully.uiText())
+            MainScreenEvent.OnWorkProfileCreationFailed -> sendToastSideEffect(R.string.couldn_t_create_a_work_profile.uiText())
         }
     }
 

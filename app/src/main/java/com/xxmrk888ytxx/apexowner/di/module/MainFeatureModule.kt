@@ -2,8 +2,10 @@ package com.xxmrk888ytxx.apexowner.di.module
 
 import com.xxmrk888ytxx.apexowner.featureContract.main.DeviceOwnerStateProviderContractImpl
 import com.xxmrk888ytxx.apexowner.featureContract.main.NavigateToModuleContractImpl
+import com.xxmrk888ytxx.apexowner.featureContract.main.ProvideIntentForWorkProfileCreationContractImpl
 import com.xxmrk888ytxx.feature.main.contract.DeviceOwnerStateProviderContract
 import com.xxmrk888ytxx.feature.main.contract.NavigateToModuleContract
+import com.xxmrk888ytxx.feature.main.contract.ProvideIntentForWorkProfileCreationContract
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -19,4 +21,9 @@ interface MainFeatureModule {
     fun bindsNavigateToModuleContract(
         navigateToModuleContractImpl: NavigateToModuleContractImpl
     ) : NavigateToModuleContract
+
+    @Binds
+    fun bindsProvideIntentForWorkProfileCreationContract(
+        provideIntentForWorkProfileCreationContractImpl: ProvideIntentForWorkProfileCreationContractImpl
+    ) : ProvideIntentForWorkProfileCreationContract
 }

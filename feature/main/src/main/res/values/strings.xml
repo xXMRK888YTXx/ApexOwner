@@ -9,4 +9,8 @@
     <string name="limit_device_features_to_enhance_your_privacy_e_g_camera_microphone_usb_data_transfer">Limit device features to enhance your privacy (e.g., camera, microphone, USB data transfer)</string>
     <string name="device_management">Device Management</string>
     <string name="management_modules">Management Modules</string>
+    <string name="work_profile_setup">Work Profile Setup</string>
+    <string name="create_a_separate_profile_to_isolate_work_apps_and_data_from_personal_ones">Create a separate profile to isolate work apps and data from personal ones.</string>
+    <string name="work_profile_created_successfully">Work profile created successfully</string>
+    <string name="couldn_t_create_a_work_profile">Couldn\'t create a work profile</string>
 </resources>

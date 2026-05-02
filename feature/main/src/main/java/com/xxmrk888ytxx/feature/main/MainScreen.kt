@@ -1,5 +1,8 @@
 package com.xxmrk888ytxx.feature.main
 
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +41,7 @@ import com.xxmrk888ytxx.core.base.compose.extension.HandleSideEffects
 import com.xxmrk888ytxx.core.base.compose.ui.CoreTopBar
 import com.xxmrk888ytxx.feature.main.model.DeviceOwnerModule
 import com.xxmrk888ytxx.feature.main.model.MainScreenEvent
+import com.xxmrk888ytxx.feature.main.model.MainScreenSideEffect
 import com.xxmrk888ytxx.feature.main.model.ScreenState
 import kotlinx.coroutines.flow.Flow
 
@@ -48,7 +52,20 @@ fun MainScreen(
     onEvent: (MainScreenEvent) -> Unit,
     sideEffect: Flow<SideEffect>
 ) {
-    HandleSideEffects(sideEffect)
+    val createWorkProfileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            onEvent(MainScreenEvent.OnWorkProfileCreatedSuccessfully)
+        } else {
+            onEvent(MainScreenEvent.OnWorkProfileCreationFailed)
+        }
+    }
+    HandleSideEffects<MainScreenSideEffect>(sideEffect) { effect ->
+        when(effect) {
+            is MainScreenSideEffect.SendIntentForCreateWorkProfile -> createWorkProfileLauncher.launch(effect.createWorkProfileIntent)
+        }
+    }
     val modules = remember {
         listOf(
             DeviceOwnerModule(
@@ -57,6 +74,13 @@ fun MainScreen(
                 description = R.string.limit_device_features_to_enhance_your_privacy_e_g_camera_microphone_usb_data_transfer,
                 iconResId = R.drawable.security,
                 onClick = { onEvent(MainScreenEvent.OnDeviveRestrictionButtonClicked) }
+            ),
+            DeviceOwnerModule(
+                id = 1,
+                title = R.string.work_profile_setup,
+                description = R.string.create_a_separate_profile_to_isolate_work_apps_and_data_from_personal_ones,
+                iconResId = R.drawable.work,
+                onClick = { onEvent(MainScreenEvent.OnWorkProfileButtonClicked) }
             ),
         )
     }
