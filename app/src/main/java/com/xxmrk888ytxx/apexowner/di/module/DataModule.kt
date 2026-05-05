@@ -1,7 +1,7 @@
 package com.xxmrk888ytxx.apexowner.di.module
 
 import android.content.Context
-import com.xxmrk888ytxx.preferencesstorage.PreferencesStorage
+import com.xxmrk888ytxx.common.preferencesstorage.PreferencesStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

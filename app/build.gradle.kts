@@ -26,8 +26,8 @@ extensions.configure<ApplicationExtension> {
         applicationId = "com.xxmrk888ytxx.apexowner"
         minSdk = catalogMinSdk
         targetSdk = catalogCompileSdk
-        versionCode = 1
-        versionName = "WIP"
+        versionCode = 6
+        versionName = "Final"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -63,11 +63,14 @@ extensions.configure<ApplicationExtension> {
 
 dependencies {
     // Core
-    implementation(projects.core.compose)
+    implementation(projects.core.base.compose)
+    implementation(projects.core.preferencesStorage)
+    implementation(projects.core.devicePolicy)
     // Common
-    implementation(projects.common.preferencesStorage)
     // Feature
     implementation(projects.feature.onboarding)
+    implementation(projects.feature.main)
+    implementation(projects.feature.managementModule.appRestriction)
 
     // Dependencies
     ksp(libs.hilt.compiler)

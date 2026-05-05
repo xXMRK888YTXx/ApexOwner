@@ -1,1 +1,31 @@
 # TODO
+```adb
+adb shell dpm set-device-owner com.xxmrk888ytxx.apexowner/com.xxmrk888ytxx.core.devicepolicy.ApexDeviceOwnerReceiver
+```
+
+# Проблемы
+1. На моем Xiaomi даже когда я удалил все аккаунты, команда не могла быть выполнена
+выполнение просто замерало и нечего не происходило
+Решение: Выйти из аккаунта Xiaomi, он не светится в списке аккаунтов, но не дает выдать разрешение(Причем в крысу)
+
+2. Не даёт выдать если есть другие пользователи
+Решение
+```adb
+adb shell pm list users
+```
+Вывод который должен быть
+```
+Users:
+        UserInfo{0:Owner:c13} running
+```
+Если есть что то ещё надо удалить либо самим либо через команду
+```adb
+adb shell pm remove-user <Номер пользователя>
+```
+Номер пользователя это то что идет сразу после фигурной скобки
+У основного пользователя все 0, его не трогаем, остальное удаляем
+
+# Снять Device Owner
+```adb
+adb shell dpm remove-active-admin --user 0 com.xxmrk888ytxx.apexowner/com.xxmrk888ytxx.core.devicepolicy.ApexDeviceOwnerReceiver
+```

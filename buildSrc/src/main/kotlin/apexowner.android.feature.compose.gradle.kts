@@ -12,5 +12,5 @@ extensions.configure<LibraryExtension> {
 }
 
 dependencies {
-    implementation(project(":core:compose"))
+    implementation(project(":core:base:compose"))
 }

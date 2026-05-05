@@ -3,11 +3,13 @@
 package com.xxmrk888ytxx.apexowner.view.mainActivity
 
 import androidx.lifecycle.viewModelScope
-import com.xxmrk888ytxx.android.logs.Logger
-import com.xxmrk888ytxx.android.viewModel.stub.StubViewModel
-import com.xxmrk888ytxx.apexowner.core.Screen
+import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
 import com.xxmrk888ytxx.apexowner.domain.SettingsRepository
+import com.xxmrk888ytxx.apexowner.view.mainActivity.model.MainActivityEvent
+import com.xxmrk888ytxx.core.base.android.viewModel.ApexOwnerViewModel
+import com.xxmrk888ytxx.core.base.android.viewModel.stub.Stub
+import com.xxmrk888ytxx.core.devicepolicy.DeviceOwnerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +17,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -25,8 +28,13 @@ import javax.inject.Inject
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
-    private val settingsRepository: SettingsRepository
-) : StubViewModel() {
+    private val settingsRepository: SettingsRepository,
+    private val deviceOwnerManager: DeviceOwnerManager
+) : ApexOwnerViewModel<Stub, MainActivityEvent>(Stub) {
+
+    override val state: StateFlow<Stub> = MutableStateFlow(Stub)
+    val backStack = navigationManager.backStack
+    val navigator = navigationManager
 
     private val prepareScreenScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val isAppReady = MutableStateFlow(false)
@@ -50,9 +58,18 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        Logger.writeDebugLog("onCleared")
+    override fun onEvent(event: MainActivityEvent) {
+        when(event) {
+            is MainActivityEvent.BottomItemClicked -> {
+                // TODO
+            }
+            MainActivityEvent.NavigationUp -> navigationManager.navigateUp()
+            MainActivityEvent.OnResume -> updateDeviceOwnerState()
+        }
+    }
+
+    private fun updateDeviceOwnerState() = viewModelScope.launch(Dispatchers.Default) {
+        deviceOwnerManager.updateDeviceOwnerState()
     }
 
     init {

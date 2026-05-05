@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ApexOwner</string>
+    <string name="main_screen">Main Screen</string>
+    <string name="settings">Settings</string>
 </resources>
