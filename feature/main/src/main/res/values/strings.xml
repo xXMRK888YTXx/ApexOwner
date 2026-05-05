@@ -18,5 +18,4 @@
     <string name="work_profile_status_ok">Everything is set up correctly. You can now manage this work profile.</string>
     <string name="personal_profile_cannot_manage">You cannot manage your personal profile through this app. Please create a work profile to use management features.</string>
     <string name="create_work_profile">Create work profile</string>
-    <string name="manage_and_apply_restrictions_to_your_work_profile">Manage and apply restrictions to your work profile</string>
 </resources>

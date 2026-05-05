@@ -70,7 +70,7 @@ fun MainScreen(
             DeviceOwnerModule(
                 id = 0,
                 title = R.string.device_restrictions,
-                description = R.string.manage_and_apply_restrictions_to_your_work_profile,
+                description = R.string.limit_device_features_to_enhance_your_privacy_e_g_camera_microphone_usb_data_transfer,
                 iconResId = R.drawable.security,
                 onClick = { onEvent(MainScreenEvent.OnDeviveRestrictionButtonClicked) }
             ),
