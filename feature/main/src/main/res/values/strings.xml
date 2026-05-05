@@ -13,9 +13,4 @@
     <string name="create_a_separate_profile_to_isolate_work_apps_and_data_from_personal_ones">Create a separate profile to isolate work apps and data from personal ones.</string>
     <string name="work_profile_created_successfully">Work profile created successfully</string>
     <string name="couldn_t_create_a_work_profile">Couldn\'t create a work profile</string>
-    <string name="you_are_in_work_profile">You are in work profile</string>
-    <string name="you_are_in_personal_profile">You are in personal profile</string>
-    <string name="work_profile_status_ok">Everything is set up correctly. You can now manage this work profile.</string>
-    <string name="personal_profile_cannot_manage">You cannot manage your personal profile through this app. Please create a work profile to use management features.</string>
-    <string name="create_work_profile">Create work profile</string>
 </resources>
