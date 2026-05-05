@@ -5,6 +5,8 @@ import com.xxmrk888ytxx.core.base.android.mvi.UiEvent
 sealed interface AppRestrictionModuleUiEvent : UiEvent {
     data object ToggleCameraDisabled : AppRestrictionModuleUiEvent
     data object ToggleMicrophoneDisabled : AppRestrictionModuleUiEvent
+    data object ToggleUSBDataSignalDisable : AppRestrictionModuleUiEvent
+    data object ToggleUSBFileTransferDisabled : AppRestrictionModuleUiEvent
     data object ToggleInstallAppsDisabled : AppRestrictionModuleUiEvent
     data object ToggleInstallAppsFromUnknownSourcesDisabled : AppRestrictionModuleUiEvent
     data object ToggleUninstallAppsDisabled : AppRestrictionModuleUiEvent
@@ -13,6 +15,28 @@ sealed interface AppRestrictionModuleUiEvent : UiEvent {
     data object ToggleContentSuggestionDisabled : AppRestrictionModuleUiEvent
     data object ToggleScreenshotsDisabled : AppRestrictionModuleUiEvent
     data object ToggleDebugFeaturesDisabled : AppRestrictionModuleUiEvent
+    data object ToggleFactoryResetDisabled : AppRestrictionModuleUiEvent
+    data object ToggleSafeBootDisabled : AppRestrictionModuleUiEvent
+    data object ToggleAddUserDisabled : AppRestrictionModuleUiEvent
+    data object ToggleRemoveUserDisabled : AppRestrictionModuleUiEvent
+    data object ToggleSwitchUserDisabled : AppRestrictionModuleUiEvent
+    data object ToggleBluetoothDisabled : AppRestrictionModuleUiEvent
+    data object ToggleBluetoothConfigDisabled : AppRestrictionModuleUiEvent
+    data object ToggleMountPhysicalMediaDisabled : AppRestrictionModuleUiEvent
     data object ToggleLocationDisabled : AppRestrictionModuleUiEvent
+    data object ToggleNFCDisabled : AppRestrictionModuleUiEvent
+    data object ToggleOutgoingCallsDisabled : AppRestrictionModuleUiEvent
+    data object ToggleSMSDisabled : AppRestrictionModuleUiEvent
+    data object ToggleWallpaperChangeDisabled : AppRestrictionModuleUiEvent
+    data object ToggleFunDisabled : AppRestrictionModuleUiEvent
+    data object ToggleWifiConfigDisabled : AppRestrictionModuleUiEvent
+    data object ToggleWifiStateChangeDisabled : AppRestrictionModuleUiEvent
+    data object ToggleHotspotDisabled : AppRestrictionModuleUiEvent
+    data object ToggleAddNewWifiNetworksDisabled : AppRestrictionModuleUiEvent
+    data object ToggleAirplaneModeDisabled : AppRestrictionModuleUiEvent
     data object ToggleConfigVPNDisabled : AppRestrictionModuleUiEvent
+    data object ToggleConfigPrivateDNSDisabled : AppRestrictionModuleUiEvent
+    data object ToggleRoamingDisabled : AppRestrictionModuleUiEvent
+    data object ToggleMobileDataDisabled: AppRestrictionModuleUiEvent
+    data object Toggle2GNetworkDisabled : AppRestrictionModuleUiEvent
 }

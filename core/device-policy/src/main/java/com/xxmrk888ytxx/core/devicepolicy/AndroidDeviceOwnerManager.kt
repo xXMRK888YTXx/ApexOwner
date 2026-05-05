@@ -22,14 +22,14 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 ) : BaseOwnerComponent(devicePolicyManager, context), DeviceOwnerManager,
     DeviceRestrictionOwnerComponentManager by deviceRestrictionOwnerComponentManagerImpl,
     WorkProfileOwnerComponentManager by workProfileOwnerComponentManagerImpl {
-    private val _isProfileOwner = MutableStateFlow(checkIsAppProfileOwner())
+    private val _isDeviceOwner = MutableStateFlow(checkIsAppDeviceOwner())
 
-    override val isProfileOwner: Flow<Boolean> = _isProfileOwner
+    override val isDeviceOwner: Flow<Boolean> = _isDeviceOwner
         .asAndroidDeviceOwnerFlow()
 
     override suspend fun updateDeviceOwnerState() {
-        if (!checkIsAppProfileOwner()) return
-        _isProfileOwner.value = checkIsAppProfileOwner()
+        if (!checkIsAppDeviceOwner()) return
+        _isDeviceOwner.value = checkIsAppDeviceOwner()
         updateRestrictionState()
     }
 

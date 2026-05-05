@@ -5,9 +5,8 @@ import android.content.Context
 import android.os.Build
 import android.os.UserManager
 import androidx.annotation.ChecksSdkIntAtLeast
-import com.xxmrk888ytxx.core.devicepolicy.DeprecatedDeviceOwnerRestriction
 import com.xxmrk888ytxx.core.devicepolicy.DeviceRestrictionOwnerComponentManager
-import com.xxmrk888ytxx.core.devicepolicy.exception.AppNotProfileOwnerException
+import com.xxmrk888ytxx.core.devicepolicy.exception.AppNotDeviceOwnerException
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +15,6 @@ import kotlinx.coroutines.flow.onSubscription
 import javax.inject.Inject
 import javax.inject.Singleton
 
-//@OptIn(DeprecatedDeviceOwnerRestriction::class)
 @Singleton
 internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
     devicePolicyManager: DevicePolicyManager,
@@ -64,6 +62,10 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
     override val isCameraDisabled: Flow<Boolean> = _isCameraDisabled.asAndroidDeviceOwnerFlow()
     override val isMicrophoneDisabled: Flow<Boolean> =
         _isMicrophoneDisabled.asAndroidDeviceOwnerFlow()
+    override val isUSBDataSignalDisabled: Flow<Boolean> =
+        _isUSBDataSignalDisabled.asAndroidDeviceOwnerFlow()
+    override val isUSBFileTransferDisabled: Flow<Boolean> =
+        _isUSBFileTransferDisabled.asAndroidDeviceOwnerFlow()
     override val isInstallAppsDisabled: Flow<Boolean> =
         _isInstallAppsDisabled.asAndroidDeviceOwnerFlow()
     override val isInstallAppsFromUnknownSourcesDisabled: Flow<Boolean> =
@@ -78,13 +80,8 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         _isContentSuggestionDisabled.asAndroidDeviceOwnerFlow()
     override val isScreenshotsDisabled: Flow<Boolean> =
         _isScreenshotsDisabled.asAndroidDeviceOwnerFlow()
-    override val isLocationDisabled: Flow<Boolean> = _isLocationDisabled.asAndroidDeviceOwnerFlow()
-    override val isConfigVPNDisabled: Flow<Boolean> = _isConfigVPNDisabled.asAndroidDeviceOwnerFlow()
     override val isDebugFeaturesDisabled: Flow<Boolean> =
         _isDebugFeaturesDisabled.asAndroidDeviceOwnerFlow()
-
-
-
     override val isFactoryResetDisabled: Flow<Boolean> =
         _isFactoryResetDisabled.asAndroidDeviceOwnerFlow()
     override val isSafeBootDisabled: Flow<Boolean> = _isSafeBootDisabled.asAndroidDeviceOwnerFlow()
@@ -99,6 +96,7 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         _isBluetoothConfigDisabled.asAndroidDeviceOwnerFlow()
     override val isMountPhysicalMediaDisabled: Flow<Boolean> =
         _isMountPhysicalMediaDisabled.asAndroidDeviceOwnerFlow()
+    override val isLocationDisabled: Flow<Boolean> = _isLocationDisabled.asAndroidDeviceOwnerFlow()
     override val isNFCDisabled: Flow<Boolean> = _isNFCDisabled.asAndroidDeviceOwnerFlow()
     override val isOutgoingCallsDisabled: Flow<Boolean> =
         _isOutgoingCallsDisabled.asAndroidDeviceOwnerFlow()
@@ -111,28 +109,11 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
     override val isHotspotDisabled: Flow<Boolean> = _isHotspotDisabled.asAndroidDeviceOwnerFlow()
     override val isAddNewWifiNetworksDisabled: Flow<Boolean> = _isAddNewWifiNetworksDisabled.asAndroidDeviceOwnerFlow()
     override val isAirplaneModeDisabled: Flow<Boolean> = _isAirplaneModeDisabled.asAndroidDeviceOwnerFlow()
+    override val isConfigVPNDisabled: Flow<Boolean> = _isConfigVPNDisabled.asAndroidDeviceOwnerFlow()
     override val isConfigPrivateDNSDisabled: Flow<Boolean> = _isConfigPrivateDNSDisabled.asAndroidDeviceOwnerFlow()
     override val isRoamingDisabled: Flow<Boolean> = _isRoamingDisabled.asAndroidDeviceOwnerFlow()
     override val isConfigMobileDataDisabled: Flow<Boolean> = _isConfigMobileDataDisabled.asAndroidDeviceOwnerFlow()
     override val is2GNetworkDisabled: Flow<Boolean> = _is2GNetworkDisabled.asAndroidDeviceOwnerFlow()
-
-
-
-
-    override val isCanDisableScreenContentCaptureForAI: Boolean
-        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.Q)
-        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-    override val isCanDisableContentSuggestion: Boolean
-        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.Q)
-        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-
-
-
-
-    override val isUSBDataSignalDisabled: Flow<Boolean> =
-        _isUSBDataSignalDisabled.asAndroidDeviceOwnerFlow()
-    override val isUSBFileTransferDisabled: Flow<Boolean> =
-        _isUSBFileTransferDisabled.asAndroidDeviceOwnerFlow()
 
     override val isCanDisableUSBDataSignal: Boolean
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -140,6 +121,12 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         } else {
             false
         }
+    override val isCanDisableScreenContentCaptureForAI: Boolean
+        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.Q)
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+    override val isCanDisableContentSuggestion: Boolean
+        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.Q)
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     override val isCanDisableNFC: Boolean
         @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.VANILLA_ICE_CREAM)
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
@@ -160,7 +147,7 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
 
     override suspend fun updateRestrictionState() {
-        if (!checkIsAppProfileOwner()) return
+        if (!checkIsAppDeviceOwner()) return
         _isCameraDisabled.value = checkIsCameraDisabled()
         _isUSBDataSignalDisabled.value = checkIsUSBDataSignalDisabled()
         val userRestriction = devicePolicyManager.getUserRestrictions(deviceOwnerReceiver)
@@ -260,6 +247,16 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         toggleUserRestriction(UserManager.DISALLOW_UNMUTE_MICROPHONE, isDisabled)
     }
 
+    override suspend fun setUSBDataSignalDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            devicePolicyManager.isUsbDataSignalingEnabled = !isDisabled
+        }
+    }
+
+    override suspend fun setUSBFileTransferDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER, isDisabled)
+    }
+
     override suspend fun setInstallAppsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_INSTALL_APPS, isDisabled)
     }
@@ -295,22 +292,8 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         devicePolicyManager.setScreenCaptureDisabled(deviceOwnerReceiver, isDisabled)
     }
 
-    override suspend fun setLocationDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
-        toggleUserRestriction(UserManager.DISALLOW_SHARE_LOCATION, isDisabled)
-    }
-
     override suspend fun setDebugFeaturesDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, isDisabled)
-    }
-
-    override suspend fun setUSBDataSignalDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            devicePolicyManager.isUsbDataSignalingEnabled = !isDisabled
-        }
-    }
-
-    override suspend fun setUSBFileTransferDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
-        toggleUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER, isDisabled)
     }
 
     override suspend fun setFactoryResetDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
@@ -345,6 +328,10 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         changeDeviceOwnerPolicy {
             toggleUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, isDisabled)
         }
+
+    override suspend fun setLocationDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+        toggleUserRestriction(UserManager.DISALLOW_SHARE_LOCATION, isDisabled)
+    }
 
     override suspend fun setOutgoingCallsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
         toggleUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, isDisabled)
@@ -427,7 +414,7 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
     }
 
     private suspend fun changeDeviceOwnerPolicy(block: suspend DevicePolicyManager.() -> Unit) {
-        if (!checkIsAppProfileOwner()) throw AppNotProfileOwnerException()
+        if (!checkIsAppDeviceOwner()) throw AppNotDeviceOwnerException()
         devicePolicyManager.block()
         updateRestrictionState()
     }
@@ -444,7 +431,6 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         false
     }
 
-    @DeprecatedDeviceOwnerRestriction
     private fun checkIsUSBDataSignalDisabled() =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             !devicePolicyManager.isUsbDataSignalingEnabled
