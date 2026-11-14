@@ -107,17 +107,20 @@ class ApexPolicyService : Service() {
                     val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                     prefs.edit().putLong(KEY_DEVICE_LOCKED_SINCE, 0L).apply()
                     evaluateInactivityPolicies()
-                    cancelInactivityAlarm()
+                    scheduleNextInactivityAlarm()
                 }
 
                 Intent.ACTION_SCREEN_ON -> {
-                    val isLocked = km?.isKeyguardLocked == true || km?.isDeviceLocked == true
-                    if (!isLocked) {
-                        Logger.writeDebugLog("ApexPolicyService: screen on and device not locked, resetting lock timer")
+                    // Do NOT eagerly reset lockedSince on SCREEN_ON if device has a keyguard/lock screen.
+                    // ACTION_USER_PRESENT will be called once the user actually unlocks.
+                    // Only reset on SCREEN_ON if keyguard is absent or disabled.
+                    val hasKeyguard = km?.isKeyguardSecure == true || km?.isKeyguardLocked == true || km?.isDeviceLocked == true
+                    if (!hasKeyguard) {
+                        Logger.writeDebugLog("ApexPolicyService: screen on and no keyguard, resetting lock timer")
                         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                         prefs.edit().putLong(KEY_DEVICE_LOCKED_SINCE, 0L).apply()
                         evaluateInactivityPolicies()
-                        cancelInactivityAlarm()
+                        scheduleNextInactivityAlarm()
                     }
                 }
             }
@@ -284,13 +287,14 @@ class ApexPolicyService : Service() {
     private fun evaluateInactivityPolicies() {
         serviceScope.launch {
             try {
-                val km = getSystemService(KEYGUARD_SERVICE) as? KeyguardManager
-                val isLocked = km?.isKeyguardLocked == true || km?.isDeviceLocked == true
                 val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 val lockedSince = prefs.getLong(KEY_DEVICE_LOCKED_SINCE, 0L)
+                val km = getSystemService(KEYGUARD_SERVICE) as? KeyguardManager
+                val isKmLocked = km?.isKeyguardLocked == true || km?.isDeviceLocked == true
+                val isLocked = lockedSince > 0L || isKmLocked
                 val now = System.currentTimeMillis()
-                val lockedDuration = if (isLocked && lockedSince > 0L) {
-                    now - lockedSince
+                val lockedDuration = if (lockedSince > 0L) {
+                    (now - lockedSince).coerceAtLeast(0L)
                 } else {
                     0L
                 }
@@ -309,7 +313,8 @@ class ApexPolicyService : Service() {
                 val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 val lockedSince = prefs.getLong(KEY_DEVICE_LOCKED_SINCE, 0L)
                 val km = getSystemService(KEYGUARD_SERVICE) as? KeyguardManager
-                val isLocked = km?.isKeyguardLocked == true || km?.isDeviceLocked == true
+                val isKmLocked = km?.isKeyguardLocked == true || km?.isDeviceLocked == true
+                val isLocked = lockedSince > 0L || isKmLocked
                 val now = System.currentTimeMillis()
 
                 val policies = oneShotAppManagerOwnerComponent.appInactivityPolicies.first()
@@ -319,14 +324,14 @@ class ApexPolicyService : Service() {
                     if (isLocked && lockedSince > 0L) {
                         when (policy.lockAction) {
                             LockInactivityAction.FREEZE_ONLY -> {
-                                val deadline = lockedSince + policy.lockFreezeHours * 3600_000L
+                                val deadline = lockedSince + policy.lockFreezeDurationMs
                                 if (deadline > now && deadline < earliestDeadline) {
                                     earliestDeadline = deadline
                                 }
                             }
                             LockInactivityAction.FREEZE_AND_WIPE -> {
-                                val freezeDeadline = lockedSince + policy.lockFreezeHours * 3600_000L
-                                val wipeDeadline = lockedSince + policy.lockWipeHours * 3600_000L
+                                val freezeDeadline = lockedSince + policy.lockFreezeDurationMs
+                                val wipeDeadline = lockedSince + policy.lockWipeDurationMs
                                 if (freezeDeadline > now && freezeDeadline < earliestDeadline) {
                                     earliestDeadline = freezeDeadline
                                 }
@@ -338,7 +343,7 @@ class ApexPolicyService : Service() {
                         }
                     }
                     if (policy.wipeIfUnusedEnabled && policy.lastOpenedTimestamp > 0L) {
-                        val unusedDeadline = policy.lastOpenedTimestamp + policy.wipeIfUnusedDays * 86400_000L
+                        val unusedDeadline = policy.lastOpenedTimestamp + policy.unusedWipeDurationMs
                         if (unusedDeadline > now && unusedDeadline < earliestDeadline) {
                             earliestDeadline = unusedDeadline
                         }
@@ -365,6 +370,8 @@ class ApexPolicyService : Service() {
                     } else {
                         alarmManager.set(AlarmManager.RTC_WAKEUP, earliestDeadline, pendingIntent)
                     }
+                } else {
+                    cancelInactivityAlarm()
                 }
             } catch (e: Exception) {
                 Logger.writeErrorLog("Failed to schedule inactivity alarm: ${e.message}")

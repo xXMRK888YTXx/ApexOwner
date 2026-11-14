@@ -14,6 +14,7 @@ import com.xxmrk888ytxx.apexowner.bridge.PackageInstallerReceiver
 import com.xxmrk888ytxx.apexowner.bridge.WorkProfileDispatcherActivity
 import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
+import com.xxmrk888ytxx.apexowner.service.ApexPolicyService
 import com.xxmrk888ytxx.apexowner.view.mainActivity.MainActivity
 import com.xxmrk888ytxx.core.base.android.logs.Logger
 import com.xxmrk888ytxx.core.devicepolicy.OneShotAppManagerOwnerComponent
@@ -302,7 +303,12 @@ class WorkProfileContractImpl @Inject constructor(
                         lockWipeHours = it.lockWipeHours,
                         wipeIfUnusedEnabled = it.wipeIfUnusedEnabled,
                         wipeIfUnusedDays = it.wipeIfUnusedDays,
-                        lastOpenedTimestamp = it.lastOpenedTimestamp
+                        lastOpenedTimestamp = it.lastOpenedTimestamp,
+                        lockFreezeMinutes = it.lockFreezeMinutes,
+                        lockWipeMinutes = it.lockWipeMinutes,
+                        lastLockFreezeTimestamp = it.lastLockFreezeTimestamp,
+                        lastLockWipeTimestamp = it.lastLockWipeTimestamp,
+                        lastUnusedWipeTimestamp = it.lastUnusedWipeTimestamp
                     )
                 }
 
@@ -354,7 +360,12 @@ class WorkProfileContractImpl @Inject constructor(
                         lockWipeHours = it.lockWipeHours,
                         wipeIfUnusedEnabled = it.wipeIfUnusedEnabled,
                         wipeIfUnusedDays = it.wipeIfUnusedDays,
-                        lastOpenedTimestamp = it.lastOpenedTimestamp
+                        lastOpenedTimestamp = it.lastOpenedTimestamp,
+                        lockFreezeMinutes = it.lockFreezeMinutes,
+                        lockWipeMinutes = it.lockWipeMinutes,
+                        lastLockFreezeTimestamp = it.lastLockFreezeTimestamp,
+                        lastLockWipeTimestamp = it.lastLockWipeTimestamp,
+                        lastUnusedWipeTimestamp = it.lastUnusedWipeTimestamp
                     )
                 }
 
@@ -468,12 +479,18 @@ class WorkProfileContractImpl @Inject constructor(
             lockWipeHours = policy.lockWipeHours,
             wipeIfUnusedEnabled = policy.wipeIfUnusedEnabled,
             wipeIfUnusedDays = policy.wipeIfUnusedDays,
-            lastOpenedTimestamp = policy.lastOpenedTimestamp
+            lastOpenedTimestamp = policy.lastOpenedTimestamp,
+            lockFreezeMinutes = policy.lockFreezeMinutes,
+            lockWipeMinutes = policy.lockWipeMinutes,
+            lastLockFreezeTimestamp = policy.lastLockFreezeTimestamp,
+            lastLockWipeTimestamp = policy.lastLockWipeTimestamp,
+            lastUnusedWipeTimestamp = policy.lastUnusedWipeTimestamp
         )
 
         if (profileOwnerManager.isInsideWorkProfile || profileOwnerManager.isAppDeviceOwner) {
             val result = oneShotAppManagerOwnerComponent.setInactivityPolicy(corePolicy)
             if (result.isSuccess) {
+                ApexPolicyService.triggerInactivityCheck(context)
                 refresh()
             }
             result

@@ -195,6 +195,7 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
                         if (policy != null) {
                             oneShotAppManagerOwnerComponent.setInactivityPolicy(policy).fold(
                                 onSuccess = {
+                                    com.xxmrk888ytxx.apexowner.service.ApexPolicyService.triggerInactivityCheck(this@WorkProfileDispatcherActivity)
                                     Toast.makeText(this@WorkProfileDispatcherActivity, "Тайм-аут сохранен", Toast.LENGTH_SHORT).show()
                                 },
                                 onFailure = {

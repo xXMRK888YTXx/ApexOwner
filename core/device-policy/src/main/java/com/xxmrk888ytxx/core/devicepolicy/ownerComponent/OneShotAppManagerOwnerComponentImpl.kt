@@ -366,31 +366,44 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
             val now = System.currentTimeMillis()
 
             for ((pkg, policy) in policies) {
+                var currentPolicy = policy
+                var policyModified = false
+
                 // 1. Device locked inactivity checks
                 if (isDeviceLocked && deviceLockedDurationMs > 0L) {
-                    when (policy.lockAction) {
+                    when (currentPolicy.lockAction) {
                         LockInactivityAction.FREEZE_ONLY -> {
-                            val freezeThresholdMs = policy.lockFreezeHours * 3600_000L
+                            val freezeThresholdMs = currentPolicy.lockFreezeDurationMs
                             if (deviceLockedDurationMs >= freezeThresholdMs) {
-                                Logger.writeDebugLog("checkAndApplyInactivityPolicies: Freezing $pkg (locked for ${deviceLockedDurationMs / 3600000}h >= ${policy.lockFreezeHours}h)")
+                                Logger.writeDebugLog("checkAndApplyInactivityPolicies: Freezing $pkg (locked for ${deviceLockedDurationMs / 1000}s >= ${freezeThresholdMs / 1000}s)")
                                 hideApp(pkg)
+                                if (currentPolicy.lastLockFreezeTimestamp == 0L || (now - currentPolicy.lastLockFreezeTimestamp) > 60_000L) {
+                                    currentPolicy = currentPolicy.copy(lastLockFreezeTimestamp = now)
+                                    policyModified = true
+                                }
                             }
                         }
                         LockInactivityAction.FREEZE_AND_WIPE -> {
-                            val freezeThresholdMs = policy.lockFreezeHours * 3600_000L
-                            val wipeThresholdMs = policy.lockWipeHours * 3600_000L
+                            val freezeThresholdMs = currentPolicy.lockFreezeDurationMs
+                            val wipeThresholdMs = currentPolicy.lockWipeDurationMs
 
                             if (deviceLockedDurationMs >= freezeThresholdMs) {
-                                Logger.writeDebugLog("checkAndApplyInactivityPolicies: Freezing $pkg (locked for ${deviceLockedDurationMs / 3600000}h >= ${policy.lockFreezeHours}h)")
+                                Logger.writeDebugLog("checkAndApplyInactivityPolicies: Freezing $pkg (locked for ${deviceLockedDurationMs / 1000}s >= ${freezeThresholdMs / 1000}s)")
                                 hideApp(pkg)
+                                if (currentPolicy.lastLockFreezeTimestamp == 0L || (now - currentPolicy.lastLockFreezeTimestamp) > 60_000L) {
+                                    currentPolicy = currentPolicy.copy(lastLockFreezeTimestamp = now)
+                                    policyModified = true
+                                }
                             }
 
                             if (deviceLockedDurationMs >= wipeThresholdMs) {
                                 if (!wipedPackagesInCurrentLockSession.contains(pkg)) {
-                                    Logger.writeDebugLog("checkAndApplyInactivityPolicies: Wiping $pkg (locked for ${deviceLockedDurationMs / 3600000}h >= ${policy.lockWipeHours}h)")
+                                    Logger.writeDebugLog("checkAndApplyInactivityPolicies: Wiping $pkg (locked for ${deviceLockedDurationMs / 1000}s >= ${wipeThresholdMs / 1000}s)")
                                     clearAppData(pkg)
                                     hideApp(pkg)
                                     wipedPackagesInCurrentLockSession.add(pkg)
+                                    currentPolicy = currentPolicy.copy(lastLockWipeTimestamp = now)
+                                    policyModified = true
                                 }
                             }
                         }
@@ -399,19 +412,25 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
                 }
 
                 // 2. Unused app checks (e.g. 30 days)
-                if (policy.wipeIfUnusedEnabled && policy.lastOpenedTimestamp > 0L) {
-                    val unusedThresholdMs = policy.wipeIfUnusedDays * 86400_000L
-                    val unusedDurationMs = now - policy.lastOpenedTimestamp
+                if (currentPolicy.wipeIfUnusedEnabled && currentPolicy.lastOpenedTimestamp > 0L) {
+                    val unusedThresholdMs = currentPolicy.unusedWipeDurationMs
+                    val unusedDurationMs = now - currentPolicy.lastOpenedTimestamp
                     if (unusedDurationMs >= unusedThresholdMs) {
-                        Logger.writeDebugLog("checkAndApplyInactivityPolicies: Wiping $pkg because unused for ${unusedDurationMs / 86400000L}d >= ${policy.wipeIfUnusedDays}d")
+                        Logger.writeDebugLog("checkAndApplyInactivityPolicies: Wiping $pkg because unused for ${unusedDurationMs / 1000}s >= ${unusedThresholdMs / 1000}s")
                         clearAppData(pkg)
                         hideApp(pkg)
-                        // Reset timestamp to current time to avoid wiping in loop every check
-                        val updatedMap = _appInactivityPolicies.value.toMutableMap()
-                        val updatedPolicy = policy.copy(lastOpenedTimestamp = now)
-                        updatedMap[pkg] = updatedPolicy
-                        saveInactivityPolicies(updatedMap)
+                        currentPolicy = currentPolicy.copy(
+                            lastOpenedTimestamp = now,
+                            lastUnusedWipeTimestamp = now
+                        )
+                        policyModified = true
                     }
+                }
+
+                if (policyModified) {
+                    val updatedMap = _appInactivityPolicies.value.toMutableMap()
+                    updatedMap[pkg] = currentPolicy
+                    saveInactivityPolicies(updatedMap)
                 }
             }
             Result.success(Unit)

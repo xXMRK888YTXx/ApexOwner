@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -80,7 +81,6 @@ import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileSi
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileUiEvent
 import kotlinx.coroutines.flow.Flow
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -498,14 +498,17 @@ private fun AppListItem(
 
                     app.inactivityPolicy?.let { policy ->
                         if (policy.lockAction == LockInactivityAction.FREEZE_ONLY) {
+                            val text = if (policy.lockFreezeMinutes > 0) "⏱ ${policy.lockFreezeMinutes} мин" else stringResource(R.string.badge_lock_freeze, policy.lockFreezeHours)
                             BadgeTag(
-                                text = stringResource(R.string.badge_lock_freeze, policy.lockFreezeHours),
+                                text = text,
                                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                             )
                         } else if (policy.lockAction == LockInactivityAction.FREEZE_AND_WIPE) {
+                            val freezeText = if (policy.lockFreezeMinutes > 0) "${policy.lockFreezeMinutes}м" else "${policy.lockFreezeHours}ч"
+                            val wipeText = if (policy.lockWipeMinutes > 0) "${policy.lockWipeMinutes}м" else "${policy.lockWipeHours}ч"
                             BadgeTag(
-                                text = stringResource(R.string.badge_lock_wipe, policy.lockFreezeHours, policy.lockWipeHours),
+                                text = "⏱ $freezeText / 🗑️ $wipeText",
                                 containerColor = MaterialTheme.colorScheme.errorContainer,
                                 contentColor = MaterialTheme.colorScheme.onErrorContainer
                             )
@@ -641,14 +644,17 @@ private fun AppManagementSheetContent(
 
             app.inactivityPolicy?.let { policy ->
                 if (policy.lockAction == LockInactivityAction.FREEZE_ONLY) {
+                    val text = if (policy.lockFreezeMinutes > 0) "⏱ ${policy.lockFreezeMinutes} мин" else stringResource(R.string.badge_lock_freeze, policy.lockFreezeHours)
                     BadgeTag(
-                        text = stringResource(R.string.badge_lock_freeze, policy.lockFreezeHours),
+                        text = text,
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                         contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 } else if (policy.lockAction == LockInactivityAction.FREEZE_AND_WIPE) {
+                    val freezeText = if (policy.lockFreezeMinutes > 0) "${policy.lockFreezeMinutes}м" else "${policy.lockFreezeHours}ч"
+                    val wipeText = if (policy.lockWipeMinutes > 0) "${policy.lockWipeMinutes}м" else "${policy.lockWipeHours}ч"
                     BadgeTag(
-                        text = stringResource(R.string.badge_lock_wipe, policy.lockFreezeHours, policy.lockWipeHours),
+                        text = "⏱ $freezeText / 🗑️ $wipeText",
                         containerColor = MaterialTheme.colorScheme.errorContainer,
                         contentColor = MaterialTheme.colorScheme.onErrorContainer
                     )
@@ -1004,8 +1010,18 @@ private fun LockInactivityPolicyCard(
                     Text(
                         text = when (currentPolicy.lockAction) {
                             LockInactivityAction.NONE -> stringResource(R.string.lock_action_none_desc)
-                            LockInactivityAction.FREEZE_ONLY -> stringResource(R.string.lock_freeze_summary, currentPolicy.lockFreezeHours)
-                            LockInactivityAction.FREEZE_AND_WIPE -> stringResource(R.string.lock_wipe_summary, currentPolicy.lockFreezeHours, currentPolicy.lockWipeHours)
+                            LockInactivityAction.FREEZE_ONLY -> {
+                                if (currentPolicy.lockFreezeMinutes > 0) {
+                                    "Заморозка через ${currentPolicy.lockFreezeMinutes} мин без разблокировки"
+                                } else {
+                                    stringResource(R.string.lock_freeze_summary, currentPolicy.lockFreezeHours)
+                                }
+                            }
+                            LockInactivityAction.FREEZE_AND_WIPE -> {
+                                val freezeStr = if (currentPolicy.lockFreezeMinutes > 0) "${currentPolicy.lockFreezeMinutes} мин" else "${currentPolicy.lockFreezeHours} ч"
+                                val wipeStr = if (currentPolicy.lockWipeMinutes > 0) "${currentPolicy.lockWipeMinutes} мин" else "${currentPolicy.lockWipeHours} ч"
+                                "Заморозка через $freezeStr, сброс через $wipeStr"
+                            }
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1052,41 +1068,117 @@ private fun LockInactivityPolicyCard(
                     )
                 }
 
-                if (currentPolicy.lockAction == LockInactivityAction.FREEZE_ONLY) {
-                    SettingStepperRow(
-                        label = stringResource(R.string.hours_without_unlock_label),
-                        value = currentPolicy.lockFreezeHours,
-                        unit = "ч",
-                        minValue = 1,
-                        maxValue = 168,
-                        onValueChange = { hours ->
-                            onUpdateInactivityPolicy(currentPolicy.copy(lockFreezeHours = hours))
-                        }
+                // Единицы измерения (Часы / Минуты для тестирования)
+                val isMinutesMode = currentPolicy.lockFreezeMinutes > 0 || currentPolicy.lockWipeMinutes > 0
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Единицы:",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                } else if (currentPolicy.lockAction == LockInactivityAction.FREEZE_AND_WIPE) {
-                    SettingStepperRow(
-                        label = stringResource(R.string.hours_to_freeze_label),
-                        value = currentPolicy.lockFreezeHours,
-                        unit = "ч",
-                        minValue = 1,
-                        maxValue = currentPolicy.lockWipeHours,
-                        onValueChange = { hours ->
-                            onUpdateInactivityPolicy(currentPolicy.copy(lockFreezeHours = hours))
-                        }
+                    FilterChip(
+                        selected = !isMinutesMode,
+                        onClick = {
+                            onUpdateInactivityPolicy(
+                                currentPolicy.copy(
+                                    lockFreezeMinutes = 0,
+                                    lockWipeMinutes = 0,
+                                    lockFreezeHours = if (currentPolicy.lockFreezeHours <= 0) 12 else currentPolicy.lockFreezeHours,
+                                    lockWipeHours = if (currentPolicy.lockWipeHours <= 0) 12 else currentPolicy.lockWipeHours
+                                )
+                            )
+                        },
+                        label = { Text("Часы") }
                     )
-                    SettingStepperRow(
-                        label = stringResource(R.string.hours_to_wipe_label),
-                        value = currentPolicy.lockWipeHours,
-                        unit = "ч",
-                        minValue = currentPolicy.lockFreezeHours,
-                        maxValue = 168,
-                        onValueChange = { hours ->
-                            onUpdateInactivityPolicy(currentPolicy.copy(lockWipeHours = hours))
-                        }
+                    FilterChip(
+                        selected = isMinutesMode,
+                        onClick = {
+                            onUpdateInactivityPolicy(
+                                currentPolicy.copy(
+                                    lockFreezeMinutes = if (currentPolicy.lockFreezeMinutes <= 0) 1 else currentPolicy.lockFreezeMinutes,
+                                    lockWipeMinutes = if (currentPolicy.lockWipeMinutes <= 0) 2 else currentPolicy.lockWipeMinutes
+                                )
+                            )
+                        },
+                        label = { Text("Минуты (тест)") }
                     )
                 }
 
-                // Информационная панель с точным расчётным временем
+                if (!isMinutesMode) {
+                    if (currentPolicy.lockAction == LockInactivityAction.FREEZE_ONLY) {
+                        SettingStepperRow(
+                            label = stringResource(R.string.hours_without_unlock_label),
+                            value = currentPolicy.lockFreezeHours,
+                            unit = "ч",
+                            minValue = 1,
+                            maxValue = 168,
+                            onValueChange = { hours ->
+                                onUpdateInactivityPolicy(currentPolicy.copy(lockFreezeHours = hours))
+                            }
+                        )
+                    } else if (currentPolicy.lockAction == LockInactivityAction.FREEZE_AND_WIPE) {
+                        SettingStepperRow(
+                            label = stringResource(R.string.hours_to_freeze_label),
+                            value = currentPolicy.lockFreezeHours,
+                            unit = "ч",
+                            minValue = 1,
+                            maxValue = currentPolicy.lockWipeHours,
+                            onValueChange = { hours ->
+                                onUpdateInactivityPolicy(currentPolicy.copy(lockFreezeHours = hours))
+                            }
+                        )
+                        SettingStepperRow(
+                            label = stringResource(R.string.hours_to_wipe_label),
+                            value = currentPolicy.lockWipeHours,
+                            unit = "ч",
+                            minValue = currentPolicy.lockFreezeHours,
+                            maxValue = 168,
+                            onValueChange = { hours ->
+                                onUpdateInactivityPolicy(currentPolicy.copy(lockWipeHours = hours))
+                            }
+                        )
+                    }
+                } else {
+                    if (currentPolicy.lockAction == LockInactivityAction.FREEZE_ONLY) {
+                        SettingStepperRow(
+                            label = stringResource(R.string.hours_without_unlock_label),
+                            value = currentPolicy.lockFreezeMinutes,
+                            unit = "мин",
+                            minValue = 1,
+                            maxValue = 120,
+                            onValueChange = { mins ->
+                                onUpdateInactivityPolicy(currentPolicy.copy(lockFreezeMinutes = mins))
+                            }
+                        )
+                    } else if (currentPolicy.lockAction == LockInactivityAction.FREEZE_AND_WIPE) {
+                        SettingStepperRow(
+                            label = stringResource(R.string.hours_to_freeze_label),
+                            value = currentPolicy.lockFreezeMinutes,
+                            unit = "мин",
+                            minValue = 1,
+                            maxValue = currentPolicy.lockWipeMinutes,
+                            onValueChange = { mins ->
+                                onUpdateInactivityPolicy(currentPolicy.copy(lockFreezeMinutes = mins))
+                            }
+                        )
+                        SettingStepperRow(
+                            label = stringResource(R.string.hours_to_wipe_label),
+                            value = currentPolicy.lockWipeMinutes,
+                            unit = "мин",
+                            minValue = currentPolicy.lockFreezeMinutes,
+                            maxValue = 120,
+                            onValueChange = { mins ->
+                                onUpdateInactivityPolicy(currentPolicy.copy(lockWipeMinutes = mins))
+                            }
+                        )
+                    }
+                }
+
+                // Информационная панель
                 Card(
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
@@ -1098,14 +1190,38 @@ private fun LockInactivityPolicyCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .background(Color(0xFF4CAF50), CircleShape)
+                            )
+                            Text(
+                                text = "Экран разблокирован — таймер ждёт выключения",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
                         Text(
-                            text = "Время срабатывания при блокировке экрана:",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold,
+                            text = "Отсчёт ведётся только пока телефон непрерывно заблокирован (экран выключен). Разблокировка сбрасывает таймер.",
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+                        val freezeText = if (currentPolicy.lockFreezeMinutes > 0) {
+                            "через ${currentPolicy.lockFreezeMinutes} мин сна"
+                        } else {
+                            "через ${currentPolicy.lockFreezeHours} ч сна"
+                        }
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1113,12 +1229,12 @@ private fun LockInactivityPolicyCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "❄️ Заморозка:",
+                                text = "❄️ Заморозка приложения:",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = formatEstimatedLockTime(currentPolicy.lockFreezeHours),
+                                text = freezeText,
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.primary
@@ -1126,18 +1242,23 @@ private fun LockInactivityPolicyCard(
                         }
 
                         if (currentPolicy.lockAction == LockInactivityAction.FREEZE_AND_WIPE) {
+                            val wipeText = if (currentPolicy.lockWipeMinutes > 0) {
+                                "через ${currentPolicy.lockWipeMinutes} мин сна"
+                            } else {
+                                "через ${currentPolicy.lockWipeHours} ч сна"
+                            }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "🗑️ Сброс данных:",
+                                    text = "🗑️ Очистка данных:",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = formatEstimatedLockTime(currentPolicy.lockWipeHours),
+                                    text = wipeText,
                                     style = MaterialTheme.typography.bodySmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.error
@@ -1145,11 +1266,23 @@ private fun LockInactivityPolicyCard(
                             }
                         }
 
-                        Text(
-                            text = "Отсчёт начнётся при выключении экрана. При разблокировке телефона таймер сбрасывается.",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        )
+                        if (currentPolicy.lastLockFreezeTimestamp > 0L || currentPolicy.lastLockWipeTimestamp > 0L) {
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                            if (currentPolicy.lastLockFreezeTimestamp > 0L) {
+                                Text(
+                                    text = "❄️ Последняя заморозка: ${formatTargetDateTime(currentPolicy.lastLockFreezeTimestamp)}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            if (currentPolicy.lastLockWipeTimestamp > 0L) {
+                                Text(
+                                    text = "🗑️ Последний сброс данных: ${formatTargetDateTime(currentPolicy.lastLockWipeTimestamp)}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -1323,6 +1456,14 @@ private fun AppUnusedPolicyCard(
                             )
                         }
 
+                        if (currentPolicy.lastUnusedWipeTimestamp > 0L) {
+                            Text(
+                                text = "🗑️ Последний сброс данных: ${formatTargetDateTime(currentPolicy.lastUnusedWipeTimestamp)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
 
                         Row(
@@ -1342,18 +1483,38 @@ private fun AppUnusedPolicyCard(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
                             }
-                            TextButton(
-                                onClick = {
-                                    onUpdateInactivityPolicy(
-                                        currentPolicy.copy(lastOpenedTimestamp = System.currentTimeMillis())
+
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                TextButton(
+                                    onClick = {
+                                        // Set lastOpenedTimestamp to 31 days in past to trigger immediate wipe
+                                        val pastTime = System.currentTimeMillis() - ((currentPolicy.wipeIfUnusedDays + 1) * 86400_000L)
+                                        onUpdateInactivityPolicy(
+                                            currentPolicy.copy(lastOpenedTimestamp = pastTime)
+                                        )
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = "Тест (30+ дн)",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.error
                                     )
-                                },
-                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    text = "Сбросить отсчёт",
-                                    style = MaterialTheme.typography.labelSmall
-                                )
+                                }
+
+                                TextButton(
+                                    onClick = {
+                                        onUpdateInactivityPolicy(
+                                            currentPolicy.copy(lastOpenedTimestamp = System.currentTimeMillis())
+                                        )
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = "Сбросить отсчёт",
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
                             }
                         }
                     }
@@ -1366,29 +1527,6 @@ private fun AppUnusedPolicyCard(
 private fun formatTargetDateTime(timestampMs: Long): String {
     val sdf = SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault())
     return sdf.format(Date(timestampMs))
-}
-
-private fun formatEstimatedLockTime(offsetHours: Int): String {
-    val targetMs = System.currentTimeMillis() + (offsetHours * 3600_000L)
-    val targetCal = Calendar.getInstance().apply { timeInMillis = targetMs }
-    val nowCal = Calendar.getInstance()
-
-    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-    val formattedTime = timeFormat.format(targetCal.time)
-
-    val isToday = targetCal.get(Calendar.DAY_OF_YEAR) == nowCal.get(Calendar.DAY_OF_YEAR) &&
-            targetCal.get(Calendar.YEAR) == nowCal.get(Calendar.YEAR)
-    val isTomorrow = (targetCal.get(Calendar.DAY_OF_YEAR) == nowCal.get(Calendar.DAY_OF_YEAR) + 1 ||
-            (nowCal.get(Calendar.DAY_OF_YEAR) == nowCal.getActualMaximum(Calendar.DAY_OF_YEAR) && targetCal.get(Calendar.DAY_OF_YEAR) == 1)) &&
-            targetCal.get(Calendar.YEAR) >= nowCal.get(Calendar.YEAR)
-
-    val dayPrefix = when {
-        isToday -> "сегодня в"
-        isTomorrow -> "завтра в"
-        else -> SimpleDateFormat("d MMM в", Locale.getDefault()).format(targetCal.time)
-    }
-
-    return "через $offsetHours ч ($dayPrefix $formattedTime)"
 }
 
 @Composable
