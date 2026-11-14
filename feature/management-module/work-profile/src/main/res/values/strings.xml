@@ -41,5 +41,10 @@
     <string name="one_shot_enabled">Приложение помечено как One-shot и заморожено</string>
     <string name="one_shot_disabled">One-shot режим выключен</string>
     <string name="one_shot_reset_success">Данные сброшены и приложение заморожено</string>
+    <string name="badge_auto_freeze">Автозаморозка</string>
+    <string name="auto_freeze_mode_title">Режим автозаморозки</string>
+    <string name="auto_freeze_mode_desc">Приложение заморожено. При выключении профиля или перезагрузке замораживается без удаления данных.</string>
+    <string name="auto_freeze_enabled">Автозаморозка включена, приложение заморожено</string>
+    <string name="auto_freeze_disabled">Автозаморозка выключена</string>
     <string name="cancel">Отмена</string>
 </resources>

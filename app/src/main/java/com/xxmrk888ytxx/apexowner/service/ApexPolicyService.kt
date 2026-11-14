@@ -44,10 +44,10 @@ class ApexPolicyService : Service() {
             if (action == Intent.ACTION_SHUTDOWN) {
                 runBlocking {
                     try {
-                        Logger.writeDebugLog("ApexPolicyService resetting one-shot apps on ACTION_SHUTDOWN")
-                        oneShotAppManagerOwnerComponent.resetOneShotApps()
+                        Logger.writeDebugLog("ApexPolicyService handling triggers on ACTION_SHUTDOWN")
+                        oneShotAppManagerOwnerComponent.handleLifecycleTriggers()
                     } catch (e: Exception) {
-                        Logger.writeErrorLog("Failed to reset one-shot apps on ACTION_SHUTDOWN: ${e.message}")
+                        Logger.writeErrorLog("Failed to handle triggers on ACTION_SHUTDOWN: ${e.message}")
                     }
                 }
             }
@@ -81,10 +81,10 @@ class ApexPolicyService : Service() {
         registerShutdownReceiver()
         serviceScope.launch {
             try {
-                Logger.writeDebugLog("ApexPolicyService: resetting one-shot apps on service start")
-                oneShotAppManagerOwnerComponent.resetOneShotApps()
+                Logger.writeDebugLog("ApexPolicyService: handling triggers on service start")
+                oneShotAppManagerOwnerComponent.handleLifecycleTriggers()
             } catch (e: Exception) {
-                Logger.writeErrorLog("Failed to reset one-shot apps on service start: ${e.message}")
+                Logger.writeErrorLog("Failed to handle triggers on service start: ${e.message}")
             }
         }
     }

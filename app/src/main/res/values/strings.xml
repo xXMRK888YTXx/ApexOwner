@@ -5,12 +5,14 @@
     <string name="policy_service_channel_name">Служба политик и защиты</string>
     <string name="policy_service_notification_title">ApexOwner активен</string>
     <string name="policy_service_notification_desc">Контроль политик и разрешений выполняется в фоновом режиме</string>
-    <string name="shortcut_one_shot_short">One-shot</string>
-    <string name="shortcut_one_shot_long">One-shot приложения</string>
-    <string name="one_shot_launcher_title">One-shot приложения</string>
-    <string name="one_shot_launcher_empty_title">Нет One-shot приложений</string>
-    <string name="one_shot_launcher_empty_desc">Вы можете пометить приложения как One-shot в модуле «Рабочий профиль».</string>
+    <string name="shortcut_one_shot_short">Быстрый запуск</string>
+    <string name="shortcut_one_shot_long">Быстрый запуск приложений</string>
+    <string name="one_shot_launcher_title">Быстрый запуск</string>
+    <string name="one_shot_launcher_empty_title">Нет настроенных приложений</string>
+    <string name="one_shot_launcher_empty_desc">Настройте режим One-shot или Автозаморозку для приложений в модуле «Рабочий профиль».</string>
     <string name="one_shot_open_profile">Управление приложениями</string>
     <string name="one_shot_search_hint">Поиск приложений…</string>
     <string name="one_shot_launch_btn">Запустить</string>
+    <string name="badge_auto_freeze">Автозаморозка</string>
+    <string name="badge_one_shot">One-shot</string>
 </resources>

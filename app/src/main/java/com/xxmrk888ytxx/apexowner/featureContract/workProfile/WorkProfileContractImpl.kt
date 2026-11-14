@@ -197,7 +197,7 @@ class WorkProfileContractImpl @Inject constructor(
 
     override suspend fun launchApp(packageName: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            if (oneShotAppManagerOwnerComponent.isOneShotApp(packageName)) {
+            if (oneShotAppManagerOwnerComponent.isOneShotApp(packageName) || oneShotAppManagerOwnerComponent.isAutoFreezeApp(packageName)) {
                 val res = oneShotAppManagerOwnerComponent.launchOneShotApp(packageName)
                 if (res.isSuccess) {
                     refresh()
@@ -300,7 +300,8 @@ class WorkProfileContractImpl @Inject constructor(
                     isInstalledInWorkProfile = true,
                     hasLauncher = hasLauncher,
                     isInstalledInOtherProfile = false,
-                    isOneShot = oneShotAppManagerOwnerComponent.isOneShotApp(pkg)
+                    isOneShot = oneShotAppManagerOwnerComponent.isOneShotApp(pkg),
+                    isAutoFreeze = oneShotAppManagerOwnerComponent.isAutoFreezeApp(pkg)
                 )
             }
             .sortedBy { it.name.lowercase() }
@@ -337,7 +338,8 @@ class WorkProfileContractImpl @Inject constructor(
                     isInstalledInWorkProfile = isInstalledInWork,
                     hasLauncher = hasLauncher,
                     isInstalledInOtherProfile = isInstalledInWork,
-                    isOneShot = oneShotAppManagerOwnerComponent.isOneShotApp(pkg)
+                    isOneShot = oneShotAppManagerOwnerComponent.isOneShotApp(pkg),
+                    isAutoFreeze = oneShotAppManagerOwnerComponent.isAutoFreezeApp(pkg)
                 )
             }
             .sortedBy { it.name.lowercase() }
@@ -395,6 +397,33 @@ class WorkProfileContractImpl @Inject constructor(
                     Result.success(Unit)
                 } catch (e: Exception) {
                     Logger.writeErrorLog("Failed to dispatch reset one-shot intent: ${e.message}")
+                    Result.failure(e)
+                }
+            }
+        }
+
+    override suspend fun toggleAutoFreeze(packageName: String, isAutoFreeze: Boolean): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            if (profileOwnerManager.isInsideWorkProfile || profileOwnerManager.isAppDeviceOwner) {
+                val result = oneShotAppManagerOwnerComponent.setAutoFreezeApp(packageName, isAutoFreeze)
+                if (result.isSuccess) {
+                    refresh()
+                }
+                result
+            } else {
+                try {
+                    val intent = Intent(WorkProfileDispatcherActivity.ACTION_TOGGLE_AUTO_FREEZE).apply {
+                        addCategory(Intent.CATEGORY_DEFAULT)
+                        putExtra(WorkProfileDispatcherActivity.EXTRA_PACKAGE_NAME, packageName)
+                        putExtra(WorkProfileDispatcherActivity.EXTRA_IS_AUTO_FREEZE, isAutoFreeze)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                    delay(500)
+                    refresh()
+                    Result.success(Unit)
+                } catch (e: Exception) {
+                    Logger.writeErrorLog("Failed to dispatch toggle auto-freeze intent: ${e.message}")
                     Result.failure(e)
                 }
             }

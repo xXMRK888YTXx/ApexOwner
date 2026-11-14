@@ -140,8 +140,10 @@ class ApexBridgeProvider : ContentProvider() {
             METHOD_GET_ONE_SHOT_APPS -> {
                 try {
                     val oneShotManager = entryPoint.oneShotAppManagerOwnerComponent()
-                    val packages = runBlocking { oneShotManager.oneShotAppPackages.first() }
-                    response.putStringArrayList(EXTRA_ONE_SHOT_PACKAGES, ArrayList(packages))
+                    val oneShotPackages = runBlocking { oneShotManager.oneShotAppPackages.first() }
+                    val autoFreezePackages = runBlocking { oneShotManager.autoFreezeAppPackages.first() }
+                    response.putStringArrayList(EXTRA_ONE_SHOT_PACKAGES, ArrayList(oneShotPackages))
+                    response.putStringArrayList(EXTRA_AUTO_FREEZE_PACKAGES, ArrayList(autoFreezePackages))
                     response.putBoolean(EXTRA_SUCCESS, true)
                 } catch (e: Exception) {
                     Logger.writeErrorLog("ApexBridgeProvider: failed to get one-shot apps: ${e.message}")
@@ -189,6 +191,7 @@ class ApexBridgeProvider : ContentProvider() {
         const val EXTRA_ERROR = "extra_error"
         const val EXTRA_APPS = "extra_apps"
         const val EXTRA_ONE_SHOT_PACKAGES = "EXTRA_ONE_SHOT_PACKAGES"
+        const val EXTRA_AUTO_FREEZE_PACKAGES = "EXTRA_AUTO_FREEZE_PACKAGES"
         const val EXTRA_APK_PATH = "EXTRA_APK_PATH"
         const val EXTRA_SPLIT_PATHS = "EXTRA_SPLIT_PATHS"
     }

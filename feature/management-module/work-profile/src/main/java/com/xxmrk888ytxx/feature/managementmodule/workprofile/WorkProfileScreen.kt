@@ -170,6 +170,7 @@ fun WorkProfileScreen(
                     onEvent(WorkProfileUiEvent.OnToggleOneShot(app.packageName, isOneShot))
                     selectedAppForManagement = selectedAppForManagement?.copy(
                         isOneShot = isOneShot,
+                        isAutoFreeze = !isOneShot && selectedAppForManagement!!.isAutoFreeze,
                         isFrozen = isOneShot || selectedAppForManagement!!.isFrozen
                     )
                 },
@@ -177,6 +178,14 @@ fun WorkProfileScreen(
                     onEvent(WorkProfileUiEvent.OnResetOneShot(app.packageName))
                     selectedAppForManagement = selectedAppForManagement?.copy(
                         isFrozen = true
+                    )
+                },
+                onToggleAutoFreeze = { isAutoFreeze ->
+                    onEvent(WorkProfileUiEvent.OnToggleAutoFreeze(app.packageName, isAutoFreeze))
+                    selectedAppForManagement = selectedAppForManagement?.copy(
+                        isAutoFreeze = isAutoFreeze,
+                        isOneShot = !isAutoFreeze && selectedAppForManagement!!.isOneShot,
+                        isFrozen = isAutoFreeze || selectedAppForManagement!!.isFrozen
                     )
                 },
                 onDismiss = { selectedAppForManagement = null }
@@ -432,6 +441,14 @@ private fun AppListItem(
                         )
                     }
 
+                    if (app.isAutoFreeze) {
+                        BadgeTag(
+                            text = stringResource(R.string.badge_auto_freeze),
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+
                     if (app.isFrozen) {
                         BadgeTag(
                             text = stringResource(R.string.badge_frozen),
@@ -486,6 +503,7 @@ private fun AppManagementSheetContent(
     onManagePermissions: () -> Unit,
     onToggleOneShot: (Boolean) -> Unit,
     onResetOneShot: () -> Unit,
+    onToggleAutoFreeze: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     val canFreeze = state.canFreezeInCurrentProfile
@@ -537,6 +555,14 @@ private fun AppManagementSheetContent(
                     text = stringResource(R.string.badge_one_shot),
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            }
+
+            if (app.isAutoFreeze) {
+                BadgeTag(
+                    text = stringResource(R.string.badge_auto_freeze),
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
 
@@ -710,6 +736,45 @@ private fun AppManagementSheetContent(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.reset_and_freeze_action))
+                    }
+                }
+
+                // Auto-freeze Mode Toggle Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (app.isAutoFreeze) {
+                            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        }
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.auto_freeze_mode_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = stringResource(R.string.auto_freeze_mode_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Switch(
+                            checked = app.isAutoFreeze,
+                            onCheckedChange = { onToggleAutoFreeze(it) }
+                        )
                     }
                 }
             } else {

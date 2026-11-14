@@ -22,4 +22,5 @@ interface WorkProfileContract {
     suspend fun openAppPermissions(packageName: String, appName: String)
     suspend fun toggleOneShot(packageName: String, isOneShot: Boolean): Result<Unit>
     suspend fun resetOneShot(packageName: String): Result<Unit>
+    suspend fun toggleAutoFreeze(packageName: String, isAutoFreeze: Boolean): Result<Unit>
 }

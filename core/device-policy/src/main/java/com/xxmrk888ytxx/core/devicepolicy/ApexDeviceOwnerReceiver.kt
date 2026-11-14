@@ -33,12 +33,12 @@ internal class ApexDeviceOwnerReceiver : DeviceAdminReceiver() {
             Logger.writeDebugLog("onReceive: ACTION_MANAGED_PROFILE_PROVISIONED")
             enableWorkProfile(context)
         } else if (intent.action == Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE || intent.action == Intent.ACTION_SHUTDOWN) {
-            Logger.writeDebugLog("onReceive: ${intent.action}, resetting one-shot apps")
+            Logger.writeDebugLog("onReceive: ${intent.action}, handling triggers")
             scope.launch {
                 try {
-                    deviceOwnerManager.resetOneShotApps()
+                    deviceOwnerManager.handleLifecycleTriggers()
                 } catch (e: Exception) {
-                    Logger.writeErrorLog("Failed to reset one-shot apps on ${intent.action}: ${e.message}")
+                    Logger.writeErrorLog("Failed to handle triggers on ${intent.action}: ${e.message}")
                 }
             }
         }
@@ -68,9 +68,9 @@ internal class ApexDeviceOwnerReceiver : DeviceAdminReceiver() {
         Logger.writeDebugLog("onUserStopped: $stoppedUser")
         scope.launch {
             try {
-                deviceOwnerManager.resetOneShotApps()
+                deviceOwnerManager.handleLifecycleTriggers()
             } catch (e: Exception) {
-                Logger.writeErrorLog("Failed to reset one-shot apps in onUserStopped: ${e.message}")
+                Logger.writeErrorLog("Failed to handle triggers in onUserStopped: ${e.message}")
             }
         }
     }

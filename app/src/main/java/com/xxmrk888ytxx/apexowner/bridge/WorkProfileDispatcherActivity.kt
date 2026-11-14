@@ -175,8 +175,21 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
                     )
                 }
 
+                ACTION_TOGGLE_AUTO_FREEZE -> {
+                    val isAutoFreeze = intent?.getBooleanExtra(EXTRA_IS_AUTO_FREEZE, false) ?: false
+                    oneShotAppManagerOwnerComponent.setAutoFreezeApp(packageName, isAutoFreeze).fold(
+                        onSuccess = {
+                            val msg = if (isAutoFreeze) "Режим автозаморозки включен" else "Режим автозаморозки выключен"
+                            Toast.makeText(this@WorkProfileDispatcherActivity, msg, Toast.LENGTH_SHORT).show()
+                        },
+                        onFailure = {
+                            Toast.makeText(this@WorkProfileDispatcherActivity, "Ошибка: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+
                 ACTION_LAUNCH_APP -> {
-                    if (oneShotAppManagerOwnerComponent.isOneShotApp(packageName)) {
+                    if (oneShotAppManagerOwnerComponent.isOneShotApp(packageName) || oneShotAppManagerOwnerComponent.isAutoFreezeApp(packageName)) {
                         oneShotAppManagerOwnerComponent.launchOneShotApp(packageName)
                     } else {
                         if (profileOwnerManager.isApplicationHidden(packageName)) {
@@ -270,9 +283,11 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
         const val ACTION_INSTALL_CALLBACK = "com.xxmrk888ytxx.apexowner.ACTION_INSTALL_CALLBACK"
         const val ACTION_TOGGLE_ONE_SHOT = "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_ONE_SHOT"
         const val ACTION_RESET_ONE_SHOT = "com.xxmrk888ytxx.apexowner.ACTION_RESET_ONE_SHOT"
+        const val ACTION_TOGGLE_AUTO_FREEZE = "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_AUTO_FREEZE"
         const val ACTION_LAUNCH_APP = "com.xxmrk888ytxx.apexowner.ACTION_LAUNCH_APP"
         const val EXTRA_PACKAGE_NAME = "EXTRA_PACKAGE_NAME"
         const val EXTRA_IS_ONE_SHOT = "EXTRA_IS_ONE_SHOT"
+        const val EXTRA_IS_AUTO_FREEZE = "EXTRA_IS_AUTO_FREEZE"
         const val EXTRA_APK_PATH = "EXTRA_APK_PATH"
         const val EXTRA_SPLIT_PATHS = "EXTRA_SPLIT_PATHS"
     }

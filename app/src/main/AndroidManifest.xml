@@ -70,6 +70,7 @@
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_INSTALL_CALLBACK" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_ONE_SHOT" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_RESET_ONE_SHOT" />
+                <action android:name="com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_AUTO_FREEZE" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_LAUNCH_APP" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

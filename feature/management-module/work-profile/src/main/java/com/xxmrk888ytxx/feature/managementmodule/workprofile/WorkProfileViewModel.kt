@@ -85,6 +85,7 @@ class WorkProfileViewModel @Inject constructor(
             }
             is WorkProfileUiEvent.OnToggleOneShot -> toggleOneShot(event.packageName, event.isOneShot)
             is WorkProfileUiEvent.OnResetOneShot -> resetOneShot(event.packageName)
+            is WorkProfileUiEvent.OnToggleAutoFreeze -> toggleAutoFreeze(event.packageName, event.isAutoFreeze)
         }
     }
 
@@ -112,6 +113,25 @@ class WorkProfileViewModel @Inject constructor(
                     sendToastSideEffect(
                         if (isOneShot) R.string.one_shot_enabled.uiText()
                         else R.string.one_shot_disabled.uiText()
+                    )
+                    contract.refresh()
+                },
+                onFailure = {
+                    sendToastSideEffect(R.string.app_action_failed.uiText())
+                }
+            )
+            isLoading.value = false
+        }
+    }
+
+    private fun toggleAutoFreeze(packageName: String, isAutoFreeze: Boolean) {
+        viewModelScope.launch {
+            isLoading.value = true
+            contract.toggleAutoFreeze(packageName, isAutoFreeze).fold(
+                onSuccess = {
+                    sendToastSideEffect(
+                        if (isAutoFreeze) R.string.auto_freeze_enabled.uiText()
+                        else R.string.auto_freeze_disabled.uiText()
                     )
                     contract.refresh()
                 },

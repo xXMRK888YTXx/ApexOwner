@@ -30,10 +30,10 @@ class DeviceOwnerStateProviderContractImpl @Inject constructor(
     override suspend fun setWorkProfileQuietMode(isQuietMode: Boolean): Result<Unit> {
         if (isQuietMode) {
             try {
-                Logger.writeDebugLog("DeviceOwnerStateProviderContractImpl: resetting one-shot apps before quiet mode")
-                deviceOwnerManager.resetOneShotApps()
+                Logger.writeDebugLog("DeviceOwnerStateProviderContractImpl: handling triggers before quiet mode")
+                deviceOwnerManager.handleLifecycleTriggers()
             } catch (e: Exception) {
-                Logger.writeErrorLog("Failed to reset one-shot apps before quiet mode: ${e.message}")
+                Logger.writeErrorLog("Failed to handle triggers before quiet mode: ${e.message}")
             }
         }
         return deviceOwnerManager.setWorkProfileQuietMode(isQuietMode)

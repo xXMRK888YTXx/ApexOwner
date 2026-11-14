@@ -16,4 +16,5 @@ sealed interface WorkProfileUiEvent : UiEvent {
     data class OnManagePermissions(val packageName: String, val appName: String) : WorkProfileUiEvent
     data class OnToggleOneShot(val packageName: String, val isOneShot: Boolean) : WorkProfileUiEvent
     data class OnResetOneShot(val packageName: String) : WorkProfileUiEvent
+    data class OnToggleAutoFreeze(val packageName: String, val isAutoFreeze: Boolean) : WorkProfileUiEvent
 }
