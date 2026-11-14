@@ -9,5 +9,6 @@ data class WorkProfileApp(
     val hasLauncher: Boolean = true,
     val isInstalledInOtherProfile: Boolean = false,
     val isOneShot: Boolean = false,
-    val isAutoFreeze: Boolean = false
+    val isAutoFreeze: Boolean = false,
+    val inactivityPolicy: AppInactivityPolicy? = null
 )

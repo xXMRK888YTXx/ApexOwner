@@ -8,6 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +20,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -27,6 +32,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +47,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +61,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -64,11 +72,17 @@ import com.xxmrk888ytxx.core.base.android.mvi.SideEffect
 import com.xxmrk888ytxx.core.base.compose.LocalNavigator
 import com.xxmrk888ytxx.core.base.compose.extension.HandleSideEffects
 import com.xxmrk888ytxx.core.base.compose.ui.CoreTopBar
+import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.AppInactivityPolicy
+import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.LockInactivityAction
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileApp
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileScreenState
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileSideEffect
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileUiEvent
 import kotlinx.coroutines.flow.Flow
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -186,6 +200,12 @@ fun WorkProfileScreen(
                         isAutoFreeze = isAutoFreeze,
                         isOneShot = !isAutoFreeze && selectedAppForManagement!!.isOneShot,
                         isFrozen = isAutoFreeze || selectedAppForManagement!!.isFrozen
+                    )
+                },
+                onUpdateInactivityPolicy = { policy ->
+                    onEvent(WorkProfileUiEvent.OnUpdateInactivityPolicy(policy))
+                    selectedAppForManagement = selectedAppForManagement?.copy(
+                        inactivityPolicy = policy
                     )
                 },
                 onDismiss = { selectedAppForManagement = null }
@@ -421,9 +441,10 @@ private fun AppListItem(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Row(
+                FlowRow(
                     modifier = Modifier.padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     if (app.isSystem) {
                         BadgeTag(
@@ -474,6 +495,29 @@ private fun AppListItem(
                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     }
+
+                    app.inactivityPolicy?.let { policy ->
+                        if (policy.lockAction == LockInactivityAction.FREEZE_ONLY) {
+                            BadgeTag(
+                                text = stringResource(R.string.badge_lock_freeze, policy.lockFreezeHours),
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        } else if (policy.lockAction == LockInactivityAction.FREEZE_AND_WIPE) {
+                            BadgeTag(
+                                text = stringResource(R.string.badge_lock_wipe, policy.lockFreezeHours, policy.lockWipeHours),
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                        if (policy.wipeIfUnusedEnabled) {
+                            BadgeTag(
+                                text = stringResource(R.string.badge_unused_wipe, policy.wipeIfUnusedDays),
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                    }
                 }
             }
 
@@ -504,6 +548,7 @@ private fun AppManagementSheetContent(
     onToggleOneShot: (Boolean) -> Unit,
     onResetOneShot: () -> Unit,
     onToggleAutoFreeze: (Boolean) -> Unit,
+    onUpdateInactivityPolicy: (AppInactivityPolicy) -> Unit,
     onDismiss: () -> Unit
 ) {
     val canFreeze = state.canFreezeInCurrentProfile
@@ -511,6 +556,7 @@ private fun AppManagementSheetContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
             .padding(bottom = 36.dp, top = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -540,9 +586,10 @@ private fun AppManagementSheetContent(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Row(
+        FlowRow(
+            modifier = Modifier.padding(top = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             BadgeTag(
                 text = if (app.isSystem) stringResource(R.string.badge_system) else stringResource(R.string.badge_user),
@@ -590,6 +637,29 @@ private fun AppManagementSheetContent(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                 )
+            }
+
+            app.inactivityPolicy?.let { policy ->
+                if (policy.lockAction == LockInactivityAction.FREEZE_ONLY) {
+                    BadgeTag(
+                        text = stringResource(R.string.badge_lock_freeze, policy.lockFreezeHours),
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                } else if (policy.lockAction == LockInactivityAction.FREEZE_AND_WIPE) {
+                    BadgeTag(
+                        text = stringResource(R.string.badge_lock_wipe, policy.lockFreezeHours, policy.lockWipeHours),
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+                if (policy.wipeIfUnusedEnabled) {
+                    BadgeTag(
+                        text = stringResource(R.string.badge_unused_wipe, policy.wipeIfUnusedDays),
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
             }
         }
 
@@ -777,6 +847,18 @@ private fun AppManagementSheetContent(
                         )
                     }
                 }
+
+                // Lock Inactivity Policy Card
+                LockInactivityPolicyCard(
+                    app = app,
+                    onUpdateInactivityPolicy = onUpdateInactivityPolicy
+                )
+
+                // App Unused Wipe Policy Card
+                AppUnusedPolicyCard(
+                    app = app,
+                    onUpdateInactivityPolicy = onUpdateInactivityPolicy
+                )
             } else {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -827,7 +909,9 @@ private fun BadgeTag(
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
-            color = contentColor
+            color = contentColor,
+            maxLines = 1,
+            softWrap = false
         )
     }
 }
@@ -867,6 +951,555 @@ private fun AppIconImage(
                 MaterialTheme.colorScheme.surfaceContainerHighest,
                 RoundedCornerShape(8.dp)
             )
+        )
+    }
+}
+
+@Composable
+private fun LockInactivityPolicyCard(
+    app: WorkProfileApp,
+    onUpdateInactivityPolicy: (AppInactivityPolicy) -> Unit
+) {
+    val currentPolicy = app.inactivityPolicy ?: remember(app.packageName) {
+        AppInactivityPolicy(
+            packageName = app.packageName,
+            lockAction = LockInactivityAction.NONE,
+            lockFreezeHours = 12,
+            lockWipeHours = 12,
+            wipeIfUnusedEnabled = false,
+            wipeIfUnusedDays = 30
+        )
+    }
+
+    val isEnabled = currentPolicy.lockAction != LockInactivityAction.NONE
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isEnabled) {
+                MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            }
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.lock_inactivity_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = when (currentPolicy.lockAction) {
+                            LockInactivityAction.NONE -> stringResource(R.string.lock_action_none_desc)
+                            LockInactivityAction.FREEZE_ONLY -> stringResource(R.string.lock_freeze_summary, currentPolicy.lockFreezeHours)
+                            LockInactivityAction.FREEZE_AND_WIPE -> stringResource(R.string.lock_wipe_summary, currentPolicy.lockFreezeHours, currentPolicy.lockWipeHours)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Switch(
+                    checked = isEnabled,
+                    onCheckedChange = { checked ->
+                        val newAction = if (checked) LockInactivityAction.FREEZE_ONLY else LockInactivityAction.NONE
+                        onUpdateInactivityPolicy(currentPolicy.copy(lockAction = newAction))
+                    }
+                )
+            }
+
+            if (isEnabled) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = currentPolicy.lockAction == LockInactivityAction.FREEZE_ONLY,
+                        onClick = {
+                            onUpdateInactivityPolicy(currentPolicy.copy(lockAction = LockInactivityAction.FREEZE_ONLY))
+                        },
+                        label = { Text(stringResource(R.string.lock_chip_freeze_only)) }
+                    )
+
+                    FilterChip(
+                        selected = currentPolicy.lockAction == LockInactivityAction.FREEZE_AND_WIPE,
+                        onClick = {
+                            val freezeH = if (currentPolicy.lockFreezeHours == 12) 6 else currentPolicy.lockFreezeHours
+                            onUpdateInactivityPolicy(
+                                currentPolicy.copy(
+                                    lockAction = LockInactivityAction.FREEZE_AND_WIPE,
+                                    lockFreezeHours = freezeH,
+                                    lockWipeHours = 12
+                                )
+                            )
+                        },
+                        label = { Text(stringResource(R.string.lock_chip_freeze_wipe)) }
+                    )
+                }
+
+                if (currentPolicy.lockAction == LockInactivityAction.FREEZE_ONLY) {
+                    SettingStepperRow(
+                        label = stringResource(R.string.hours_without_unlock_label),
+                        value = currentPolicy.lockFreezeHours,
+                        unit = "ч",
+                        minValue = 1,
+                        maxValue = 168,
+                        onValueChange = { hours ->
+                            onUpdateInactivityPolicy(currentPolicy.copy(lockFreezeHours = hours))
+                        }
+                    )
+                } else if (currentPolicy.lockAction == LockInactivityAction.FREEZE_AND_WIPE) {
+                    SettingStepperRow(
+                        label = stringResource(R.string.hours_to_freeze_label),
+                        value = currentPolicy.lockFreezeHours,
+                        unit = "ч",
+                        minValue = 1,
+                        maxValue = currentPolicy.lockWipeHours,
+                        onValueChange = { hours ->
+                            onUpdateInactivityPolicy(currentPolicy.copy(lockFreezeHours = hours))
+                        }
+                    )
+                    SettingStepperRow(
+                        label = stringResource(R.string.hours_to_wipe_label),
+                        value = currentPolicy.lockWipeHours,
+                        unit = "ч",
+                        minValue = currentPolicy.lockFreezeHours,
+                        maxValue = 168,
+                        onValueChange = { hours ->
+                            onUpdateInactivityPolicy(currentPolicy.copy(lockWipeHours = hours))
+                        }
+                    )
+                }
+
+                // Информационная панель с точным расчётным временем
+                Card(
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f)
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = "Время срабатывания при блокировке экрана:",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "❄️ Заморозка:",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = formatEstimatedLockTime(currentPolicy.lockFreezeHours),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        if (currentPolicy.lockAction == LockInactivityAction.FREEZE_AND_WIPE) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "🗑️ Сброс данных:",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = formatEstimatedLockTime(currentPolicy.lockWipeHours),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = "Отсчёт начнётся при выключении экрана. При разблокировке телефона таймер сбрасывается.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AppUnusedPolicyCard(
+    app: WorkProfileApp,
+    onUpdateInactivityPolicy: (AppInactivityPolicy) -> Unit
+) {
+    val currentPolicy = app.inactivityPolicy ?: remember(app.packageName) {
+        AppInactivityPolicy(
+            packageName = app.packageName,
+            lockAction = LockInactivityAction.NONE,
+            lockFreezeHours = 12,
+            lockWipeHours = 12,
+            wipeIfUnusedEnabled = false,
+            wipeIfUnusedDays = 30
+        )
+    }
+
+    val isEnabled = currentPolicy.wipeIfUnusedEnabled
+
+    LaunchedEffect(isEnabled, currentPolicy.lastOpenedTimestamp) {
+        if (isEnabled && currentPolicy.lastOpenedTimestamp == 0L) {
+            onUpdateInactivityPolicy(currentPolicy.copy(lastOpenedTimestamp = System.currentTimeMillis()))
+        }
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isEnabled) {
+                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            }
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.app_unused_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = if (isEnabled) {
+                            stringResource(R.string.app_unused_enabled_desc, currentPolicy.wipeIfUnusedDays)
+                        } else {
+                            stringResource(R.string.app_unused_disabled_desc)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Switch(
+                    checked = isEnabled,
+                    onCheckedChange = { checked ->
+                        val updated = currentPolicy.copy(
+                            wipeIfUnusedEnabled = checked,
+                            lastOpenedTimestamp = if (checked && currentPolicy.lastOpenedTimestamp == 0L) {
+                                System.currentTimeMillis()
+                            } else {
+                                currentPolicy.lastOpenedTimestamp
+                            }
+                        )
+                        onUpdateInactivityPolicy(updated)
+                    }
+                )
+            }
+
+            if (isEnabled) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+                SettingStepperRow(
+                    label = stringResource(R.string.days_unused_label),
+                    value = currentPolicy.wipeIfUnusedDays,
+                    unit = "дн",
+                    minValue = 1,
+                    maxValue = 365,
+                    onValueChange = { days ->
+                        onUpdateInactivityPolicy(currentPolicy.copy(wipeIfUnusedDays = days))
+                    }
+                )
+
+                val baseTimestamp = if (currentPolicy.lastOpenedTimestamp > 0L) {
+                    currentPolicy.lastOpenedTimestamp
+                } else {
+                    remember { System.currentTimeMillis() }
+                }
+                val wipeTimestamp = baseTimestamp + (currentPolicy.wipeIfUnusedDays * 86400_000L)
+                val now = System.currentTimeMillis()
+                val diffMs = wipeTimestamp - now
+
+                val remainingText = if (diffMs > 0) {
+                    val days = diffMs / 86400_000L
+                    val hours = (diffMs % 86400_000L) / 3600_000L
+                    if (days > 0) "$days дн. $hours ч" else "$hours ч"
+                } else {
+                    "Срок истёк (очистится при проверке)"
+                }
+
+                Card(
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f)
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = "Точное расписание очистки данных:",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "🗑️ Дата и время сброса:",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = formatTargetDateTime(wipeTimestamp),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "⏳ До сброса данных:",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = remainingText,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Отсчёт с: ${formatTargetDateTime(baseTimestamp)}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = "Обновляется при каждом запуске приложения",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                )
+                            }
+                            TextButton(
+                                onClick = {
+                                    onUpdateInactivityPolicy(
+                                        currentPolicy.copy(lastOpenedTimestamp = System.currentTimeMillis())
+                                    )
+                                },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "Сбросить отсчёт",
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun formatTargetDateTime(timestampMs: Long): String {
+    val sdf = SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault())
+    return sdf.format(Date(timestampMs))
+}
+
+private fun formatEstimatedLockTime(offsetHours: Int): String {
+    val targetMs = System.currentTimeMillis() + (offsetHours * 3600_000L)
+    val targetCal = Calendar.getInstance().apply { timeInMillis = targetMs }
+    val nowCal = Calendar.getInstance()
+
+    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    val formattedTime = timeFormat.format(targetCal.time)
+
+    val isToday = targetCal.get(Calendar.DAY_OF_YEAR) == nowCal.get(Calendar.DAY_OF_YEAR) &&
+            targetCal.get(Calendar.YEAR) == nowCal.get(Calendar.YEAR)
+    val isTomorrow = (targetCal.get(Calendar.DAY_OF_YEAR) == nowCal.get(Calendar.DAY_OF_YEAR) + 1 ||
+            (nowCal.get(Calendar.DAY_OF_YEAR) == nowCal.getActualMaximum(Calendar.DAY_OF_YEAR) && targetCal.get(Calendar.DAY_OF_YEAR) == 1)) &&
+            targetCal.get(Calendar.YEAR) >= nowCal.get(Calendar.YEAR)
+
+    val dayPrefix = when {
+        isToday -> "сегодня в"
+        isTomorrow -> "завтра в"
+        else -> SimpleDateFormat("d MMM в", Locale.getDefault()).format(targetCal.time)
+    }
+
+    return "через $offsetHours ч ($dayPrefix $formattedTime)"
+}
+
+@Composable
+private fun SettingStepperRow(
+    label: String,
+    value: Int,
+    unit: String,
+    minValue: Int = 1,
+    maxValue: Int = 365,
+    onValueChange: (Int) -> Unit
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            modifier = Modifier
+                .background(
+                    MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.7f),
+                    RoundedCornerShape(8.dp)
+                )
+                .padding(horizontal = 4.dp, vertical = 2.dp)
+        ) {
+            IconButton(
+                onClick = { if (value > minValue) onValueChange(value - 1) },
+                enabled = value > minValue,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Text(
+                    text = "−",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = if (value > minValue) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .clickable { showDialog = true }
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "$value $unit",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            IconButton(
+                onClick = { if (value < maxValue) onValueChange(value + 1) },
+                enabled = value < maxValue,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Text(
+                    text = "+",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = if (value < maxValue) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                )
+            }
+        }
+    }
+
+    if (showDialog) {
+        var textInput by remember { mutableStateOf(value.toString()) }
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(label) },
+            text = {
+                OutlinedTextField(
+                    value = textInput,
+                    onValueChange = { input ->
+                        textInput = input.filter { it.isDigit() }.take(4)
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    suffix = { Text(unit) }
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val num = textInput.toIntOrNull()
+                        if (num != null) {
+                            onValueChange(num.coerceIn(minValue, maxValue))
+                        }
+                        showDialog = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
         )
     }
 }

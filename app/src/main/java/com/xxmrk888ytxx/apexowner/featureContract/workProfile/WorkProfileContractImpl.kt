@@ -207,6 +207,7 @@ class WorkProfileContractImpl @Inject constructor(
             if (profileOwnerManager.isInsideWorkProfile && profileOwnerManager.isApplicationHidden(packageName)) {
                 profileOwnerManager.setApplicationHidden(packageName, false)
             }
+            oneShotAppManagerOwnerComponent.recordAppOpened(packageName)
             val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
             if (launchIntent != null) {
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -292,6 +293,19 @@ class WorkProfileContractImpl @Inject constructor(
                     ).isNotEmpty()
                 }
 
+                val policyCore = oneShotAppManagerOwnerComponent.getInactivityPolicy(pkg)
+                val policyUi = policyCore?.let {
+                    com.xxmrk888ytxx.feature.managementmodule.workprofile.model.AppInactivityPolicy(
+                        packageName = it.packageName,
+                        lockAction = com.xxmrk888ytxx.feature.managementmodule.workprofile.model.LockInactivityAction.valueOf(it.lockAction.name),
+                        lockFreezeHours = it.lockFreezeHours,
+                        lockWipeHours = it.lockWipeHours,
+                        wipeIfUnusedEnabled = it.wipeIfUnusedEnabled,
+                        wipeIfUnusedDays = it.wipeIfUnusedDays,
+                        lastOpenedTimestamp = it.lastOpenedTimestamp
+                    )
+                }
+
                 WorkProfileApp(
                     packageName = pkg,
                     name = appInfo.loadLabel(packageManager).toString(),
@@ -301,7 +315,8 @@ class WorkProfileContractImpl @Inject constructor(
                     hasLauncher = hasLauncher,
                     isInstalledInOtherProfile = false,
                     isOneShot = oneShotAppManagerOwnerComponent.isOneShotApp(pkg),
-                    isAutoFreeze = oneShotAppManagerOwnerComponent.isAutoFreezeApp(pkg)
+                    isAutoFreeze = oneShotAppManagerOwnerComponent.isAutoFreezeApp(pkg),
+                    inactivityPolicy = policyUi
                 )
             }
             .sortedBy { it.name.lowercase() }
@@ -330,6 +345,19 @@ class WorkProfileContractImpl @Inject constructor(
                     false
                 }
 
+                val policyCore = oneShotAppManagerOwnerComponent.getInactivityPolicy(pkg)
+                val policyUi = policyCore?.let {
+                    com.xxmrk888ytxx.feature.managementmodule.workprofile.model.AppInactivityPolicy(
+                        packageName = it.packageName,
+                        lockAction = com.xxmrk888ytxx.feature.managementmodule.workprofile.model.LockInactivityAction.valueOf(it.lockAction.name),
+                        lockFreezeHours = it.lockFreezeHours,
+                        lockWipeHours = it.lockWipeHours,
+                        wipeIfUnusedEnabled = it.wipeIfUnusedEnabled,
+                        wipeIfUnusedDays = it.wipeIfUnusedDays,
+                        lastOpenedTimestamp = it.lastOpenedTimestamp
+                    )
+                }
+
                 WorkProfileApp(
                     packageName = pkg,
                     name = appInfo.loadLabel(packageManager).toString(),
@@ -339,7 +367,8 @@ class WorkProfileContractImpl @Inject constructor(
                     hasLauncher = hasLauncher,
                     isInstalledInOtherProfile = isInstalledInWork,
                     isOneShot = oneShotAppManagerOwnerComponent.isOneShotApp(pkg),
-                    isAutoFreeze = oneShotAppManagerOwnerComponent.isAutoFreezeApp(pkg)
+                    isAutoFreeze = oneShotAppManagerOwnerComponent.isAutoFreezeApp(pkg),
+                    inactivityPolicy = policyUi
                 )
             }
             .sortedBy { it.name.lowercase() }
@@ -428,4 +457,42 @@ class WorkProfileContractImpl @Inject constructor(
                 }
             }
         }
+
+    override suspend fun setInactivityPolicy(
+        policy: com.xxmrk888ytxx.feature.managementmodule.workprofile.model.AppInactivityPolicy
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        val corePolicy = com.xxmrk888ytxx.core.devicepolicy.model.AppInactivityPolicy(
+            packageName = policy.packageName,
+            lockAction = com.xxmrk888ytxx.core.devicepolicy.model.LockInactivityAction.valueOf(policy.lockAction.name),
+            lockFreezeHours = policy.lockFreezeHours,
+            lockWipeHours = policy.lockWipeHours,
+            wipeIfUnusedEnabled = policy.wipeIfUnusedEnabled,
+            wipeIfUnusedDays = policy.wipeIfUnusedDays,
+            lastOpenedTimestamp = policy.lastOpenedTimestamp
+        )
+
+        if (profileOwnerManager.isInsideWorkProfile || profileOwnerManager.isAppDeviceOwner) {
+            val result = oneShotAppManagerOwnerComponent.setInactivityPolicy(corePolicy)
+            if (result.isSuccess) {
+                refresh()
+            }
+            result
+        } else {
+            try {
+                val intent = Intent(WorkProfileDispatcherActivity.ACTION_SET_INACTIVITY_POLICY).apply {
+                    addCategory(Intent.CATEGORY_DEFAULT)
+                    putExtra(WorkProfileDispatcherActivity.EXTRA_PACKAGE_NAME, policy.packageName)
+                    putExtra(WorkProfileDispatcherActivity.EXTRA_POLICY_JSON, corePolicy.toJson())
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+                delay(500)
+                refresh()
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Logger.writeErrorLog("Failed to dispatch set inactivity policy intent: ${e.message}")
+                Result.failure(e)
+            }
+        }
+    }
 }

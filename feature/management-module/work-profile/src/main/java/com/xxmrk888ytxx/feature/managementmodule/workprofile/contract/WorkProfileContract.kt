@@ -23,4 +23,5 @@ interface WorkProfileContract {
     suspend fun toggleOneShot(packageName: String, isOneShot: Boolean): Result<Unit>
     suspend fun resetOneShot(packageName: String): Result<Unit>
     suspend fun toggleAutoFreeze(packageName: String, isAutoFreeze: Boolean): Result<Unit>
+    suspend fun setInactivityPolicy(policy: com.xxmrk888ytxx.feature.managementmodule.workprofile.model.AppInactivityPolicy): Result<Unit>
 }

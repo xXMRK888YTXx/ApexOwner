@@ -166,6 +166,22 @@ class ApexBridgeProvider : ContentProvider() {
                     response.putString(EXTRA_ERROR, e.message)
                 }
             }
+            METHOD_GET_APP_POLICIES -> {
+                try {
+                    val oneShotManager = entryPoint.oneShotAppManagerOwnerComponent()
+                    val policies = runBlocking { oneShotManager.appInactivityPolicies.first() }
+                    val policyJsonList = ArrayList<String>()
+                    for ((_, policy) in policies) {
+                        policyJsonList.add(policy.toJson())
+                    }
+                    response.putStringArrayList(EXTRA_POLICIES, policyJsonList)
+                    response.putBoolean(EXTRA_SUCCESS, true)
+                } catch (e: Exception) {
+                    Logger.writeErrorLog("ApexBridgeProvider: failed to get app policies: ${e.message}")
+                    response.putBoolean(EXTRA_SUCCESS, false)
+                    response.putString(EXTRA_ERROR, e.message)
+                }
+            }
         }
         return response
     }
@@ -186,12 +202,14 @@ class ApexBridgeProvider : ContentProvider() {
         const val METHOD_REMOVE_WORK_PROFILE = "removeWorkProfile"
         const val METHOD_GET_ONE_SHOT_APPS = "getOneShotApps"
         const val METHOD_LAUNCH_ONE_SHOT_APP = "launchOneShotApp"
+        const val METHOD_GET_APP_POLICIES = "getAppPolicies"
         const val METHOD_PING = "ping"
         const val EXTRA_SUCCESS = "extra_success"
         const val EXTRA_ERROR = "extra_error"
         const val EXTRA_APPS = "extra_apps"
         const val EXTRA_ONE_SHOT_PACKAGES = "EXTRA_ONE_SHOT_PACKAGES"
         const val EXTRA_AUTO_FREEZE_PACKAGES = "EXTRA_AUTO_FREEZE_PACKAGES"
+        const val EXTRA_POLICIES = "EXTRA_POLICIES"
         const val EXTRA_APK_PATH = "EXTRA_APK_PATH"
         const val EXTRA_SPLIT_PATHS = "EXTRA_SPLIT_PATHS"
     }

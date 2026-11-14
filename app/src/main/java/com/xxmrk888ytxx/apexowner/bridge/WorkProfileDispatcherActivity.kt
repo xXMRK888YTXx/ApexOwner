@@ -188,7 +188,25 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
                     )
                 }
 
+                ACTION_SET_INACTIVITY_POLICY -> {
+                    val json = intent?.getStringExtra(EXTRA_POLICY_JSON)
+                    if (json != null) {
+                        val policy = com.xxmrk888ytxx.core.devicepolicy.model.AppInactivityPolicy.fromJson(json)
+                        if (policy != null) {
+                            oneShotAppManagerOwnerComponent.setInactivityPolicy(policy).fold(
+                                onSuccess = {
+                                    Toast.makeText(this@WorkProfileDispatcherActivity, "Тайм-аут сохранен", Toast.LENGTH_SHORT).show()
+                                },
+                                onFailure = {
+                                    Toast.makeText(this@WorkProfileDispatcherActivity, "Ошибка: ${it.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        }
+                    }
+                }
+
                 ACTION_LAUNCH_APP -> {
+                    oneShotAppManagerOwnerComponent.recordAppOpened(packageName)
                     if (oneShotAppManagerOwnerComponent.isOneShotApp(packageName) || oneShotAppManagerOwnerComponent.isAutoFreezeApp(packageName)) {
                         oneShotAppManagerOwnerComponent.launchOneShotApp(packageName)
                     } else {
@@ -284,8 +302,10 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
         const val ACTION_TOGGLE_ONE_SHOT = "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_ONE_SHOT"
         const val ACTION_RESET_ONE_SHOT = "com.xxmrk888ytxx.apexowner.ACTION_RESET_ONE_SHOT"
         const val ACTION_TOGGLE_AUTO_FREEZE = "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_AUTO_FREEZE"
+        const val ACTION_SET_INACTIVITY_POLICY = "com.xxmrk888ytxx.apexowner.ACTION_SET_INACTIVITY_POLICY"
         const val ACTION_LAUNCH_APP = "com.xxmrk888ytxx.apexowner.ACTION_LAUNCH_APP"
         const val EXTRA_PACKAGE_NAME = "EXTRA_PACKAGE_NAME"
+        const val EXTRA_POLICY_JSON = "EXTRA_POLICY_JSON"
         const val EXTRA_IS_ONE_SHOT = "EXTRA_IS_ONE_SHOT"
         const val EXTRA_IS_AUTO_FREEZE = "EXTRA_IS_AUTO_FREEZE"
         const val EXTRA_APK_PATH = "EXTRA_APK_PATH"

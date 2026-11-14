@@ -47,4 +47,21 @@
     <string name="auto_freeze_enabled">Автозаморозка включена, приложение заморожено</string>
     <string name="auto_freeze_disabled">Автозаморозка выключена</string>
     <string name="cancel">Отмена</string>
+    <string name="inactivity_policy_saved">Тайм-аут сохранен</string>
+    <string name="lock_inactivity_title">Блокировка экрана</string>
+    <string name="lock_action_none_desc">Действия при блокировке отключены</string>
+    <string name="lock_freeze_summary">Заморозка через %1$d ч без разблокировки</string>
+    <string name="lock_wipe_summary">Заморозка через %1$d ч, сброс через %2$d ч</string>
+    <string name="lock_chip_freeze_only">Только заморозка</string>
+    <string name="lock_chip_freeze_wipe">Заморозка и сброс</string>
+    <string name="hours_without_unlock_label">Без разблокировки:</string>
+    <string name="hours_to_freeze_label">Заморозка через:</string>
+    <string name="hours_to_wipe_label">Сброс данных через:</string>
+    <string name="app_unused_title">Сброс при неиспользовании</string>
+    <string name="app_unused_enabled_desc">Очистка данных, если не открывалось %1$d дн.</string>
+    <string name="app_unused_disabled_desc">Очистка данных при неиспользовании отключена</string>
+    <string name="days_unused_label">Срок неактивности:</string>
+    <string name="badge_lock_freeze">⏱ %1$d ч</string>
+    <string name="badge_lock_wipe">⏱ %1$d/%2$d ч</string>
+    <string name="badge_unused_wipe">⏳ %1$d дн</string>
 </resources>

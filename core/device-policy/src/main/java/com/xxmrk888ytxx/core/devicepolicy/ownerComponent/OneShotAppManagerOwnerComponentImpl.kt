@@ -7,6 +7,8 @@ import androidx.core.content.ContextCompat
 import com.xxmrk888ytxx.core.base.android.logs.Logger
 import com.xxmrk888ytxx.core.devicepolicy.OneShotAppManagerOwnerComponent
 import com.xxmrk888ytxx.core.devicepolicy.exception.AppNotProfileOwnerException
+import com.xxmrk888ytxx.core.devicepolicy.model.AppInactivityPolicy
+import com.xxmrk888ytxx.core.devicepolicy.model.LockInactivityAction
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -16,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import org.json.JSONObject
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,9 +41,15 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
     private val _autoFreezeAppPackages = MutableStateFlow<Set<String>>(emptySet())
     override val autoFreezeAppPackages: Flow<Set<String>> = _autoFreezeAppPackages.asStateFlow()
 
+    private val _appInactivityPolicies = MutableStateFlow<Map<String, AppInactivityPolicy>>(emptyMap())
+    override val appInactivityPolicies: Flow<Map<String, AppInactivityPolicy>> = _appInactivityPolicies.asStateFlow()
+
+    private val wipedPackagesInCurrentLockSession = ConcurrentHashMap.newKeySet<String>()
+
     init {
         _oneShotAppPackages.value = getStoredOneShotPackages()
         _autoFreezeAppPackages.value = getStoredAutoFreezePackages()
+        _appInactivityPolicies.value = getStoredInactivityPolicies()
     }
 
     private fun getStoredOneShotPackages(): Set<String> {
@@ -50,12 +60,100 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
         return prefs.getStringSet(KEY_AUTO_FREEZE_PACKAGES, emptySet())?.toSet() ?: emptySet()
     }
 
+    private fun getStoredInactivityPolicies(): Map<String, AppInactivityPolicy> {
+        val jsonStr = prefs.getString(KEY_INACTIVITY_POLICIES, null) ?: return emptyMap()
+        val result = mutableMapOf<String, AppInactivityPolicy>()
+        return try {
+            val root = JSONObject(jsonStr)
+            val keys = root.keys()
+            while (keys.hasNext()) {
+                val pkg = keys.next()
+                val policyJson = root.optString(pkg, "")
+                if (policyJson.isNotEmpty()) {
+                    val policy = AppInactivityPolicy.fromJson(policyJson)
+                    if (policy != null) {
+                        result[pkg] = policy
+                    }
+                }
+            }
+            result
+        } catch (e: Exception) {
+            Logger.writeErrorLog("Failed to parse stored inactivity policies: ${e.message}")
+            emptyMap()
+        }
+    }
+
+    private fun saveInactivityPolicies(map: Map<String, AppInactivityPolicy>) {
+        try {
+            val root = JSONObject()
+            for ((pkg, policy) in map) {
+                root.put(pkg, policy.toJson())
+            }
+            prefs.edit().putString(KEY_INACTIVITY_POLICIES, root.toString()).apply()
+            _appInactivityPolicies.value = map
+        } catch (e: Exception) {
+            Logger.writeErrorLog("Failed to save inactivity policies: ${e.message}")
+        }
+    }
+
     override fun isOneShotApp(packageName: String): Boolean {
         return _oneShotAppPackages.value.contains(packageName)
     }
 
     override fun isAutoFreezeApp(packageName: String): Boolean {
         return _autoFreezeAppPackages.value.contains(packageName)
+    }
+
+    override fun getInactivityPolicy(packageName: String): AppInactivityPolicy? {
+        return _appInactivityPolicies.value[packageName]
+    }
+
+    override suspend fun setInactivityPolicy(policy: AppInactivityPolicy): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val currentMap = _appInactivityPolicies.value.toMutableMap()
+            val effectivePolicy = if (policy.wipeIfUnusedEnabled && policy.lastOpenedTimestamp == 0L) {
+                policy.copy(lastOpenedTimestamp = System.currentTimeMillis())
+            } else {
+                policy
+            }
+
+            if (effectivePolicy.isConfigured) {
+                currentMap[policy.packageName] = effectivePolicy
+            } else {
+                currentMap.remove(policy.packageName)
+            }
+            saveInactivityPolicies(currentMap)
+            Logger.writeDebugLog("setInactivityPolicy for ${policy.packageName}: lockAction=${effectivePolicy.lockAction}, lockFreezeHours=${effectivePolicy.lockFreezeHours}, lockWipeHours=${effectivePolicy.lockWipeHours}, wipeUnused=${effectivePolicy.wipeIfUnusedEnabled}, wipeDays=${effectivePolicy.wipeIfUnusedDays}")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Logger.writeErrorLog("setInactivityPolicy failed for ${policy.packageName}: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun recordAppOpened(packageName: String): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val currentMap = _appInactivityPolicies.value.toMutableMap()
+            val existing = currentMap[packageName]
+            if (existing != null) {
+                val updated = existing.copy(lastOpenedTimestamp = System.currentTimeMillis())
+                currentMap[packageName] = updated
+                saveInactivityPolicies(currentMap)
+                Logger.writeDebugLog("recordAppOpened: updated lastOpenedTimestamp for $packageName")
+            } else {
+                val newPolicy = AppInactivityPolicy(
+                    packageName = packageName,
+                    lastOpenedTimestamp = System.currentTimeMillis()
+                )
+                currentMap[packageName] = newPolicy
+                saveInactivityPolicies(currentMap)
+                Logger.writeDebugLog("recordAppOpened: initialized lastOpenedTimestamp for $packageName")
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Logger.writeErrorLog("recordAppOpened failed for $packageName: ${e.message}")
+            Result.failure(e)
+        }
     }
 
     override suspend fun setOneShotApp(packageName: String, isOneShot: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
@@ -140,6 +238,7 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
             if (launchIntent != null) {
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(launchIntent)
+                recordAppOpened(packageName)
                 Logger.writeDebugLog("launchOneShotApp: successfully launched $packageName")
                 Result.success(Unit)
             } else {
@@ -254,9 +353,78 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
         } ?: Result.failure(TimeoutException("clearApplicationUserData timed out for $packageName"))
     }
 
+    override suspend fun checkAndApplyInactivityPolicies(
+        deviceLockedDurationMs: Long,
+        isDeviceLocked: Boolean
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            if (!isDeviceLocked) {
+                wipedPackagesInCurrentLockSession.clear()
+            }
+
+            val policies = _appInactivityPolicies.value
+            val now = System.currentTimeMillis()
+
+            for ((pkg, policy) in policies) {
+                // 1. Device locked inactivity checks
+                if (isDeviceLocked && deviceLockedDurationMs > 0L) {
+                    when (policy.lockAction) {
+                        LockInactivityAction.FREEZE_ONLY -> {
+                            val freezeThresholdMs = policy.lockFreezeHours * 3600_000L
+                            if (deviceLockedDurationMs >= freezeThresholdMs) {
+                                Logger.writeDebugLog("checkAndApplyInactivityPolicies: Freezing $pkg (locked for ${deviceLockedDurationMs / 3600000}h >= ${policy.lockFreezeHours}h)")
+                                hideApp(pkg)
+                            }
+                        }
+                        LockInactivityAction.FREEZE_AND_WIPE -> {
+                            val freezeThresholdMs = policy.lockFreezeHours * 3600_000L
+                            val wipeThresholdMs = policy.lockWipeHours * 3600_000L
+
+                            if (deviceLockedDurationMs >= freezeThresholdMs) {
+                                Logger.writeDebugLog("checkAndApplyInactivityPolicies: Freezing $pkg (locked for ${deviceLockedDurationMs / 3600000}h >= ${policy.lockFreezeHours}h)")
+                                hideApp(pkg)
+                            }
+
+                            if (deviceLockedDurationMs >= wipeThresholdMs) {
+                                if (!wipedPackagesInCurrentLockSession.contains(pkg)) {
+                                    Logger.writeDebugLog("checkAndApplyInactivityPolicies: Wiping $pkg (locked for ${deviceLockedDurationMs / 3600000}h >= ${policy.lockWipeHours}h)")
+                                    clearAppData(pkg)
+                                    hideApp(pkg)
+                                    wipedPackagesInCurrentLockSession.add(pkg)
+                                }
+                            }
+                        }
+                        LockInactivityAction.NONE -> { /* No lock inactivity action */ }
+                    }
+                }
+
+                // 2. Unused app checks (e.g. 30 days)
+                if (policy.wipeIfUnusedEnabled && policy.lastOpenedTimestamp > 0L) {
+                    val unusedThresholdMs = policy.wipeIfUnusedDays * 86400_000L
+                    val unusedDurationMs = now - policy.lastOpenedTimestamp
+                    if (unusedDurationMs >= unusedThresholdMs) {
+                        Logger.writeDebugLog("checkAndApplyInactivityPolicies: Wiping $pkg because unused for ${unusedDurationMs / 86400000L}d >= ${policy.wipeIfUnusedDays}d")
+                        clearAppData(pkg)
+                        hideApp(pkg)
+                        // Reset timestamp to current time to avoid wiping in loop every check
+                        val updatedMap = _appInactivityPolicies.value.toMutableMap()
+                        val updatedPolicy = policy.copy(lastOpenedTimestamp = now)
+                        updatedMap[pkg] = updatedPolicy
+                        saveInactivityPolicies(updatedMap)
+                    }
+                }
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Logger.writeErrorLog("checkAndApplyInactivityPolicies failed: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
     companion object {
         private const val PREFS_NAME = "one_shot_apps_prefs"
         private const val KEY_ONE_SHOT_PACKAGES = "one_shot_packages"
         private const val KEY_AUTO_FREEZE_PACKAGES = "auto_freeze_packages"
+        private const val KEY_INACTIVITY_POLICIES = "inactivity_policies"
     }
 }

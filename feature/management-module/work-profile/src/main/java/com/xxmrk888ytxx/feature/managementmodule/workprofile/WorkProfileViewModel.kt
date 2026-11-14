@@ -86,6 +86,23 @@ class WorkProfileViewModel @Inject constructor(
             is WorkProfileUiEvent.OnToggleOneShot -> toggleOneShot(event.packageName, event.isOneShot)
             is WorkProfileUiEvent.OnResetOneShot -> resetOneShot(event.packageName)
             is WorkProfileUiEvent.OnToggleAutoFreeze -> toggleAutoFreeze(event.packageName, event.isAutoFreeze)
+            is WorkProfileUiEvent.OnUpdateInactivityPolicy -> updateInactivityPolicy(event.policy)
+        }
+    }
+
+    private fun updateInactivityPolicy(policy: com.xxmrk888ytxx.feature.managementmodule.workprofile.model.AppInactivityPolicy) {
+        viewModelScope.launch {
+            isLoading.value = true
+            contract.setInactivityPolicy(policy).fold(
+                onSuccess = {
+                    sendToastSideEffect(R.string.inactivity_policy_saved.uiText())
+                    contract.refresh()
+                },
+                onFailure = {
+                    sendToastSideEffect(R.string.app_action_failed.uiText())
+                }
+            )
+            isLoading.value = false
         }
     }
 
