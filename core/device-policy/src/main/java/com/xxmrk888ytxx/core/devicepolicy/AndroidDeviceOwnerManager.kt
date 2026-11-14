@@ -17,21 +17,26 @@ import javax.inject.Singleton
 
 @Singleton
 internal class AndroidDeviceOwnerManager @Inject constructor(
+    private val deviceRestrictionOwnerComponentManager: DeviceRestrictionOwnerComponentManagerImpl,
+    private val workProfileOwnerComponentManagerImpl: WorkProfileOwnerComponentManagerImpl,
     devicePolicyManager: DevicePolicyManager,
-    @ApplicationContext context: Context,
-    private val deviceRestrictionOwnerComponentManagerImpl: DeviceRestrictionOwnerComponentManagerImpl,
-    private val workProfileOwnerComponentManagerImpl: WorkProfileOwnerComponentManagerImpl
+    @ApplicationContext context: Context
 ) : BaseOwnerComponent(devicePolicyManager, context),
     DeviceOwnerManager,
-    DeviceRestrictionOwnerComponentManager by deviceRestrictionOwnerComponentManagerImpl,
+    DeviceRestrictionOwnerComponentManager by deviceRestrictionOwnerComponentManager,
     WorkProfileOwnerComponentManager by workProfileOwnerComponentManagerImpl {
+
+    override val isAppDeviceOwner: Boolean
+        get() = checkIsAppDeviceOwner()
 
     private val _isDeviceOwner = MutableStateFlow(checkIsAppDeviceOwner())
     private val _policyState = MutableStateFlow(buildCurrentPolicyState())
 
     override val isDeviceOwner: Flow<Boolean> = _isDeviceOwner
         .asStateFlow()
-        .onSubscription { updateDeviceOwnerState() }
+        .onSubscription {
+            updateDeviceOwnerState()
+        }
 
     override val policyState: Flow<PolicyState> = _policyState
         .asStateFlow()
@@ -40,7 +45,7 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     override suspend fun updateDeviceOwnerState() {
         val isOwner = checkIsAppDeviceOwner()
         _isDeviceOwner.value = isOwner
-        if (isOwner) {
+        if (checkCanManageOwnerPolicies()) {
             updateRestrictionState()
         }
         updatePolicyState()
@@ -48,6 +53,9 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
 
     override suspend fun updatePolicyState() {
         workProfileOwnerComponentManagerImpl.updateProfileOwnerState()
+        if (checkCanManageOwnerPolicies()) {
+            updateRestrictionState()
+        }
         _policyState.value = buildCurrentPolicyState()
     }
 

@@ -3,6 +3,9 @@
     <string name="app_not_device_owner">App not device owner</string>
     <string name="an_error_has_occurred">An error has occurred</string>
     <string name="app_restriction">App Restriction</string>
+    <string name="restrictions_title_device">Ограничения устройства</string>
+    <string name="restrictions_title_work_profile">Ограничения рабочего профиля</string>
+    <string name="device_owner_required">Требуются права Device Owner</string>
     <string name="disable_camera">Disable Camera</string>
     <string name="prevent_all_applications_from_accessing_the_camera_hardware">Prevent all apps and system services from accessing the camera hardware.</string>
     <string name="disable_microphone">Disable Microphone</string>

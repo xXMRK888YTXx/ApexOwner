@@ -3,6 +3,9 @@ package com.xxmrk888ytxx.feature.managementmodule.apprestriction.model
 import com.xxmrk888ytxx.core.base.android.mvi.UiState
 
 data class ScreenState(
+    val isDeviceOwner: Boolean = false,
+    val isProfileOwner: Boolean = false,
+
     val isCameraDisabled: Boolean = false,
     val isMicrophoneDisabled: Boolean = false,
     val isCanDisableUSBDataSignal: Boolean = true,

@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import com.xxmrk888ytxx.apexowner.view.mainActivity.MainActivity
 import com.xxmrk888ytxx.core.base.android.logs.Logger
 import com.xxmrk888ytxx.core.devicepolicy.ProfileOwnerManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -70,6 +71,16 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
                 )
                 finish()
             }
+            return
+        }
+
+        if (action == ACTION_OPEN_RESTRICTIONS) {
+            val mainIntent = Intent(this, MainActivity::class.java).apply {
+                putExtra(MainActivity.EXTRA_OPEN_RESTRICTIONS, true)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            startActivity(mainIntent)
+            finish()
             return
         }
 
@@ -196,6 +207,7 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
         const val ACTION_FREEZE_APP = "com.xxmrk888ytxx.apexowner.ACTION_FREEZE_APP"
         const val ACTION_UNFREEZE_APP = "com.xxmrk888ytxx.apexowner.ACTION_UNFREEZE_APP"
         const val ACTION_REMOVE_WORK_PROFILE = "com.xxmrk888ytxx.apexowner.ACTION_REMOVE_WORK_PROFILE"
+        const val ACTION_OPEN_RESTRICTIONS = "com.xxmrk888ytxx.apexowner.ACTION_OPEN_RESTRICTIONS"
         const val ACTION_INSTALL_CALLBACK = "com.xxmrk888ytxx.apexowner.ACTION_INSTALL_CALLBACK"
         const val EXTRA_PACKAGE_NAME = "EXTRA_PACKAGE_NAME"
         const val EXTRA_APK_PATH = "EXTRA_APK_PATH"

@@ -22,8 +22,10 @@
     <string name="create_work_profile_one_click">Создать рабочий профиль в 1 клик</string>
     <string name="open_work_profile_shelter">Управление приложениями (Shelter)</string>
     <string name="shelter_management_desc">Заморозка, разморозка и клонирование приложений</string>
-    <string name="device_owner_restrictions_title">Ограничения устройства (Device Owner)</string>
+    <string name="device_owner_restrictions_title">Ограничения всего устройства (Device Owner)</string>
     <string name="device_owner_restrictions_desc">Аппаратные блокировки (камера, микрофон, USB, 2G сети)</string>
-    <string name="device_owner_not_granted_desc">Для разблокировки требуются права Device Owner (через ADB)</string>
+    <string name="work_profile_restrictions_title">Ограничения рабочего профиля</string>
+    <string name="work_profile_restrictions_desc">Камера, скриншоты, установка неизвестных приложений и др.</string>
+    <string name="device_owner_not_granted_desc">Для разблокировки требуются права Device Owner или создание рабочего профиля</string>
     <string name="quiet_mode_toggle">Пауза рабочего профиля (Quiet Mode)</string>
 </resources>

@@ -11,6 +11,11 @@ import javax.inject.Inject
 class RestrictionManageContractImpl @Inject constructor(
     private val deviceRestrictionOwnerComponentManager: DeviceRestrictionOwnerComponentManager
 ) : RestrictionManageContract {
+    override val isAppDeviceOwner: Boolean
+        get() = deviceRestrictionOwnerComponentManager.isAppDeviceOwner
+    override val isAppProfileOwner: Boolean
+        get() = deviceRestrictionOwnerComponentManager.isAppProfileOwner
+
     override val isCameraDisabled: Flow<Boolean> = deviceRestrictionOwnerComponentManager.isCameraDisabled
     override val isMicrophoneDisabled: Flow<Boolean> = deviceRestrictionOwnerComponentManager.isMicrophoneDisabled
     override val isUSBDataSignalDisabled: Flow<Boolean> =

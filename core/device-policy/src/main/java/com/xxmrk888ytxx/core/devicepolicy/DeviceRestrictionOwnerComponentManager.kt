@@ -3,6 +3,8 @@ package com.xxmrk888ytxx.core.devicepolicy
 import kotlinx.coroutines.flow.Flow
 
 interface DeviceRestrictionOwnerComponentManager {
+    val isAppDeviceOwner: Boolean
+    val isAppProfileOwner: Boolean
     val isCameraDisabled: Flow<Boolean>
     val isMicrophoneDisabled: Flow<Boolean>
     val isUSBDataSignalDisabled: Flow<Boolean>

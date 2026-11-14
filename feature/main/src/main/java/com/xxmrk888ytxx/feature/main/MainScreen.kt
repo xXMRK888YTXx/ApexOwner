@@ -107,7 +107,7 @@ fun MainScreen(
 
             item {
                 DeviceOwnerRestrictionsCard(
-                    isDeviceOwner = screenState.isDeviceOwner,
+                    screenState = screenState,
                     onClick = { onEvent(MainScreenEvent.OnDeviveRestrictionButtonClicked) }
                 )
             }
@@ -287,13 +287,30 @@ private fun WorkProfileSectionCard(
 
 @Composable
 private fun DeviceOwnerRestrictionsCard(
-    isDeviceOwner: Boolean,
+    screenState: ScreenState,
     onClick: () -> Unit
 ) {
+    val isDeviceOwner = screenState.isDeviceOwner
+    val isProfileOwner = screenState.operatingMode == MainOperatingMode.PROFILE_OWNER
+    val hasWorkProfile = screenState.hasWorkProfile
+    val isEnabled = isDeviceOwner || isProfileOwner || hasWorkProfile
+
+    val title = when {
+        isDeviceOwner -> stringResource(R.string.device_owner_restrictions_title)
+        isProfileOwner || hasWorkProfile -> stringResource(R.string.work_profile_restrictions_title)
+        else -> stringResource(R.string.device_owner_restrictions_title)
+    }
+
+    val desc = when {
+        isDeviceOwner -> stringResource(R.string.device_owner_restrictions_desc)
+        isProfileOwner || hasWorkProfile -> stringResource(R.string.work_profile_restrictions_desc)
+        else -> stringResource(R.string.device_owner_not_granted_desc)
+    }
+
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(enabled = isEnabled, onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -308,7 +325,7 @@ private fun DeviceOwnerRestrictionsCard(
             Icon(
                 painter = painterResource(R.drawable.security),
                 contentDescription = null,
-                tint = if (isDeviceOwner) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                tint = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                 modifier = Modifier.size(32.dp)
             )
 
@@ -316,16 +333,12 @@ private fun DeviceOwnerRestrictionsCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.device_owner_restrictions_title),
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = if (isDeviceOwner) {
-                        stringResource(R.string.device_owner_restrictions_desc)
-                    } else {
-                        stringResource(R.string.device_owner_not_granted_desc)
-                    },
+                    text = desc,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -336,7 +349,7 @@ private fun DeviceOwnerRestrictionsCard(
             Icon(
                 painter = painterResource(R.drawable.arrow_forward),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = if (isEnabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
             )
         }
     }

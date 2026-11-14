@@ -3,6 +3,8 @@ package com.xxmrk888ytxx.feature.managementmodule.apprestriction.contract
 import kotlinx.coroutines.flow.Flow
 
 interface RestrictionManageContract {
+    val isAppDeviceOwner: Boolean
+    val isAppProfileOwner: Boolean
     val isCameraDisabled: Flow<Boolean>
     val isMicrophoneDisabled: Flow<Boolean>
     val isUSBDataSignalDisabled: Flow<Boolean>

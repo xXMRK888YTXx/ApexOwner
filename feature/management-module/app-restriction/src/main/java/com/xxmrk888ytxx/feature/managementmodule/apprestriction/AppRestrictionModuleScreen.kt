@@ -54,7 +54,8 @@ fun AppRestrictionModuleScreen(
     onEvent: (AppRestrictionModuleUiEvent) -> Unit,
     sideEffect: Flow<SideEffect>
 ) {
-    val groupedRestrictions = remember(screenState) {
+    val profileOwnerSupportedIds = remember { setOf<Short>(0, 10, 4, 5, 6, 7) }
+    val rawGroupedRestrictions = remember(screenState) {
         mapOf(
             R.string.category_hardware_and_media.uiText() to listOf(
                 Restriction(
@@ -369,14 +370,35 @@ fun AppRestrictionModuleScreen(
         )
     }
 
+    val groupedRestrictions = remember(rawGroupedRestrictions, screenState.isDeviceOwner) {
+        rawGroupedRestrictions.mapValues { (_, list) ->
+            list.map { restriction ->
+                val isDoOnly = restriction.id !in profileOwnerSupportedIds
+                if (!screenState.isDeviceOwner && isDoOnly) {
+                    restriction.copy(
+                        isAvailable = false,
+                        unavailableMessage = R.string.device_owner_required.uiText()
+                    )
+                } else {
+                    restriction
+                }
+            }
+        }
+    }
+
     HandleSideEffects(sideEffect)
+    val titleText = when {
+        screenState.isDeviceOwner -> stringResource(R.string.restrictions_title_device)
+        screenState.isProfileOwner -> stringResource(R.string.restrictions_title_work_profile)
+        else -> stringResource(R.string.app_restriction)
+    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(),
         topBar = {
             CoreTopBar(
                 title = {
-                    Text(text = stringResource(R.string.app_restriction))
+                    Text(text = titleText)
                 }
             )
         }
@@ -522,3 +544,4 @@ fun RestrictionCard(
         }
     }
 }
+

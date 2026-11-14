@@ -73,6 +73,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         profileOwnerManager.setupCrossProfileFilters()
         splashScreen.setKeepOnScreenCondition { viewModel.isScreenLoading.value }
+        if (intent?.getBooleanExtra(EXTRA_OPEN_RESTRICTIONS, false) == true) {
+            viewModel.navigator.navigate(Screen.DeviceRestrictionModuleScreen)
+        }
         setContentWithThemeAndProviders(
             navigator = viewModel.navigator,
             toastManager = toastManager,
@@ -184,9 +187,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.getBooleanExtra(EXTRA_OPEN_RESTRICTIONS, false)) {
+            viewModel.navigator.navigate(Screen.DeviceRestrictionModuleScreen)
+        }
+    }
+
     companion object {
         const val ACTION_CLONE_APP = "com.xxmrk888ytxx.apexowner.ACTION_CLONE_APP"
         const val EXTRA_PACKAGE_NAME = "EXTRA_PACKAGE_NAME"
+        const val EXTRA_OPEN_RESTRICTIONS = "EXTRA_OPEN_RESTRICTIONS"
         private const val BACK_PRESS_ANIMATION_DURATION = 300
     }
 }

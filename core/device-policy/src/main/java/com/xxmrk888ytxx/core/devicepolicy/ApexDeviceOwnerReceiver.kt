@@ -84,7 +84,8 @@ internal class ApexDeviceOwnerReceiver : DeviceAdminReceiver() {
                 "com.xxmrk888ytxx.apexowner.ACTION_CLONE_APP",
                 "com.xxmrk888ytxx.apexowner.ACTION_FREEZE_APP",
                 "com.xxmrk888ytxx.apexowner.ACTION_UNFREEZE_APP",
-                "com.xxmrk888ytxx.apexowner.ACTION_REMOVE_WORK_PROFILE"
+                "com.xxmrk888ytxx.apexowner.ACTION_REMOVE_WORK_PROFILE",
+                "com.xxmrk888ytxx.apexowner.ACTION_OPEN_RESTRICTIONS"
             ).forEach { actionStr ->
                 val filter = android.content.IntentFilter(actionStr).apply {
                     addCategory(Intent.CATEGORY_DEFAULT)

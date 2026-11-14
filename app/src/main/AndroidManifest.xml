@@ -45,6 +45,7 @@
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_FREEZE_APP" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_UNFREEZE_APP" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_REMOVE_WORK_PROFILE" />
+                <action android:name="com.xxmrk888ytxx.apexowner.ACTION_OPEN_RESTRICTIONS" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_INSTALL_CALLBACK" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
