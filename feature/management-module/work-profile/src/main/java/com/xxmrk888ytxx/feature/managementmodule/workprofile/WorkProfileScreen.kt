@@ -82,7 +82,7 @@ fun WorkProfileScreen(
 
     val filteredApps = remember(currentList, state.searchQuery, state.showSystemApps) {
         currentList.filter { app ->
-            (state.showSystemApps || !app.isSystem) &&
+            (state.showSystemApps || !app.isSystem || app.hasLauncher || app.isFrozen) &&
                 (app.name.contains(state.searchQuery, ignoreCase = true) ||
                     app.packageName.contains(state.searchQuery, ignoreCase = true))
         }
@@ -176,6 +176,13 @@ fun WorkProfileScreen(
                 }
             }
 
+            val profileAppsCount = remember(state.profileApps, state.showSystemApps) {
+                state.profileApps.count { state.showSystemApps || !it.isSystem || it.hasLauncher || it.isFrozen }
+            }
+            val personalAppsCount = remember(state.personalApps, state.showSystemApps) {
+                state.personalApps.count { state.showSystemApps || !it.isSystem || it.hasLauncher || it.isFrozen }
+            }
+
             SecondaryTabRow(
                 state.selectedTab.ordinal,
                 Modifier.fillMaxWidth(),
@@ -195,7 +202,7 @@ fun WorkProfileScreen(
                         onClick = { onEvent(WorkProfileUiEvent.OnTabSelected(WorkProfileTab.PROFILE_APPS)) },
                         text = {
                             Text(
-                                "${stringResource(R.string.profile_apps_tab)} (${state.profileApps.size})"
+                                "${stringResource(R.string.profile_apps_tab)} ($profileAppsCount)"
                             )
                         }
                     )
@@ -204,7 +211,11 @@ fun WorkProfileScreen(
                         onClick = { onEvent(WorkProfileUiEvent.OnTabSelected(WorkProfileTab.CLONE_APPS)) },
                         text = {
                             Text(
-                                "${stringResource(R.string.clone_apps_tab)} (${state.personalApps.size})"
+                                if (state.isInsideWorkProfile) {
+                                    stringResource(R.string.clone_apps_tab)
+                                } else {
+                                    "${stringResource(R.string.clone_apps_tab)} ($personalAppsCount)"
+                                }
                             )
                         }
                     )
@@ -261,7 +272,45 @@ fun WorkProfileScreen(
                 }
             }
 
-            if (filteredApps.isEmpty()) {
+            if (state.selectedTab == WorkProfileTab.CLONE_APPS && state.isInsideWorkProfile) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "💼",
+                                style = MaterialTheme.typography.headlineLarge
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = stringResource(R.string.clone_apps_tab),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Клонирование приложений осуществляется из основного профиля. Откройте ApexOwner в основном профиле для клонирования приложений в рабочий профиль.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            } else if (filteredApps.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -437,11 +486,10 @@ private fun AppListItem(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(end = 4.dp)
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_check),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
+                            BadgeTag(
+                                text = "В профиле",
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                             )
                         }
                     } else {

@@ -5,5 +5,6 @@ data class WorkProfileApp(
     val name: String,
     val isSystem: Boolean,
     val isFrozen: Boolean,
-    val isInstalledInWorkProfile: Boolean
+    val isInstalledInWorkProfile: Boolean,
+    val hasLauncher: Boolean = true
 )
