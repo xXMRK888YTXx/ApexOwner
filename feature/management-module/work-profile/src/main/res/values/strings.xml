@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="work_profile_title">Рабочий профиль (Shelter)</string>
+    <string name="profile_apps_tab">Приложения профиля</string>
+    <string name="clone_apps_tab">Клонировать из личного</string>
+    <string name="search_apps_hint">Поиск приложений…</string>
+    <string name="show_system_apps">Системные приложения</string>
+    <string name="freeze_action">Заморозить</string>
+    <string name="unfreeze_action">Разморозить</string>
+    <string name="launch_action">Запустить</string>
+    <string name="clone_action">Клонировать</string>
+    <string name="badge_frozen">Заморожено</string>
+    <string name="badge_active">Активно</string>
+    <string name="badge_system">Системное</string>
+    <string name="no_apps_found">Приложений не найдено</string>
+    <string name="work_profile_not_active">Рабочий профиль еще не активирован</string>
+    <string name="create_work_profile_btn">Создать рабочий профиль</string>
+    <string name="app_cloned_success">Приложение клонировано в рабочий профиль</string>
+    <string name="app_freeze_success">Статус заморозки изменен</string>
+    <string name="app_action_failed">Не удалось выполнить операцию</string>
+    <string name="app_launched_success">Приложение запущено</string>
+    <string name="open_work_profile_instance">Открыть в рабочем профиле 💼</string>
+    <string name="work_profile_host_banner">Управление из личного профиля. Для расширенного доступа можно открыть приложение в рабочем профиле.</string>
+    <string name="remove_work_profile_btn">Удалить рабочий профиль</string>
+    <string name="remove_work_profile_success">Рабочий профиль успешно удален</string>
+</resources>

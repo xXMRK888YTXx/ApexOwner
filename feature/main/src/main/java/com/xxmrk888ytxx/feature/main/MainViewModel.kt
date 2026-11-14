@@ -10,28 +10,40 @@ import com.xxmrk888ytxx.feature.main.model.MainScreenEvent
 import com.xxmrk888ytxx.feature.main.model.MainScreenSideEffect
 import com.xxmrk888ytxx.feature.main.model.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    deviceOwnerStateProvider: DeviceOwnerStateProviderContract,
+    private val deviceOwnerStateProvider: DeviceOwnerStateProviderContract,
     private val navigateToModuleContract: NavigateToModuleContract,
     private val provideIntentForWorkProfileCreationContract: ProvideIntentForWorkProfileCreationContract
 ) : ApexOwnerViewModel<ScreenState, MainScreenEvent>(ScreenState()) {
 
-    override val state: StateFlow<ScreenState> =
-        deviceOwnerStateProvider.isDeviceOwner.map { isGranted ->
-            ScreenState(isGranted)
-        }.stateWhileSubscribed()
+    override val state: StateFlow<ScreenState> = combine(
+        deviceOwnerStateProvider.operatingMode,
+        deviceOwnerStateProvider.isDeviceOwner,
+        deviceOwnerStateProvider.hasWorkProfile,
+        deviceOwnerStateProvider.isWorkProfileQuietMode
+    ) { mode, isDO, hasProfile, isQuiet ->
+        ScreenState(
+            operatingMode = mode,
+            isDeviceOwner = isDO,
+            hasWorkProfile = hasProfile,
+            isWorkProfileQuietMode = isQuiet
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ScreenState())
 
     override fun onEvent(event: MainScreenEvent) {
         when (event) {
             MainScreenEvent.OnDeviveRestrictionButtonClicked -> toDeviceRestrictionModule()
+            MainScreenEvent.OnWorkProfileManagementClicked -> toWorkProfileManagement()
             MainScreenEvent.OnHowGrantPermissionClicked -> {
-                // TODO
+                // How to grant
             }
 
             MainScreenEvent.OnWorkProfileButtonClicked -> sendSideEffect(
@@ -40,6 +52,7 @@ class MainViewModel @Inject constructor(
                 )
             )
 
+            is MainScreenEvent.OnToggleWorkProfileQuietMode -> toggleQuietMode(event.isQuiet)
             MainScreenEvent.OnWorkProfileCreatedSuccessfully -> sendToastSideEffect(R.string.work_profile_created_successfully.uiText())
             MainScreenEvent.OnWorkProfileCreationFailed -> sendToastSideEffect(R.string.couldn_t_create_a_work_profile.uiText())
         }
@@ -49,4 +62,11 @@ class MainViewModel @Inject constructor(
         navigateToModuleContract.toDeviceRestriction()
     }
 
+    private fun toWorkProfileManagement() = viewModelScope.launch {
+        navigateToModuleContract.toWorkProfileManagement()
+    }
+
+    private fun toggleQuietMode(isQuiet: Boolean) = viewModelScope.launch {
+        deviceOwnerStateProvider.setWorkProfileQuietMode(isQuiet)
+    }
 }

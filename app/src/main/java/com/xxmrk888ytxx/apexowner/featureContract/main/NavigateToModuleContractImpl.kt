@@ -11,4 +11,8 @@ class NavigateToModuleContractImpl @Inject constructor(
     override suspend fun toDeviceRestriction() {
         navigationManager.navigate(Screen.DeviceRestrictionModuleScreen)
     }
+
+    override suspend fun toWorkProfileManagement() {
+        navigationManager.navigate(Screen.WorkProfileModuleScreen)
+    }
 }

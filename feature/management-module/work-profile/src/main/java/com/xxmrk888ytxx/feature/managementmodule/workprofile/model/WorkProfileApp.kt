@@ -1,0 +1,9 @@
+package com.xxmrk888ytxx.feature.managementmodule.workprofile.model
+
+data class WorkProfileApp(
+    val packageName: String,
+    val name: String,
+    val isSystem: Boolean,
+    val isFrozen: Boolean,
+    val isInstalledInWorkProfile: Boolean
+)

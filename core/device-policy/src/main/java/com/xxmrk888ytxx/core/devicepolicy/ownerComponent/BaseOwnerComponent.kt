@@ -9,7 +9,14 @@ internal abstract class BaseOwnerComponent(
     protected val devicePolicyManager: DevicePolicyManager,
     protected val context: Context
 ) {
-    protected fun checkIsAppDeviceOwner() = devicePolicyManager.isDeviceOwnerApp(context.packageName)
+    protected fun checkIsAppDeviceOwner(): Boolean =
+        devicePolicyManager.isDeviceOwnerApp(context.packageName)
+
+    protected fun checkIsAppProfileOwner(): Boolean =
+        devicePolicyManager.isProfileOwnerApp(context.packageName)
+
+    protected fun checkCanManageOwnerPolicies(): Boolean =
+        checkIsAppDeviceOwner() || checkIsAppProfileOwner()
 
     protected val deviceOwnerReceiver: ComponentName by lazy {
         ComponentName(context, ApexDeviceOwnerReceiver::class.java)

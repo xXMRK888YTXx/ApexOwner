@@ -24,7 +24,16 @@ internal class ApexDeviceOwnerReceiver : DeviceAdminReceiver() {
     @Inject
     lateinit var devicePolicyManager: DevicePolicyManager
 
-    private fun provideDeviceOwnerReceiverComponentName(context: Context): ComponentName = ComponentName(context, ApexDeviceOwnerReceiver::class.java)
+    private fun provideDeviceOwnerReceiverComponentName(context: Context): ComponentName =
+        ComponentName(context, ApexDeviceOwnerReceiver::class.java)
+
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == DevicePolicyManager.ACTION_MANAGED_PROFILE_PROVISIONED) {
+            Logger.writeDebugLog("onReceive: ACTION_MANAGED_PROFILE_PROVISIONED")
+            enableWorkProfile(context)
+        }
+        super.onReceive(context, intent)
+    }
 
     override fun onEnabled(context: Context, intent: Intent) {
         super.onEnabled(context, intent)
@@ -40,8 +49,55 @@ internal class ApexDeviceOwnerReceiver : DeviceAdminReceiver() {
 
     override fun onProfileProvisioningComplete(context: Context, intent: Intent) {
         super.onProfileProvisioningComplete(context, intent)
+        Logger.writeDebugLog("onProfileProvisioningComplete")
+        enableWorkProfile(context)
+    }
+
+    private fun enableWorkProfile(context: Context) {
         val componentName = provideDeviceOwnerReceiverComponentName(context)
-        devicePolicyManager.setProfileName(componentName, "Work Workspace")
-        devicePolicyManager.setProfileEnabled(componentName)
+        try {
+            val profileName = context.getString(R.string.work_profile_name)
+            devicePolicyManager.setProfileName(componentName, profileName)
+            devicePolicyManager.setProfileEnabled(componentName)
+            Logger.writeDebugLog("Work profile successfully enabled with name: $profileName")
+
+            try {
+                devicePolicyManager.clearUserRestriction(componentName, android.os.UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)
+                devicePolicyManager.clearUserRestriction(componentName, android.os.UserManager.DISALLOW_INSTALL_APPS)
+                Logger.writeDebugLog("Cleared DISALLOW_INSTALL_UNKNOWN_SOURCES and DISALLOW_INSTALL_APPS in receiver")
+            } catch (e: Exception) {
+                Logger.writeErrorLog("Failed to clear install restrictions in receiver: ${e.message}")
+            }
+
+            try {
+                context.packageManager.setComponentEnabledSetting(
+                    ComponentName(context, "com.xxmrk888ytxx.apexowner.bridge.WorkProfileDispatcherActivity"),
+                    android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                    android.content.pm.PackageManager.DONT_KILL_APP
+                )
+            } catch (e: Exception) {
+                Logger.writeErrorLog("Failed to enable dispatcher in receiver: ${e.message}")
+            }
+
+            devicePolicyManager.clearCrossProfileIntentFilters(componentName)
+            listOf(
+                "com.xxmrk888ytxx.apexowner.ACTION_CLONE_APP",
+                "com.xxmrk888ytxx.apexowner.ACTION_FREEZE_APP",
+                "com.xxmrk888ytxx.apexowner.ACTION_UNFREEZE_APP",
+                "com.xxmrk888ytxx.apexowner.ACTION_REMOVE_WORK_PROFILE"
+            ).forEach { actionStr ->
+                val filter = android.content.IntentFilter(actionStr).apply {
+                    addCategory(Intent.CATEGORY_DEFAULT)
+                }
+                devicePolicyManager.addCrossProfileIntentFilter(
+                    componentName,
+                    filter,
+                    DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED or DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT
+                )
+            }
+        } catch (e: Exception) {
+            Logger.writeErrorLog("Failed to enable work profile: ${e.message}")
+        }
+        scope.launch { deviceOwnerManager.updatePolicyState() }
     }
 }

@@ -18,4 +18,7 @@ sealed interface Screen : NavKey {
 
     @Serializable
     data object DeviceRestrictionModuleScreen : Screen
+
+    @Serializable
+    data object WorkProfileModuleScreen : Screen
 }

@@ -6,6 +6,8 @@ import androidx.core.content.getSystemService
 import com.xxmrk888ytxx.core.devicepolicy.AndroidDeviceOwnerManager
 import com.xxmrk888ytxx.core.devicepolicy.DeviceOwnerManager
 import com.xxmrk888ytxx.core.devicepolicy.DeviceRestrictionOwnerComponentManager
+import com.xxmrk888ytxx.core.devicepolicy.PolicyRoleProvider
+import com.xxmrk888ytxx.core.devicepolicy.ProfileOwnerManager
 import com.xxmrk888ytxx.core.devicepolicy.WorkProfileOwnerComponentManager
 import dagger.Binds
 import dagger.Module
@@ -24,13 +26,20 @@ internal interface DevicePolicyModule {
     fun bindsDeviceOwnerManager(androidDeviceOwnerManager: AndroidDeviceOwnerManager): DeviceOwnerManager
 
     @Binds
+    fun bindsPolicyRoleProvider(deviceOwnerManager: DeviceOwnerManager): PolicyRoleProvider
+
+    @Binds
     fun bindsRestrictionManager(deviceOwnerManager: DeviceOwnerManager): DeviceRestrictionOwnerComponentManager
 
     @Binds
     fun bindsWorkProfileOwnerManager(deviceOwnerManager: DeviceOwnerManager): WorkProfileOwnerComponentManager
 
+    @Binds
+    fun bindsProfileOwnerManager(workProfileOwnerComponentManager: WorkProfileOwnerComponentManager): ProfileOwnerManager
+
     companion object {
         @Provides
-        fun provideDevicePolicyManager(@ApplicationContext context: Context): DevicePolicyManager = context.getSystemService()!!
+        fun provideDevicePolicyManager(@ApplicationContext context: Context): DevicePolicyManager =
+            context.getSystemService()!!
     }
 }

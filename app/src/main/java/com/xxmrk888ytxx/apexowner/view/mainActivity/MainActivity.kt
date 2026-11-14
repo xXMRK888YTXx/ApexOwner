@@ -16,7 +16,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,22 +33,27 @@ import com.xxmrk888ytxx.apexowner.view.mainActivity.model.ApexOwnerBottomBarItem
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.MainActivityEvent
 import com.xxmrk888ytxx.apexowner.view.mainActivity.ui.ApexOwnerBottomBar
 import com.xxmrk888ytxx.core.base.android.ToastManager
+import com.xxmrk888ytxx.core.base.android.mvi.UiEvent
+import com.xxmrk888ytxx.core.base.android.viewModel.stub.Stub
 import com.xxmrk888ytxx.core.base.compose.extension.setContentWithThemeAndProviders
 import com.xxmrk888ytxx.core.base.compose.theme.AppSeedColors.MustardYellow
+import com.xxmrk888ytxx.core.devicepolicy.ProfileOwnerManager
 import com.xxmrk888ytxx.feature.main.MainScreen
 import com.xxmrk888ytxx.feature.main.MainViewModel
 import com.xxmrk888ytxx.feature.main.model.MainScreenEvent
 import com.xxmrk888ytxx.feature.main.model.ScreenState
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.AppRestrictionModuleScreen
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.AppRestrictionModuleViewModel
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.AppRestrictionModuleUiEvent
+import com.xxmrk888ytxx.feature.managementmodule.workprofile.WorkProfileScreen
+import com.xxmrk888ytxx.feature.managementmodule.workprofile.WorkProfileViewModel
+import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileScreenState
+import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileUiEvent
 import com.xxmrk888ytxx.feature.onboarding.OnboardingScreen
 import com.xxmrk888ytxx.feature.onboarding.OnboardingViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
-import com.xxmrk888ytxx.core.base.android.mvi.UiEvent
-import com.xxmrk888ytxx.core.base.android.viewModel.stub.Stub
-import com.xxmrk888ytxx.feature.managementmodule.apprestriction.AppRestrictionModuleScreen
-import com.xxmrk888ytxx.feature.managementmodule.apprestriction.AppRestrictionModuleViewModel
-import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.AppRestrictionModuleUiEvent
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.ScreenState as AppRestrictionScreenState
 
 @AndroidEntryPoint
@@ -58,12 +62,16 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var toastManager: ToastManager
 
+    @Inject
+    lateinit var profileOwnerManager: ProfileOwnerManager
+
     private val viewModel: MainActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        profileOwnerManager.setupCrossProfileFilters()
         splashScreen.setKeepOnScreenCondition { viewModel.isScreenLoading.value }
         setContentWithThemeAndProviders(
             navigator = viewModel.navigator,
@@ -78,9 +86,7 @@ class MainActivity : ComponentActivity() {
                         backStack = backStack,
                         onBottomItemClicked = {
                             viewModel.onEvent(
-                                MainActivityEvent.BottomItemClicked(
-                                    it
-                                )
+                                MainActivityEvent.BottomItemClicked(it)
                             )
                         }
                     )
@@ -123,6 +129,12 @@ class MainActivity : ComponentActivity() {
                         enterTransition togetherWith exitTransition
                     },
                     entryProvider = entryProvider {
+                        entry<Screen.WorkProfileModuleScreen> {
+                            ScreenContent<WorkProfileScreenState, WorkProfileUiEvent, WorkProfileViewModel>(
+                                ::WorkProfileScreen
+                            )
+                        }
+
                         entry<Screen.DeviceRestrictionModuleScreen> {
                             ScreenContent<AppRestrictionScreenState, AppRestrictionModuleUiEvent, AppRestrictionModuleViewModel>(
                                 ::AppRestrictionModuleScreen
@@ -149,6 +161,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        profileOwnerManager.setupCrossProfileFilters()
         viewModel.onEvent(MainActivityEvent.OnResume)
     }
 
@@ -171,7 +184,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private companion object {
-        const val BACK_PRESS_ANIMATION_DURATION = 300
+    companion object {
+        const val ACTION_CLONE_APP = "com.xxmrk888ytxx.apexowner.ACTION_CLONE_APP"
+        const val EXTRA_PACKAGE_NAME = "EXTRA_PACKAGE_NAME"
+        private const val BACK_PRESS_ANIMATION_DURATION = 300
     }
 }
