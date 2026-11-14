@@ -8,6 +8,7 @@ interface ProfileOwnerManager {
     val isProfileOwner: Flow<Boolean>
     val hasWorkProfile: Flow<Boolean>
     val isInsideWorkProfile: Boolean
+    val isAppDeviceOwner: Boolean
     val isWorkProfileQuietMode: Flow<Boolean>
     val workProfileCreateIntent: Intent
 

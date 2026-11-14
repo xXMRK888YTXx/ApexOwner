@@ -23,4 +23,15 @@
     <string name="work_profile_host_banner">Управление из личного профиля. Для расширенного доступа можно открыть приложение в рабочем профиле.</string>
     <string name="remove_work_profile_btn">Удалить рабочий профиль</string>
     <string name="remove_work_profile_success">Рабочий профиль успешно удален</string>
+    <string name="uninstall_action">Удалить</string>
+    <string name="uninstall_dialog_title">Удаление приложения</string>
+    <string name="uninstall_dialog_message">Вы действительно хотите удалить приложение %1$s?</string>
+    <string name="freeze_not_supported_personal">Заморозка в основном профиле недоступна (требуются права Device Owner)</string>
+    <string name="badge_user">Пользовательское</string>
+    <string name="clone_to_work_profile">Клонировать в рабочий профиль</string>
+    <string name="clone_to_personal_profile">Клонировать в личный профиль</string>
+    <string name="badge_in_work_profile">В рабочем профиле</string>
+    <string name="badge_in_personal_profile">В личном профиле</string>
+    <string name="app_management_title">Управление приложением</string>
+    <string name="cancel">Отмена</string>
 </resources>

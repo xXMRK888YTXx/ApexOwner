@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -25,30 +27,39 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Switch
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.xxmrk888ytxx.core.base.android.mvi.SideEffect
 import com.xxmrk888ytxx.core.base.compose.LocalNavigator
 import com.xxmrk888ytxx.core.base.compose.extension.HandleSideEffects
@@ -56,7 +67,6 @@ import com.xxmrk888ytxx.core.base.compose.ui.CoreTopBar
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileApp
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileScreenState
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileSideEffect
-import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileTab
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileUiEvent
 import kotlinx.coroutines.flow.Flow
 
@@ -75,23 +85,33 @@ fun WorkProfileScreen(
         }
     }
 
-    val currentList = when (state.selectedTab) {
-        WorkProfileTab.PROFILE_APPS -> state.profileApps
-        WorkProfileTab.CLONE_APPS -> state.personalApps
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                onEvent(WorkProfileUiEvent.OnRefresh)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
-    val filteredApps = remember(currentList, state.searchQuery, state.showSystemApps) {
-        currentList.filter { app ->
-            (state.showSystemApps || !app.isSystem || app.hasLauncher || app.isFrozen) &&
+    val filteredApps = remember(state.apps, state.searchQuery, state.showSystemApps) {
+        state.apps.filter { app ->
+            (state.showSystemApps || !app.isSystem) &&
                 (app.name.contains(state.searchQuery, ignoreCase = true) ||
                     app.packageName.contains(state.searchQuery, ignoreCase = true))
         }
     }
 
-    var showDeleteConfirmDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var selectedAppForManagement by remember { mutableStateOf<WorkProfileApp?>(null) }
 
+    // Dialog for removing the entire work profile
     if (showDeleteConfirmDialog) {
-        androidx.compose.material3.AlertDialog(
+        AlertDialog(
             onDismissRequest = { showDeleteConfirmDialog = false },
             title = { Text(stringResource(R.string.remove_work_profile_btn)) },
             text = { Text("Вы уверены, что хотите удалить рабочий профиль? Все данные и приложения внутри рабочего профиля будут стерты.") },
@@ -107,17 +127,57 @@ fun WorkProfileScreen(
                 }
             },
             dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { showDeleteConfirmDialog = false }) {
-                    Text("Отмена")
+                TextButton(onClick = { showDeleteConfirmDialog = false }) {
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
     }
 
+    // App Management Modal Bottom Sheet
+    selectedAppForManagement?.let { app ->
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = { selectedAppForManagement = null },
+            sheetState = sheetState
+        ) {
+            AppManagementSheetContent(
+                app = app,
+                state = state,
+                onLaunch = {
+                    onEvent(WorkProfileUiEvent.OnLaunchApp(app.packageName))
+                    selectedAppForManagement = null
+                },
+                onToggleFreeze = {
+                    onEvent(WorkProfileUiEvent.OnToggleFreezeApp(app.packageName, !app.isFrozen))
+                    selectedAppForManagement = null
+                },
+                onUninstall = {
+                    val target = app
+                    selectedAppForManagement = null
+                    onEvent(WorkProfileUiEvent.OnUninstallApp(target.packageName))
+                },
+                onClone = {
+                    onEvent(WorkProfileUiEvent.OnCloneApp(app.packageName))
+                    selectedAppForManagement = null
+                },
+                onDismiss = { selectedAppForManagement = null }
+            )
+        }
+    }
+
     Scaffold(
         topBar = {
             CoreTopBar(
-                title = { Text(stringResource(R.string.work_profile_title)) },
+                title = {
+                    Text(
+                        if (state.isInsideWorkProfile) {
+                            "Рабочий профиль (Shelter)"
+                        } else {
+                            "Личный профиль (Shelter)"
+                        }
+                    )
+                },
                 isShouldShowBackArrow = true,
                 onNavigateBack = { onEvent(WorkProfileUiEvent.OnNavigateBack) },
                 actions = {
@@ -142,6 +202,7 @@ fun WorkProfileScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            // Profile context switch banner
             if (!state.isInsideWorkProfile && state.hasWorkProfile) {
                 Card(
                     modifier = Modifier
@@ -176,51 +237,7 @@ fun WorkProfileScreen(
                 }
             }
 
-            val profileAppsCount = remember(state.profileApps, state.showSystemApps) {
-                state.profileApps.count { state.showSystemApps || !it.isSystem || it.hasLauncher || it.isFrozen }
-            }
-            val personalAppsCount = remember(state.personalApps, state.showSystemApps) {
-                state.personalApps.count { state.showSystemApps || !it.isSystem || it.hasLauncher || it.isFrozen }
-            }
-
-            SecondaryTabRow(
-                state.selectedTab.ordinal,
-                Modifier.fillMaxWidth(),
-                TabRowDefaults.primaryContainerColor,
-                TabRowDefaults.primaryContentColor,
-                @Composable { tabPositions ->
-                    if (state.selectedTab.ordinal < tabPositions.size) {
-                        TabRowDefaults.SecondaryIndicator(
-                            Modifier.tabIndicatorOffset(tabPositions[state.selectedTab.ordinal])
-                        )
-                    }
-                },
-                @Composable { HorizontalDivider() },
-                {
-                    Tab(
-                        selected = state.selectedTab == WorkProfileTab.PROFILE_APPS,
-                        onClick = { onEvent(WorkProfileUiEvent.OnTabSelected(WorkProfileTab.PROFILE_APPS)) },
-                        text = {
-                            Text(
-                                "${stringResource(R.string.profile_apps_tab)} ($profileAppsCount)"
-                            )
-                        }
-                    )
-                    Tab(
-                        selected = state.selectedTab == WorkProfileTab.CLONE_APPS,
-                        onClick = { onEvent(WorkProfileUiEvent.OnTabSelected(WorkProfileTab.CLONE_APPS)) },
-                        text = {
-                            Text(
-                                if (state.isInsideWorkProfile) {
-                                    stringResource(R.string.clone_apps_tab)
-                                } else {
-                                    "${stringResource(R.string.clone_apps_tab)} ($personalAppsCount)"
-                                }
-                            )
-                        }
-                    )
-                })
-
+            // Search bar
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -250,14 +267,24 @@ fun WorkProfileScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = stringResource(R.string.show_system_apps),
+                        text = "Приложений: ${filteredApps.size}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary
                     )
-                    Switch(
-                        checked = state.showSystemApps,
-                        onCheckedChange = { onEvent(WorkProfileUiEvent.OnToggleSystemApps(it)) }
-                    )
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = stringResource(R.string.show_system_apps),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(
+                            checked = state.showSystemApps,
+                            onCheckedChange = { onEvent(WorkProfileUiEvent.OnToggleSystemApps(it)) }
+                        )
+                    }
                 }
             }
 
@@ -272,45 +299,7 @@ fun WorkProfileScreen(
                 }
             }
 
-            if (state.selectedTab == WorkProfileTab.CLONE_APPS && state.isInsideWorkProfile) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "💼",
-                                style = MaterialTheme.typography.headlineLarge
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                text = stringResource(R.string.clone_apps_tab),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Клонирование приложений осуществляется из основного профиля. Откройте ApexOwner в основном профиле для клонирования приложений в рабочий профиль.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            } else if (filteredApps.isEmpty()) {
+            if (filteredApps.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -336,16 +325,8 @@ fun WorkProfileScreen(
                     ) { app ->
                         AppListItem(
                             app = app,
-                            tab = state.selectedTab,
-                            onToggleFreeze = {
-                                onEvent(WorkProfileUiEvent.OnToggleFreezeApp(app.packageName, !app.isFrozen))
-                            },
-                            onClone = {
-                                onEvent(WorkProfileUiEvent.OnCloneApp(app.packageName))
-                            },
-                            onLaunch = {
-                                onEvent(WorkProfileUiEvent.OnLaunchApp(app.packageName))
-                            }
+                            isInsideWorkProfile = state.isInsideWorkProfile,
+                            onClick = { selectedAppForManagement = app }
                         )
                     }
                     item {
@@ -360,13 +341,13 @@ fun WorkProfileScreen(
 @Composable
 private fun AppListItem(
     app: WorkProfileApp,
-    tab: WorkProfileTab,
-    onToggleFreeze: () -> Unit,
-    onClone: () -> Unit,
-    onLaunch: () -> Unit
+    isInsideWorkProfile: Boolean,
+    onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (app.isFrozen) {
@@ -421,90 +402,30 @@ private fun AppListItem(
                         )
                     }
 
-                    if (tab == WorkProfileTab.PROFILE_APPS) {
-                        if (app.isFrozen) {
-                            BadgeTag(
-                                text = stringResource(R.string.badge_frozen),
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                        } else {
-                            BadgeTag(
-                                text = stringResource(R.string.badge_active),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            when (tab) {
-                WorkProfileTab.PROFILE_APPS -> {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = onLaunch) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_play),
-                                contentDescription = stringResource(R.string.launch_action),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-
-                        FilledTonalIconButton(
-                            onClick = onToggleFreeze,
-                            colors = if (app.isFrozen) {
-                                androidx.compose.material3.IconButtonDefaults.filledTonalIconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                                )
-                            } else {
-                                androidx.compose.material3.IconButtonDefaults.filledTonalIconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.errorContainer
-                                )
-                            }
-                        ) {
-                            Icon(
-                                painter = painterResource(
-                                    if (app.isFrozen) R.drawable.ic_wb_sunny else R.drawable.ic_ac_unit
-                                ),
-                                contentDescription = if (app.isFrozen) {
-                                    stringResource(R.string.unfreeze_action)
-                                } else {
-                                    stringResource(R.string.freeze_action)
-                                },
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                }
-
-                WorkProfileTab.CLONE_APPS -> {
-                    if (app.isInstalledInWorkProfile) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(end = 4.dp)
-                        ) {
-                            BadgeTag(
-                                text = "В профиле",
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        }
+                    if (app.isFrozen) {
+                        BadgeTag(
+                            text = stringResource(R.string.badge_frozen),
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                        )
                     } else {
-                        Button(
-                            onClick = onClone,
-                            contentPadding = ButtonDefaults.ContentPadding
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_add),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(stringResource(R.string.clone_action))
-                        }
+                        BadgeTag(
+                            text = stringResource(R.string.badge_active),
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+
+                    if (app.isInstalledInOtherProfile) {
+                        BadgeTag(
+                            text = if (isInsideWorkProfile) {
+                                stringResource(R.string.badge_in_personal_profile)
+                            } else {
+                                stringResource(R.string.badge_in_work_profile)
+                            },
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
                     }
                 }
             }
@@ -513,10 +434,202 @@ private fun AppListItem(
 }
 
 @Composable
+private fun AppManagementSheetContent(
+    app: WorkProfileApp,
+    state: WorkProfileScreenState,
+    onLaunch: () -> Unit,
+    onToggleFreeze: () -> Unit,
+    onUninstall: () -> Unit,
+    onClone: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val canFreeze = state.canFreezeInCurrentProfile
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 36.dp, top = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AppIconImage(
+            packageName = app.packageName,
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(14.dp))
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = app.name,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+
+        Text(
+            text = app.packageName,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            BadgeTag(
+                text = if (app.isSystem) stringResource(R.string.badge_system) else stringResource(R.string.badge_user),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            if (app.isFrozen) {
+                BadgeTag(
+                    text = stringResource(R.string.badge_frozen),
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            } else {
+                BadgeTag(
+                    text = stringResource(R.string.badge_active),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+
+            if (app.isInstalledInOtherProfile) {
+                BadgeTag(
+                    text = if (state.isInsideWorkProfile) {
+                        stringResource(R.string.badge_in_personal_profile)
+                    } else {
+                        stringResource(R.string.badge_in_work_profile)
+                    },
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(18.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(18.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Launch Action
+            Button(
+                onClick = onLaunch,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_play),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.launch_action))
+            }
+
+            // Clone to other profile Action
+            Button(
+                onClick = onClone,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_add),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    if (state.isInsideWorkProfile) {
+                        stringResource(R.string.clone_to_personal_profile)
+                    } else {
+                        stringResource(R.string.clone_to_work_profile)
+                    }
+                )
+            }
+
+            // Freeze / Unfreeze Action
+            if (canFreeze) {
+                FilledTonalButton(
+                    onClick = onToggleFreeze,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = if (app.isFrozen) {
+                        ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    } else {
+                        ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            if (app.isFrozen) R.drawable.ic_wb_sunny else R.drawable.ic_ac_unit
+                        ),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        stringResource(if (app.isFrozen) R.string.unfreeze_action else R.string.freeze_action)
+                    )
+                }
+            } else {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f)
+                    )
+                ) {
+                    Text(
+                        text = stringResource(R.string.freeze_not_supported_personal),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(12.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            // Uninstall Action
+            OutlinedButton(
+                onClick = onUninstall,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text(
+                    text = "🗑️ ${stringResource(R.string.uninstall_action)}",
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun BadgeTag(
     text: String,
-    containerColor: androidx.compose.ui.graphics.Color,
-    contentColor: androidx.compose.ui.graphics.Color
+    containerColor: Color,
+    contentColor: Color
 ) {
     Box(
         modifier = Modifier

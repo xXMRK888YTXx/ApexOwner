@@ -1,7 +1,10 @@
 package com.xxmrk888ytxx.apexowner.bridge
 
+import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageInstaller
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -12,6 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -43,7 +47,7 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
                     }
                 }
                 PackageInstaller.STATUS_SUCCESS -> {
-                    Toast.makeText(this, "Приложение успешно установлено в рабочий профиль", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Приложение успешно установлено", Toast.LENGTH_SHORT).show()
                 }
                 else -> {
                     val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) ?: "Ошибка установки"
@@ -92,6 +96,12 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
                     )
                 }
 
+                ACTION_CLONE_TO_PERSONAL -> {
+                    val apkPath = intent?.getStringExtra(EXTRA_APK_PATH)
+                    val splitPaths = intent?.getStringArrayExtra(EXTRA_SPLIT_PATHS)
+                    installInCurrentProfile(packageName, apkPath, splitPaths)
+                }
+
                 ACTION_FREEZE_APP -> {
                     profileOwnerManager.setApplicationHidden(packageName, true).fold(
                         onSuccess = {
@@ -118,8 +128,71 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
         }
     }
 
+    private fun installInCurrentProfile(
+        packageName: String,
+        explicitApkPath: String?,
+        explicitSplitPaths: Array<String>?
+    ) {
+        try {
+            val pm = packageManager
+            val sourceDir = explicitApkPath ?: try {
+                pm.getApplicationInfo(packageName, PackageManager.MATCH_UNINSTALLED_PACKAGES).sourceDir
+            } catch (_: Exception) {
+                null
+            }
+
+            if (sourceDir == null) {
+                Toast.makeText(this, "Не удалось найти файл APK для $packageName", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val packageInstaller = pm.packageInstaller
+            val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
+            params.setAppPackageName(packageName)
+            val sessionId = packageInstaller.createSession(params)
+            val session = packageInstaller.openSession(sessionId)
+
+            val baseFile = File(sourceDir)
+            baseFile.inputStream().use { input ->
+                session.openWrite("base.apk", 0, baseFile.length()).use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            explicitSplitPaths?.forEachIndexed { index, splitPath ->
+                val splitFile = File(splitPath)
+                if (splitFile.exists()) {
+                    splitFile.inputStream().use { input ->
+                        session.openWrite("split_$index.apk", 0, splitFile.length()).use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                }
+            }
+
+            val callbackIntent = Intent().apply {
+                component = ComponentName(this@WorkProfileDispatcherActivity, PackageInstallerReceiver::class.java)
+                action = ACTION_INSTALL_CALLBACK
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                this,
+                sessionId,
+                callbackIntent,
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            session.commit(pendingIntent.intentSender)
+            session.close()
+            Logger.writeDebugLog("PackageInstaller session committed for $packageName in current profile")
+        } catch (e: Exception) {
+            Logger.writeErrorLog("PackageInstaller failed for $packageName: ${e.message}")
+            Toast.makeText(this, "Ошибка установки: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     companion object {
         const val ACTION_CLONE_APP = "com.xxmrk888ytxx.apexowner.ACTION_CLONE_APP"
+        const val ACTION_CLONE_TO_PERSONAL = "com.xxmrk888ytxx.apexowner.ACTION_CLONE_TO_PERSONAL"
         const val ACTION_FREEZE_APP = "com.xxmrk888ytxx.apexowner.ACTION_FREEZE_APP"
         const val ACTION_UNFREEZE_APP = "com.xxmrk888ytxx.apexowner.ACTION_UNFREEZE_APP"
         const val ACTION_REMOVE_WORK_PROFILE = "com.xxmrk888ytxx.apexowner.ACTION_REMOVE_WORK_PROFILE"

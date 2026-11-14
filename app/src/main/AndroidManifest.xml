@@ -7,6 +7,10 @@
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <uses-permission
+        android:name="android.permission.DELETE_PACKAGES"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:allowBackup="false"
@@ -37,6 +41,7 @@
             android:noHistory="true">
             <intent-filter>
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_CLONE_APP" />
+                <action android:name="com.xxmrk888ytxx.apexowner.ACTION_CLONE_TO_PERSONAL" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_FREEZE_APP" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_UNFREEZE_APP" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_REMOVE_WORK_PROFILE" />
@@ -50,6 +55,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_INSTALL_CALLBACK" />
+                <action android:name="com.xxmrk888ytxx.apexowner.ACTION_UNINSTALL_CALLBACK" />
             </intent-filter>
         </receiver>
 

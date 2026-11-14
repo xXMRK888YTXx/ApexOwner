@@ -55,6 +55,9 @@ internal class WorkProfileOwnerComponentManagerImpl @Inject constructor(
         .asStateFlow()
         .onSubscription { updateProfileOwnerState() }
 
+    override val isAppDeviceOwner: Boolean
+        get() = checkIsAppDeviceOwner()
+
     override val isInsideWorkProfile: Boolean
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             userManager?.isManagedProfile ?: false
@@ -102,6 +105,7 @@ internal class WorkProfileOwnerComponentManagerImpl @Inject constructor(
                 devicePolicyManager.clearCrossProfileIntentFilters(deviceOwnerReceiver)
                 listOf(
                     "com.xxmrk888ytxx.apexowner.ACTION_CLONE_APP",
+                    "com.xxmrk888ytxx.apexowner.ACTION_CLONE_TO_PERSONAL",
                     "com.xxmrk888ytxx.apexowner.ACTION_FREEZE_APP",
                     "com.xxmrk888ytxx.apexowner.ACTION_UNFREEZE_APP",
                     "com.xxmrk888ytxx.apexowner.ACTION_REMOVE_WORK_PROFILE"
