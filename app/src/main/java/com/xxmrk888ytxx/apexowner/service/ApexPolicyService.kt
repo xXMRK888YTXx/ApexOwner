@@ -1,6 +1,7 @@
 package com.xxmrk888ytxx.apexowner.service
 
 import android.app.Service
+import android.app.admin.DevicePolicyManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -8,6 +9,7 @@ import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.os.UserManager
 import androidx.core.content.ContextCompat
 import com.xxmrk888ytxx.apexowner.R
 import com.xxmrk888ytxx.core.base.android.extension.buildForegroundServiceNotificationChannel
@@ -76,6 +78,18 @@ class ApexPolicyService : Service() {
     override fun onCreate() {
         super.onCreate()
         Logger.writeDebugLog("ApexPolicyService: onCreate")
+        if (!shouldServiceRun(this)) {
+            Logger.writeDebugLog("ApexPolicyService: shouldServiceRun is false in this profile, stopping self")
+            startForegroundInternal()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+            }
+            stopSelf()
+            return
+        }
         startForegroundInternal()
         registerPackageReceiver()
         registerShutdownReceiver()
@@ -91,6 +105,17 @@ class ApexPolicyService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Logger.writeDebugLog("ApexPolicyService: onStartCommand")
+        if (!shouldServiceRun(this)) {
+            Logger.writeDebugLog("ApexPolicyService: onStartCommand with shouldServiceRun=false, stopping")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+            }
+            stopSelf()
+            return START_NOT_STICKY
+        }
         startForegroundInternal()
         return START_STICKY
     }
@@ -184,7 +209,30 @@ class ApexPolicyService : Service() {
         private const val CHANNEL_ID = "apex_policy_service_channel"
         private const val NOTIFICATION_ID = 1001
 
+        fun shouldServiceRun(context: Context): Boolean {
+            val dpm = context.getSystemService(DEVICE_POLICY_SERVICE) as? DevicePolicyManager
+            val userManager = context.getSystemService(USER_SERVICE) as? UserManager
+            val packageName = context.packageName
+
+            val isDeviceOwner = dpm?.isDeviceOwnerApp(packageName) == true
+            val isProfileOwner = dpm?.isProfileOwnerApp(packageName) == true
+            val isManagedProfile = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                userManager?.isManagedProfile == true
+            } else {
+                isProfileOwner && !isDeviceOwner
+            }
+
+            // In work profile (managed profile / profile owner), the service is needed.
+            // In main profile (personal profile), the service is needed ONLY if the app is Device Owner.
+            return isManagedProfile || isProfileOwner || isDeviceOwner
+        }
+
         fun start(context: Context) {
+            if (!shouldServiceRun(context)) {
+                Logger.writeDebugLog("ApexPolicyService.start: service should not run in current profile, stopping any running instance")
+                stop(context)
+                return
+            }
             try {
                 val intent = Intent(context, ApexPolicyService::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -194,6 +242,15 @@ class ApexPolicyService : Service() {
                 }
             } catch (e: Exception) {
                 Logger.writeErrorLog("Failed to start ApexPolicyService: ${e.message}")
+            }
+        }
+
+        fun stop(context: Context) {
+            try {
+                val intent = Intent(context, ApexPolicyService::class.java)
+                context.stopService(intent)
+            } catch (e: Exception) {
+                Logger.writeErrorLog("Failed to stop ApexPolicyService: ${e.message}")
             }
         }
     }
