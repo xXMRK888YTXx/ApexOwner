@@ -34,6 +34,22 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity>
+
+        <activity
+            android:name=".view.oneshot.OneShotQuickLauncherActivity"
+            android:exported="true"
+            android:theme="@style/Theme.ApexOwner.Translucent"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <activity
@@ -52,6 +68,9 @@
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_OPEN_RESTRICTIONS" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_OPEN_PERMISSIONS" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_INSTALL_CALLBACK" />
+                <action android:name="com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_ONE_SHOT" />
+                <action android:name="com.xxmrk888ytxx.apexowner.ACTION_RESET_ONE_SHOT" />
+                <action android:name="com.xxmrk888ytxx.apexowner.ACTION_LAUNCH_APP" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

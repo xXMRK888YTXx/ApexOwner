@@ -7,5 +7,6 @@ data class WorkProfileApp(
     val isFrozen: Boolean,
     val isInstalledInWorkProfile: Boolean,
     val hasLauncher: Boolean = true,
-    val isInstalledInOtherProfile: Boolean = false
+    val isInstalledInOtherProfile: Boolean = false,
+    val isOneShot: Boolean = false
 )

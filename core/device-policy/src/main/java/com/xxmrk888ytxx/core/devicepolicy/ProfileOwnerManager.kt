@@ -26,6 +26,7 @@ interface ProfileOwnerManager {
     fun isApplicationHidden(packageName: String): Boolean
     suspend fun setPackageSuspended(packageName: String, isSuspended: Boolean): Result<Unit>
     fun isPackageSuspended(packageName: String): Boolean
+    suspend fun clearApplicationUserData(packageName: String): Result<Unit>
 
     suspend fun setWorkProfileQuietMode(isQuietMode: Boolean): Result<Unit>
     suspend fun removeWorkProfile(): Result<Unit>

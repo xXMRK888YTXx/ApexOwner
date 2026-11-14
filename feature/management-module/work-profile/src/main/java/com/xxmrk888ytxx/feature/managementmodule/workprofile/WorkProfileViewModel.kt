@@ -83,6 +83,8 @@ class WorkProfileViewModel @Inject constructor(
                     contract.openAppPermissions(event.packageName, event.appName)
                 }
             }
+            is WorkProfileUiEvent.OnToggleOneShot -> toggleOneShot(event.packageName, event.isOneShot)
+            is WorkProfileUiEvent.OnResetOneShot -> resetOneShot(event.packageName)
         }
     }
 
@@ -92,6 +94,41 @@ class WorkProfileViewModel @Inject constructor(
             contract.toggleFreeze(packageName, shouldFreeze).fold(
                 onSuccess = {
                     sendToastSideEffect(R.string.app_freeze_success.uiText())
+                    contract.refresh()
+                },
+                onFailure = {
+                    sendToastSideEffect(R.string.app_action_failed.uiText())
+                }
+            )
+            isLoading.value = false
+        }
+    }
+
+    private fun toggleOneShot(packageName: String, isOneShot: Boolean) {
+        viewModelScope.launch {
+            isLoading.value = true
+            contract.toggleOneShot(packageName, isOneShot).fold(
+                onSuccess = {
+                    sendToastSideEffect(
+                        if (isOneShot) R.string.one_shot_enabled.uiText()
+                        else R.string.one_shot_disabled.uiText()
+                    )
+                    contract.refresh()
+                },
+                onFailure = {
+                    sendToastSideEffect(R.string.app_action_failed.uiText())
+                }
+            )
+            isLoading.value = false
+        }
+    }
+
+    private fun resetOneShot(packageName: String) {
+        viewModelScope.launch {
+            isLoading.value = true
+            contract.resetOneShot(packageName).fold(
+                onSuccess = {
+                    sendToastSideEffect(R.string.one_shot_reset_success.uiText())
                     contract.refresh()
                 },
                 onFailure = {

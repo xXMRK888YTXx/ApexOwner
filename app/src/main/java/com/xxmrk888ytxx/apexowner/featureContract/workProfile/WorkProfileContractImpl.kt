@@ -16,6 +16,7 @@ import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
 import com.xxmrk888ytxx.apexowner.view.mainActivity.MainActivity
 import com.xxmrk888ytxx.core.base.android.logs.Logger
+import com.xxmrk888ytxx.core.devicepolicy.OneShotAppManagerOwnerComponent
 import com.xxmrk888ytxx.core.devicepolicy.ProfileOwnerManager
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.contract.WorkProfileContract
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileApp
@@ -31,6 +32,7 @@ import javax.inject.Inject
 class WorkProfileContractImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val profileOwnerManager: ProfileOwnerManager,
+    private val oneShotAppManagerOwnerComponent: OneShotAppManagerOwnerComponent,
     private val navigationManager: NavigationManager
 ) : WorkProfileContract {
 
@@ -195,6 +197,13 @@ class WorkProfileContractImpl @Inject constructor(
 
     override suspend fun launchApp(packageName: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+            if (oneShotAppManagerOwnerComponent.isOneShotApp(packageName)) {
+                val res = oneShotAppManagerOwnerComponent.launchOneShotApp(packageName)
+                if (res.isSuccess) {
+                    refresh()
+                }
+                return@withContext res
+            }
             if (profileOwnerManager.isInsideWorkProfile && profileOwnerManager.isApplicationHidden(packageName)) {
                 profileOwnerManager.setApplicationHidden(packageName, false)
             }
@@ -202,6 +211,7 @@ class WorkProfileContractImpl @Inject constructor(
             if (launchIntent != null) {
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(launchIntent)
+                refresh()
                 Result.success(Unit)
             } else {
                 Result.failure(IllegalStateException("No launch intent found for $packageName"))
@@ -289,7 +299,8 @@ class WorkProfileContractImpl @Inject constructor(
                     isFrozen = isFrozen,
                     isInstalledInWorkProfile = true,
                     hasLauncher = hasLauncher,
-                    isInstalledInOtherProfile = false
+                    isInstalledInOtherProfile = false,
+                    isOneShot = oneShotAppManagerOwnerComponent.isOneShotApp(pkg)
                 )
             }
             .sortedBy { it.name.lowercase() }
@@ -325,7 +336,8 @@ class WorkProfileContractImpl @Inject constructor(
                     isFrozen = false,
                     isInstalledInWorkProfile = isInstalledInWork,
                     hasLauncher = hasLauncher,
-                    isInstalledInOtherProfile = isInstalledInWork
+                    isInstalledInOtherProfile = isInstalledInWork,
+                    isOneShot = oneShotAppManagerOwnerComponent.isOneShotApp(pkg)
                 )
             }
             .sortedBy { it.name.lowercase() }
@@ -334,4 +346,57 @@ class WorkProfileContractImpl @Inject constructor(
     override suspend fun openAppPermissions(packageName: String, appName: String) {
         navigationManager.navigate(Screen.AppPermissionsModuleScreen(packageName, appName))
     }
+
+    override suspend fun toggleOneShot(packageName: String, isOneShot: Boolean): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            if (profileOwnerManager.isInsideWorkProfile || profileOwnerManager.isAppDeviceOwner) {
+                val result = oneShotAppManagerOwnerComponent.setOneShotApp(packageName, isOneShot)
+                if (result.isSuccess) {
+                    refresh()
+                }
+                result
+            } else {
+                try {
+                    val intent = Intent(WorkProfileDispatcherActivity.ACTION_TOGGLE_ONE_SHOT).apply {
+                        addCategory(Intent.CATEGORY_DEFAULT)
+                        putExtra(WorkProfileDispatcherActivity.EXTRA_PACKAGE_NAME, packageName)
+                        putExtra(WorkProfileDispatcherActivity.EXTRA_IS_ONE_SHOT, isOneShot)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                    delay(500)
+                    refresh()
+                    Result.success(Unit)
+                } catch (e: Exception) {
+                    Logger.writeErrorLog("Failed to dispatch toggle one-shot intent: ${e.message}")
+                    Result.failure(e)
+                }
+            }
+        }
+
+    override suspend fun resetOneShot(packageName: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            if (profileOwnerManager.isInsideWorkProfile || profileOwnerManager.isAppDeviceOwner) {
+                val result = oneShotAppManagerOwnerComponent.resetOneShotApp(packageName)
+                if (result.isSuccess) {
+                    refresh()
+                }
+                result
+            } else {
+                try {
+                    val intent = Intent(WorkProfileDispatcherActivity.ACTION_RESET_ONE_SHOT).apply {
+                        addCategory(Intent.CATEGORY_DEFAULT)
+                        putExtra(WorkProfileDispatcherActivity.EXTRA_PACKAGE_NAME, packageName)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                    delay(500)
+                    refresh()
+                    Result.success(Unit)
+                } catch (e: Exception) {
+                    Logger.writeErrorLog("Failed to dispatch reset one-shot intent: ${e.message}")
+                    Result.failure(e)
+                }
+            }
+        }
 }

@@ -1,5 +1,6 @@
 package com.xxmrk888ytxx.apexowner.featureContract.main
 
+import com.xxmrk888ytxx.core.base.android.logs.Logger
 import com.xxmrk888ytxx.core.devicepolicy.DeviceOwnerManager
 import com.xxmrk888ytxx.core.devicepolicy.model.PolicyOperatingMode
 import com.xxmrk888ytxx.feature.main.contract.DeviceOwnerStateProviderContract
@@ -26,6 +27,15 @@ class DeviceOwnerStateProviderContractImpl @Inject constructor(
 
     override val isWorkProfileQuietMode: Flow<Boolean> = deviceOwnerManager.isWorkProfileQuietMode
 
-    override suspend fun setWorkProfileQuietMode(isQuietMode: Boolean): Result<Unit> =
-        deviceOwnerManager.setWorkProfileQuietMode(isQuietMode)
+    override suspend fun setWorkProfileQuietMode(isQuietMode: Boolean): Result<Unit> {
+        if (isQuietMode) {
+            try {
+                Logger.writeDebugLog("DeviceOwnerStateProviderContractImpl: resetting one-shot apps before quiet mode")
+                deviceOwnerManager.resetOneShotApps()
+            } catch (e: Exception) {
+                Logger.writeErrorLog("Failed to reset one-shot apps before quiet mode: ${e.message}")
+            }
+        }
+        return deviceOwnerManager.setWorkProfileQuietMode(isQuietMode)
+    }
 }

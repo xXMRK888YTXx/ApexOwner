@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.xxmrk888ytxx.apexowner.view.mainActivity.MainActivity
 import com.xxmrk888ytxx.core.base.android.logs.Logger
+import com.xxmrk888ytxx.core.devicepolicy.OneShotAppManagerOwnerComponent
 import com.xxmrk888ytxx.core.devicepolicy.ProfileOwnerManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +23,9 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
 
     @Inject
     lateinit var profileOwnerManager: ProfileOwnerManager
+
+    @Inject
+    lateinit var oneShotAppManagerOwnerComponent: OneShotAppManagerOwnerComponent
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -146,6 +150,45 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
                         }
                     )
                 }
+
+                ACTION_TOGGLE_ONE_SHOT -> {
+                    val isOneShot = intent?.getBooleanExtra(EXTRA_IS_ONE_SHOT, false) ?: false
+                    oneShotAppManagerOwnerComponent.setOneShotApp(packageName, isOneShot).fold(
+                        onSuccess = {
+                            val msg = if (isOneShot) "One-shot режим включен" else "One-shot режим выключен"
+                            Toast.makeText(this@WorkProfileDispatcherActivity, msg, Toast.LENGTH_SHORT).show()
+                        },
+                        onFailure = {
+                            Toast.makeText(this@WorkProfileDispatcherActivity, "Ошибка: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+
+                ACTION_RESET_ONE_SHOT -> {
+                    oneShotAppManagerOwnerComponent.resetOneShotApp(packageName).fold(
+                        onSuccess = {
+                            Toast.makeText(this@WorkProfileDispatcherActivity, "Данные сброшены и приложение заморожено", Toast.LENGTH_SHORT).show()
+                        },
+                        onFailure = {
+                            Toast.makeText(this@WorkProfileDispatcherActivity, "Ошибка: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+
+                ACTION_LAUNCH_APP -> {
+                    if (oneShotAppManagerOwnerComponent.isOneShotApp(packageName)) {
+                        oneShotAppManagerOwnerComponent.launchOneShotApp(packageName)
+                    } else {
+                        if (profileOwnerManager.isApplicationHidden(packageName)) {
+                            profileOwnerManager.setApplicationHidden(packageName, false)
+                        }
+                        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+                        if (launchIntent != null) {
+                            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            startActivity(launchIntent)
+                        }
+                    }
+                }
             }
             finish()
         }
@@ -225,7 +268,11 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
         const val ACTION_OPEN_RESTRICTIONS = "com.xxmrk888ytxx.apexowner.ACTION_OPEN_RESTRICTIONS"
         const val ACTION_OPEN_PERMISSIONS = "com.xxmrk888ytxx.apexowner.ACTION_OPEN_PERMISSIONS"
         const val ACTION_INSTALL_CALLBACK = "com.xxmrk888ytxx.apexowner.ACTION_INSTALL_CALLBACK"
+        const val ACTION_TOGGLE_ONE_SHOT = "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_ONE_SHOT"
+        const val ACTION_RESET_ONE_SHOT = "com.xxmrk888ytxx.apexowner.ACTION_RESET_ONE_SHOT"
+        const val ACTION_LAUNCH_APP = "com.xxmrk888ytxx.apexowner.ACTION_LAUNCH_APP"
         const val EXTRA_PACKAGE_NAME = "EXTRA_PACKAGE_NAME"
+        const val EXTRA_IS_ONE_SHOT = "EXTRA_IS_ONE_SHOT"
         const val EXTRA_APK_PATH = "EXTRA_APK_PATH"
         const val EXTRA_SPLIT_PATHS = "EXTRA_SPLIT_PATHS"
     }

@@ -5,6 +5,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.UserHandle
 import com.xxmrk888ytxx.core.base.android.logs.Logger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +32,15 @@ internal class ApexDeviceOwnerReceiver : DeviceAdminReceiver() {
         if (intent.action == DevicePolicyManager.ACTION_MANAGED_PROFILE_PROVISIONED) {
             Logger.writeDebugLog("onReceive: ACTION_MANAGED_PROFILE_PROVISIONED")
             enableWorkProfile(context)
+        } else if (intent.action == Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE || intent.action == Intent.ACTION_SHUTDOWN) {
+            Logger.writeDebugLog("onReceive: ${intent.action}, resetting one-shot apps")
+            scope.launch {
+                try {
+                    deviceOwnerManager.resetOneShotApps()
+                } catch (e: Exception) {
+                    Logger.writeErrorLog("Failed to reset one-shot apps on ${intent.action}: ${e.message}")
+                }
+            }
         }
         super.onReceive(context, intent)
     }
@@ -51,6 +61,18 @@ internal class ApexDeviceOwnerReceiver : DeviceAdminReceiver() {
         super.onProfileProvisioningComplete(context, intent)
         Logger.writeDebugLog("onProfileProvisioningComplete")
         enableWorkProfile(context)
+    }
+
+    override fun onUserStopped(context: Context, intent: Intent, stoppedUser: UserHandle) {
+        super.onUserStopped(context, intent, stoppedUser)
+        Logger.writeDebugLog("onUserStopped: $stoppedUser")
+        scope.launch {
+            try {
+                deviceOwnerManager.resetOneShotApps()
+            } catch (e: Exception) {
+                Logger.writeErrorLog("Failed to reset one-shot apps in onUserStopped: ${e.message}")
+            }
+        }
     }
 
     private fun enableWorkProfile(context: Context) {
@@ -86,7 +108,10 @@ internal class ApexDeviceOwnerReceiver : DeviceAdminReceiver() {
                 "com.xxmrk888ytxx.apexowner.ACTION_UNFREEZE_APP",
                 "com.xxmrk888ytxx.apexowner.ACTION_REMOVE_WORK_PROFILE",
                 "com.xxmrk888ytxx.apexowner.ACTION_OPEN_RESTRICTIONS",
-                "com.xxmrk888ytxx.apexowner.ACTION_OPEN_PERMISSIONS"
+                "com.xxmrk888ytxx.apexowner.ACTION_OPEN_PERMISSIONS",
+                "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_ONE_SHOT",
+                "com.xxmrk888ytxx.apexowner.ACTION_RESET_ONE_SHOT",
+                "com.xxmrk888ytxx.apexowner.ACTION_LAUNCH_APP"
             ).forEach { actionStr ->
                 val filter = android.content.IntentFilter(actionStr).apply {
                     addCategory(Intent.CATEGORY_DEFAULT)

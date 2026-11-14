@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
+import androidx.core.content.ContextCompat
 import com.xxmrk888ytxx.core.base.android.logs.Logger
 import com.xxmrk888ytxx.core.devicepolicy.WorkProfileOwnerComponentManager
 import com.xxmrk888ytxx.core.devicepolicy.exception.AppNotProfileOwnerException
@@ -21,9 +22,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
+import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resume
 
 @Singleton
 internal class WorkProfileOwnerComponentManagerImpl @Inject constructor(
@@ -110,7 +115,10 @@ internal class WorkProfileOwnerComponentManagerImpl @Inject constructor(
                     "com.xxmrk888ytxx.apexowner.ACTION_UNFREEZE_APP",
                     "com.xxmrk888ytxx.apexowner.ACTION_REMOVE_WORK_PROFILE",
                     "com.xxmrk888ytxx.apexowner.ACTION_OPEN_RESTRICTIONS",
-                    "com.xxmrk888ytxx.apexowner.ACTION_OPEN_PERMISSIONS"
+                    "com.xxmrk888ytxx.apexowner.ACTION_OPEN_PERMISSIONS",
+                    "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_ONE_SHOT",
+                    "com.xxmrk888ytxx.apexowner.ACTION_RESET_ONE_SHOT",
+                    "com.xxmrk888ytxx.apexowner.ACTION_LAUNCH_APP"
                 ).forEach { actionStr ->
                     val filter = IntentFilter(actionStr).apply {
                         addCategory(Intent.CATEGORY_DEFAULT)
@@ -306,6 +314,38 @@ internal class WorkProfileOwnerComponentManagerImpl @Inject constructor(
         } catch (_: Exception) {
             false
         }
+    }
+
+    override suspend fun clearApplicationUserData(packageName: String): Result<Unit> {
+        if (!checkCanManageOwnerPolicies()) {
+            return Result.failure(AppNotProfileOwnerException())
+        }
+        return withTimeoutOrNull(5000L) {
+            suspendCancellableCoroutine<Result<Unit>> { continuation ->
+                try {
+                    devicePolicyManager.clearApplicationUserData(
+                        deviceOwnerReceiver,
+                        packageName,
+                        ContextCompat.getMainExecutor(context)
+                    ) { pkg, succeeded ->
+                        if (continuation.isActive) {
+                            if (succeeded) {
+                                Logger.writeDebugLog("clearApplicationUserData succeeded for $pkg")
+                                continuation.resume(Result.success(Unit))
+                            } else {
+                                Logger.writeErrorLog("clearApplicationUserData failed for $pkg")
+                                continuation.resume(Result.failure(IllegalStateException("Failed to clear user data for $pkg")))
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Logger.writeErrorLog("clearApplicationUserData exception for $packageName: ${e.message}")
+                    if (continuation.isActive) {
+                        continuation.resume(Result.failure(e))
+                    }
+                }
+            }
+        } ?: Result.failure(TimeoutException("clearApplicationUserData timed out for $packageName"))
     }
 
     override suspend fun setWorkProfileQuietMode(isQuietMode: Boolean): Result<Unit> {

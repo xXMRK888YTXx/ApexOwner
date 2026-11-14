@@ -166,6 +166,19 @@ fun WorkProfileScreen(
                     selectedAppForManagement = null
                     onEvent(WorkProfileUiEvent.OnManagePermissions(target.packageName, target.name))
                 },
+                onToggleOneShot = { isOneShot ->
+                    onEvent(WorkProfileUiEvent.OnToggleOneShot(app.packageName, isOneShot))
+                    selectedAppForManagement = selectedAppForManagement?.copy(
+                        isOneShot = isOneShot,
+                        isFrozen = isOneShot || selectedAppForManagement!!.isFrozen
+                    )
+                },
+                onResetOneShot = {
+                    onEvent(WorkProfileUiEvent.OnResetOneShot(app.packageName))
+                    selectedAppForManagement = selectedAppForManagement?.copy(
+                        isFrozen = true
+                    )
+                },
                 onDismiss = { selectedAppForManagement = null }
             )
         }
@@ -411,6 +424,14 @@ private fun AppListItem(
                         )
                     }
 
+                    if (app.isOneShot) {
+                        BadgeTag(
+                            text = stringResource(R.string.badge_one_shot),
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
+
                     if (app.isFrozen) {
                         BadgeTag(
                             text = stringResource(R.string.badge_frozen),
@@ -463,6 +484,8 @@ private fun AppManagementSheetContent(
     onUninstall: () -> Unit,
     onClone: () -> Unit,
     onManagePermissions: () -> Unit,
+    onToggleOneShot: (Boolean) -> Unit,
+    onResetOneShot: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val canFreeze = state.canFreezeInCurrentProfile
@@ -508,6 +531,14 @@ private fun AppManagementSheetContent(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            if (app.isOneShot) {
+                BadgeTag(
+                    text = stringResource(R.string.badge_one_shot),
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            }
 
             if (app.isFrozen) {
                 BadgeTag(
@@ -625,6 +656,61 @@ private fun AppManagementSheetContent(
                     Text(
                         stringResource(if (app.isFrozen) R.string.unfreeze_action else R.string.freeze_action)
                     )
+                }
+
+                // One-shot Mode Toggle Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (app.isOneShot) {
+                            MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        }
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.one_shot_mode_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = stringResource(R.string.one_shot_mode_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Switch(
+                            checked = app.isOneShot,
+                            onCheckedChange = { onToggleOneShot(it) }
+                        )
+                    }
+                }
+
+                if (app.isOneShot) {
+                    FilledTonalButton(
+                        onClick = onResetOneShot,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_ac_unit),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.reset_and_freeze_action))
+                    }
                 }
             } else {
                 Card(

@@ -6,6 +6,7 @@ import com.xxmrk888ytxx.core.devicepolicy.model.PolicyOperatingMode
 import com.xxmrk888ytxx.core.devicepolicy.model.PolicyState
 import com.xxmrk888ytxx.core.devicepolicy.ownerComponent.BaseOwnerComponent
 import com.xxmrk888ytxx.core.devicepolicy.ownerComponent.DeviceRestrictionOwnerComponentManagerImpl
+import com.xxmrk888ytxx.core.devicepolicy.ownerComponent.OneShotAppManagerOwnerComponentImpl
 import com.xxmrk888ytxx.core.devicepolicy.ownerComponent.PermissionManagerOwnerComponentImpl
 import com.xxmrk888ytxx.core.devicepolicy.ownerComponent.WorkProfileOwnerComponentManagerImpl
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,13 +22,15 @@ internal class AndroidDeviceOwnerManager @Inject constructor(
     private val deviceRestrictionOwnerComponentManager: DeviceRestrictionOwnerComponentManagerImpl,
     private val workProfileOwnerComponentManagerImpl: WorkProfileOwnerComponentManagerImpl,
     private val permissionManagerOwnerComponentImpl: PermissionManagerOwnerComponentImpl,
+    private val oneShotAppManagerOwnerComponentImpl: OneShotAppManagerOwnerComponentImpl,
     devicePolicyManager: DevicePolicyManager,
     @ApplicationContext context: Context
 ) : BaseOwnerComponent(devicePolicyManager, context),
     DeviceOwnerManager,
     DeviceRestrictionOwnerComponentManager by deviceRestrictionOwnerComponentManager,
     WorkProfileOwnerComponentManager by workProfileOwnerComponentManagerImpl,
-    PermissionManagerOwnerComponent by permissionManagerOwnerComponentImpl {
+    PermissionManagerOwnerComponent by permissionManagerOwnerComponentImpl,
+    OneShotAppManagerOwnerComponent by oneShotAppManagerOwnerComponentImpl {
 
     override val isAppDeviceOwner: Boolean
         get() = checkIsAppDeviceOwner()

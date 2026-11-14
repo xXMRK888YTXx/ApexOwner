@@ -13,6 +13,7 @@ import com.xxmrk888ytxx.apexowner.R
 import com.xxmrk888ytxx.core.base.android.extension.buildForegroundServiceNotificationChannel
 import com.xxmrk888ytxx.core.base.android.extension.buildNotification
 import com.xxmrk888ytxx.core.base.android.logs.Logger
+import com.xxmrk888ytxx.core.devicepolicy.OneShotAppManagerOwnerComponent
 import com.xxmrk888ytxx.core.devicepolicy.PermissionManagerOwnerComponent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -20,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -28,8 +30,29 @@ class ApexPolicyService : Service() {
     @Inject
     lateinit var permissionManagerOwnerComponent: PermissionManagerOwnerComponent
 
+    @Inject
+    lateinit var oneShotAppManagerOwnerComponent: OneShotAppManagerOwnerComponent
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var isReceiverRegistered = false
+    private var isShutdownReceiverRegistered = false
+
+    private val shutdownReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val action = intent?.action ?: return
+            Logger.writeDebugLog("ApexPolicyService received shutdown action: $action")
+            if (action == Intent.ACTION_SHUTDOWN) {
+                runBlocking {
+                    try {
+                        Logger.writeDebugLog("ApexPolicyService resetting one-shot apps on ACTION_SHUTDOWN")
+                        oneShotAppManagerOwnerComponent.resetOneShotApps()
+                    } catch (e: Exception) {
+                        Logger.writeErrorLog("Failed to reset one-shot apps on ACTION_SHUTDOWN: ${e.message}")
+                    }
+                }
+            }
+        }
+    }
 
     private val packageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -55,6 +78,15 @@ class ApexPolicyService : Service() {
         Logger.writeDebugLog("ApexPolicyService: onCreate")
         startForegroundInternal()
         registerPackageReceiver()
+        registerShutdownReceiver()
+        serviceScope.launch {
+            try {
+                Logger.writeDebugLog("ApexPolicyService: resetting one-shot apps on service start")
+                oneShotAppManagerOwnerComponent.resetOneShotApps()
+            } catch (e: Exception) {
+                Logger.writeErrorLog("Failed to reset one-shot apps on service start: ${e.message}")
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -112,6 +144,18 @@ class ApexPolicyService : Service() {
         }
     }
 
+    private fun registerShutdownReceiver() {
+        if (isShutdownReceiverRegistered) return
+        val filter = IntentFilter(Intent.ACTION_SHUTDOWN)
+        try {
+            registerReceiver(shutdownReceiver, filter)
+            isShutdownReceiverRegistered = true
+            Logger.writeDebugLog("ApexPolicyService: shutdownReceiver successfully registered")
+        } catch (e: Exception) {
+            Logger.writeErrorLog("Failed to register shutdownReceiver in ApexPolicyService: ${e.message}")
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         Logger.writeDebugLog("ApexPolicyService: onDestroy")
@@ -121,6 +165,14 @@ class ApexPolicyService : Service() {
                 isReceiverRegistered = false
             } catch (e: Exception) {
                 Logger.writeErrorLog("Failed to unregister packageReceiver: ${e.message}")
+            }
+        }
+        if (isShutdownReceiverRegistered) {
+            try {
+                unregisterReceiver(shutdownReceiver)
+                isShutdownReceiverRegistered = false
+            } catch (e: Exception) {
+                Logger.writeErrorLog("Failed to unregister shutdownReceiver: ${e.message}")
             }
         }
         serviceScope.cancel()

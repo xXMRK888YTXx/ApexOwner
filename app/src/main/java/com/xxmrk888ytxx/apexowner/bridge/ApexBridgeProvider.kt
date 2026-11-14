@@ -8,11 +8,13 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import com.xxmrk888ytxx.core.base.android.logs.Logger
+import com.xxmrk888ytxx.core.devicepolicy.OneShotAppManagerOwnerComponent
 import com.xxmrk888ytxx.core.devicepolicy.ProfileOwnerManager
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 class ApexBridgeProvider : ContentProvider() {
@@ -21,6 +23,7 @@ class ApexBridgeProvider : ContentProvider() {
     @InstallIn(SingletonComponent::class)
     interface BridgeEntryPoint {
         fun profileOwnerManager(): ProfileOwnerManager
+        fun oneShotAppManagerOwnerComponent(): OneShotAppManagerOwnerComponent
     }
 
     override fun onCreate(): Boolean = true
@@ -134,6 +137,33 @@ class ApexBridgeProvider : ContentProvider() {
                 }
                 response.putBoolean(EXTRA_SUCCESS, result.isSuccess)
             }
+            METHOD_GET_ONE_SHOT_APPS -> {
+                try {
+                    val oneShotManager = entryPoint.oneShotAppManagerOwnerComponent()
+                    val packages = runBlocking { oneShotManager.oneShotAppPackages.first() }
+                    response.putStringArrayList(EXTRA_ONE_SHOT_PACKAGES, ArrayList(packages))
+                    response.putBoolean(EXTRA_SUCCESS, true)
+                } catch (e: Exception) {
+                    Logger.writeErrorLog("ApexBridgeProvider: failed to get one-shot apps: ${e.message}")
+                    response.putBoolean(EXTRA_SUCCESS, false)
+                    response.putString(EXTRA_ERROR, e.message)
+                }
+            }
+            METHOD_LAUNCH_ONE_SHOT_APP -> {
+                val packageName = arg ?: return null
+                try {
+                    val oneShotManager = entryPoint.oneShotAppManagerOwnerComponent()
+                    val result = runBlocking { oneShotManager.launchOneShotApp(packageName) }
+                    response.putBoolean(EXTRA_SUCCESS, result.isSuccess)
+                    if (result.isFailure) {
+                        response.putString(EXTRA_ERROR, result.exceptionOrNull()?.message)
+                    }
+                } catch (e: Exception) {
+                    Logger.writeErrorLog("ApexBridgeProvider: failed to launch one-shot app $packageName: ${e.message}")
+                    response.putBoolean(EXTRA_SUCCESS, false)
+                    response.putString(EXTRA_ERROR, e.message)
+                }
+            }
         }
         return response
     }
@@ -152,10 +182,13 @@ class ApexBridgeProvider : ContentProvider() {
         const val METHOD_GET_WORK_APPS = "getWorkApps"
         const val METHOD_GET_PERSONAL_APPS = "getPersonalApps"
         const val METHOD_REMOVE_WORK_PROFILE = "removeWorkProfile"
+        const val METHOD_GET_ONE_SHOT_APPS = "getOneShotApps"
+        const val METHOD_LAUNCH_ONE_SHOT_APP = "launchOneShotApp"
         const val METHOD_PING = "ping"
         const val EXTRA_SUCCESS = "extra_success"
         const val EXTRA_ERROR = "extra_error"
         const val EXTRA_APPS = "extra_apps"
+        const val EXTRA_ONE_SHOT_PACKAGES = "EXTRA_ONE_SHOT_PACKAGES"
         const val EXTRA_APK_PATH = "EXTRA_APK_PATH"
         const val EXTRA_SPLIT_PATHS = "EXTRA_SPLIT_PATHS"
     }

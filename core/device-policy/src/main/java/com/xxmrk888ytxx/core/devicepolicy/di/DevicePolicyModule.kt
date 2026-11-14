@@ -6,6 +6,7 @@ import androidx.core.content.getSystemService
 import com.xxmrk888ytxx.core.devicepolicy.AndroidDeviceOwnerManager
 import com.xxmrk888ytxx.core.devicepolicy.DeviceOwnerManager
 import com.xxmrk888ytxx.core.devicepolicy.DeviceRestrictionOwnerComponentManager
+import com.xxmrk888ytxx.core.devicepolicy.OneShotAppManagerOwnerComponent
 import com.xxmrk888ytxx.core.devicepolicy.PermissionManagerOwnerComponent
 import com.xxmrk888ytxx.core.devicepolicy.PolicyRoleProvider
 import com.xxmrk888ytxx.core.devicepolicy.ProfileOwnerManager
@@ -34,6 +35,9 @@ internal interface DevicePolicyModule {
 
     @Binds
     fun bindsPermissionManagerOwnerComponent(deviceOwnerManager: DeviceOwnerManager): PermissionManagerOwnerComponent
+
+    @Binds
+    fun bindsOneShotAppManagerOwnerComponent(deviceOwnerManager: DeviceOwnerManager): OneShotAppManagerOwnerComponent
 
     @Binds
     fun bindsWorkProfileOwnerManager(deviceOwnerManager: DeviceOwnerManager): WorkProfileOwnerComponentManager
