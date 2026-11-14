@@ -21,4 +21,13 @@ sealed interface Screen : NavKey {
 
     @Serializable
     data object WorkProfileModuleScreen : Screen
+
+    @Serializable
+    data object GlobalPermissionModuleScreen : Screen
+
+    @Serializable
+    data class AppPermissionsModuleScreen(
+        val packageName: String,
+        val appName: String
+    ) : Screen
 }

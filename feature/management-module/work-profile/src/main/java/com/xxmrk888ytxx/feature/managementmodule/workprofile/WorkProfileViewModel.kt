@@ -78,6 +78,11 @@ class WorkProfileViewModel @Inject constructor(
             WorkProfileUiEvent.OnRemoveWorkProfile -> removeWorkProfile()
             WorkProfileUiEvent.OnRefresh -> refresh()
             WorkProfileUiEvent.OnNavigateBack -> sendSideEffect(WorkProfileSideEffect.NavigateBack)
+            is WorkProfileUiEvent.OnManagePermissions -> {
+                viewModelScope.launch {
+                    contract.openAppPermissions(event.packageName, event.appName)
+                }
+            }
         }
     }
 

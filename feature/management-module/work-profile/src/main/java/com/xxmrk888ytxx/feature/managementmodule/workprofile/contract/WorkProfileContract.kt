@@ -19,4 +19,5 @@ interface WorkProfileContract {
     suspend fun uninstallApp(packageName: String): Result<Unit>
     suspend fun openWorkProfileApp(): Result<Unit>
     suspend fun removeWorkProfile(): Result<Unit>
+    suspend fun openAppPermissions(packageName: String, appName: String)
 }

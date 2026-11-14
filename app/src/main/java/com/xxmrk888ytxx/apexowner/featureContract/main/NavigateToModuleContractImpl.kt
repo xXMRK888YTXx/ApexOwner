@@ -45,4 +45,30 @@ class NavigateToModuleContractImpl @Inject constructor(
     override suspend fun toWorkProfileManagement() {
         navigationManager.navigate(Screen.WorkProfileModuleScreen)
     }
+
+    override suspend fun toGlobalPermissions() {
+        if (!profileOwnerManager.isInsideWorkProfile && !profileOwnerManager.isAppDeviceOwner) {
+            val workUser = profileOwnerManager.getWorkProfileUserHandle()
+            if (workUser != null) {
+                val intent = Intent("com.xxmrk888ytxx.apexowner.ACTION_OPEN_PERMISSIONS").apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                try {
+                    context.startActivity(intent)
+                    return
+                } catch (_: Exception) {
+                    val launcherApps =
+                        context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps
+                    launcherApps?.startMainActivity(
+                        ComponentName(context, MainActivity::class.java),
+                        workUser,
+                        null,
+                        null
+                    )
+                    return
+                }
+            }
+        }
+        navigationManager.navigate(Screen.GlobalPermissionModuleScreen)
+    }
 }

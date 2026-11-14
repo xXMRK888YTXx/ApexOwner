@@ -113,6 +113,13 @@ fun MainScreen(
             }
 
             item {
+                GlobalPermissionsCard(
+                    screenState = screenState,
+                    onClick = { onEvent(MainScreenEvent.OnGlobalPermissionsButtonClicked) }
+                )
+            }
+
+            item {
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
@@ -324,6 +331,77 @@ private fun DeviceOwnerRestrictionsCard(
         ) {
             Icon(
                 painter = painterResource(R.drawable.security),
+                contentDescription = null,
+                tint = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = desc,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Icon(
+                painter = painterResource(R.drawable.arrow_forward),
+                contentDescription = null,
+                tint = if (isEnabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outline.copy(
+                    alpha = 0.5f
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun GlobalPermissionsCard(
+    screenState: ScreenState,
+    onClick: () -> Unit
+) {
+    val isDeviceOwner = screenState.isDeviceOwner
+    val isProfileOwner = screenState.operatingMode == MainOperatingMode.PROFILE_OWNER
+    val hasWorkProfile = screenState.hasWorkProfile
+    val isEnabled = isDeviceOwner || isProfileOwner || hasWorkProfile
+
+    val title = when {
+        isDeviceOwner -> stringResource(R.string.global_permissions_title_device)
+        else -> stringResource(R.string.global_permissions_title_work_profile)
+    }
+
+    val desc = when {
+        isDeviceOwner -> stringResource(R.string.global_permissions_desc_device)
+        isProfileOwner || hasWorkProfile -> stringResource(R.string.global_permissions_desc_work_profile)
+        else -> stringResource(R.string.device_owner_not_granted_desc)
+    }
+
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = isEnabled, onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.shield),
                 contentDescription = null,
                 tint = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                 modifier = Modifier.size(32.dp)

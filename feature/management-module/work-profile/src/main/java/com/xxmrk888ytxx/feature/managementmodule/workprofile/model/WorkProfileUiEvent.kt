@@ -13,4 +13,5 @@ sealed interface WorkProfileUiEvent : UiEvent {
     data object OnNavigateBack : WorkProfileUiEvent
     data object OnOpenWorkProfileApp : WorkProfileUiEvent
     data object OnRemoveWorkProfile : WorkProfileUiEvent
+    data class OnManagePermissions(val packageName: String, val appName: String) : WorkProfileUiEvent
 }

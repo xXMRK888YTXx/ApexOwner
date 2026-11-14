@@ -12,6 +12,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import com.xxmrk888ytxx.apexowner.bridge.PackageInstallerReceiver
 import com.xxmrk888ytxx.apexowner.bridge.WorkProfileDispatcherActivity
+import com.xxmrk888ytxx.apexowner.core.navigation.Screen
+import com.xxmrk888ytxx.apexowner.domain.NavigationManager
 import com.xxmrk888ytxx.apexowner.view.mainActivity.MainActivity
 import com.xxmrk888ytxx.core.base.android.logs.Logger
 import com.xxmrk888ytxx.core.devicepolicy.ProfileOwnerManager
@@ -28,7 +30,8 @@ import javax.inject.Inject
 
 class WorkProfileContractImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val profileOwnerManager: ProfileOwnerManager
+    private val profileOwnerManager: ProfileOwnerManager,
+    private val navigationManager: NavigationManager
 ) : WorkProfileContract {
 
     private val packageManager: PackageManager = context.packageManager
@@ -326,5 +329,9 @@ class WorkProfileContractImpl @Inject constructor(
                 )
             }
             .sortedBy { it.name.lowercase() }
+    }
+
+    override suspend fun openAppPermissions(packageName: String, appName: String) {
+        navigationManager.navigate(Screen.AppPermissionsModuleScreen(packageName, appName))
     }
 }

@@ -88,4 +88,128 @@
     <string name="category_telephony">Telephony</string>
     <string name="show_less">Show less</string>
     <string name="show_more">Show more</string>
+
+    <string name="permissions_title_device">Глобальные разрешения устройства</string>
+    <string name="permissions_title_work_profile">Разрешения рабочего профиля</string>
+    <string name="permissions_banner_desc">Отключение разрешения принудительно запрещает его для приложений. Приложения не смогут запрашивать доступ, а пользователь не сможет включить его в системных настройках.</string>
+    <string name="permissions_banner_wp_note">Внимание: в режиме Profile Owner ограничения действуют только на приложения внутри рабочего профиля.</string>
+    <string name="perm_search_placeholder">Поиск по названию или коду разрешения...</string>
+
+    <!-- Permission Groups -->
+    <string name="perm_group_notifications">Уведомления</string>
+    <string name="perm_group_camera_mic">Камера и микрофон</string>
+    <string name="perm_group_location">Местоположение</string>
+    <string name="perm_group_storage">Хранилище и файлы</string>
+    <string name="perm_group_contacts_calendar">Контакты и календарь</string>
+    <string name="perm_group_telephony">Телефон и SMS</string>
+    <string name="perm_group_nearby">Bluetooth и беспроводные сети</string>
+    <string name="perm_group_sensors">Датчики и активность</string>
+
+    <!-- Notifications -->
+    <string name="perm_post_notifications_title">Отправка уведомлений</string>
+    <string name="perm_post_notifications_desc">Запретить показ всплывающих уведомлений и оповещений</string>
+
+    <!-- Camera / Mic -->
+    <string name="perm_camera_title">Камера</string>
+    <string name="perm_camera_desc">Запретить фото- и видеосъемку</string>
+    <string name="perm_record_audio_title">Запись аудио (микрофон)</string>
+    <string name="perm_record_audio_desc">Запретить запись звука с микрофона</string>
+
+    <!-- Location -->
+    <string name="perm_access_fine_location_title">Точное местоположение</string>
+    <string name="perm_access_fine_location_desc">Запретить определение точных координат через GPS</string>
+    <string name="perm_access_coarse_location_title">Примерное местоположение</string>
+    <string name="perm_access_coarse_location_desc">Запретить определение примерного местоположения по сотовым вышкам и Wi-Fi</string>
+    <string name="perm_access_background_location_title">Фоновое местоположение</string>
+    <string name="perm_access_background_location_desc">Запретить доступ к локации, когда приложение свернуто</string>
+
+    <!-- Contacts / Calendar -->
+    <string name="perm_read_contacts_title">Чтение контактов</string>
+    <string name="perm_read_contacts_desc">Запретить чтение адресной книги</string>
+    <string name="perm_write_contacts_title">Изменение контактов</string>
+    <string name="perm_write_contacts_desc">Запретить добавление и изменение контактов</string>
+    <string name="perm_get_accounts_title">Аккаунты на устройстве</string>
+    <string name="perm_get_accounts_desc">Запретить получение списка учетных записей</string>
+    <string name="perm_read_calendar_title">Чтение календаря</string>
+    <string name="perm_read_calendar_desc">Запретить просмотр событий и расписания</string>
+    <string name="perm_write_calendar_title">Изменение календаря</string>
+    <string name="perm_write_calendar_desc">Запретить добавление и изменение событий календаря</string>
+
+    <!-- Telephony / SMS -->
+    <string name="perm_read_phone_state_title">Состояние телефона</string>
+    <string name="perm_read_phone_state_desc">Запретить доступ к статусу вызовов, SIM-карт и сети</string>
+    <string name="perm_call_phone_title">Телефонные звонки</string>
+    <string name="perm_call_phone_desc">Запретить прямой набор телефонных номеров</string>
+    <string name="perm_read_call_log_title">Чтение журнала вызовов</string>
+    <string name="perm_read_call_log_desc">Запретить просмотр истории звонков</string>
+    <string name="perm_write_call_log_title">Изменение журнала вызовов</string>
+    <string name="perm_write_call_log_desc">Запретить редактирование истории звонков</string>
+    <string name="perm_read_phone_numbers_title">Телефонные номера</string>
+    <string name="perm_read_phone_numbers_desc">Запретить чтение телефонных номеров устройства</string>
+    <string name="perm_answer_phone_calls_title">Ответ на вызовы</string>
+    <string name="perm_answer_phone_calls_desc">Запретить автоответ на входящие вызовы</string>
+    <string name="perm_send_sms_title">Отправка SMS</string>
+    <string name="perm_send_sms_desc">Запретить отправку текстовых сообщений</string>
+    <string name="perm_read_sms_title">Чтение SMS</string>
+    <string name="perm_read_sms_desc">Запретить просмотр входящих сообщений</string>
+    <string name="perm_receive_sms_title">Прием SMS</string>
+    <string name="perm_receive_sms_desc">Запретить перехват и получение входящих SMS</string>
+    <string name="perm_receive_mms_title">Прием MMS</string>
+    <string name="perm_receive_mms_desc">Запретить получение мультимедийных сообщений</string>
+
+    <!-- Storage / Media -->
+    <string name="perm_read_external_storage_title">Чтение хранилища</string>
+    <string name="perm_read_external_storage_desc">Запретить чтение файлов из общей памяти</string>
+    <string name="perm_write_external_storage_title">Запись в хранилище</string>
+    <string name="perm_write_external_storage_desc">Запретить сохранение и изменение файлов</string>
+    <string name="perm_manage_external_storage_title">Управление всеми файлами</string>
+    <string name="perm_manage_external_storage_desc">Запретить полный доступ ко всем файлам устройства</string>
+    <string name="perm_read_media_images_title">Фото и изображения</string>
+    <string name="perm_read_media_images_desc">Запретить чтение фотографий и изображений</string>
+    <string name="perm_read_media_video_title">Видеозаписи</string>
+    <string name="perm_read_media_video_desc">Запретить чтение видеофайлов</string>
+    <string name="perm_read_media_audio_title">Аудиофайлы и музыка</string>
+    <string name="perm_read_media_audio_desc">Запретить чтение аудиозаписей</string>
+    <string name="perm_read_media_visual_user_selected_title">Выборочные фото и видео</string>
+    <string name="perm_read_media_visual_user_selected_desc">Запретить частичный доступ к медиатеке (Android 14+)</string>
+    <string name="perm_access_media_location_title">Геотеги медиафайлов</string>
+    <string name="perm_access_media_location_desc">Запретить чтение геокоординат из EXIF-метаданных</string>
+
+    <!-- Nearby / Bluetooth -->
+    <string name="perm_bluetooth_scan_title">Сканирование Bluetooth</string>
+    <string name="perm_bluetooth_scan_desc">Запретить поиск окружающих Bluetooth-устройств</string>
+    <string name="perm_bluetooth_connect_title">Подключение Bluetooth</string>
+    <string name="perm_bluetooth_connect_desc">Запретить подключение к сопряженным устройствам</string>
+    <string name="perm_bluetooth_advertise_title">Вещание Bluetooth</string>
+    <string name="perm_bluetooth_advertise_desc">Запретить передачу сигналов Bluetooth по BLE</string>
+    <string name="perm_nearby_wifi_devices_title">Wi-Fi устройства рядом</string>
+    <string name="perm_nearby_wifi_devices_desc">Запретить прямое обнаружение и подключение по Wi-Fi</string>
+    <string name="perm_uwb_ranging_title">Измерение расстояния (UWB)</string>
+    <string name="perm_uwb_ranging_desc">Запретить измерение дальности по Ultra-Wideband</string>
+
+    <!-- Sensors / Activity -->
+    <string name="perm_body_sensors_title">Датчики тела (пульсометр)</string>
+    <string name="perm_body_sensors_desc">Запретить доступ к датчикам сердечного ритма и тела</string>
+    <string name="perm_body_sensors_background_title">Датчики тела в фоне</string>
+    <string name="perm_body_sensors_background_desc">Запретить фоновый сбор показателей датчиков тела</string>
+    <string name="perm_activity_recognition_title">Физическая активность</string>
+    <string name="perm_activity_recognition_desc">Запретить распознавание шагов, ходьбы и бега</string>
+    <!-- App Specific Permissions -->
+    <string name="app_permissions_title">Разрешения приложения</string>
+    <string name="app_perm_policy_default">По умолч.</string>
+    <string name="app_perm_policy_force_deny">Запретить</string>
+    <string name="app_perm_policy_force_grant">Разрешить</string>
+    <string name="app_perm_only_requested">Только запрашиваемые</string>
+    <string name="app_perm_all">Все разрешения (36)</string>
+    <string name="app_perm_requested_badge">В манифесте</string>
+    <string name="app_perm_not_requested_badge">Не в манифесте</string>
+    <string name="app_perm_globally_disabled_badge">Глобально запрещено</string>
+    <string name="app_perm_forced_granted_desc">Принудительно выдано всегда (даже если отключено глобально)</string>
+    <string name="app_perm_forced_denied_desc">Принудительно запрещено всегда</string>
+    <string name="app_perm_default_globally_denied_desc">По умолчанию: заблокировано глобальным правилом</string>
+    <string name="app_perm_default_system_desc">По умолчанию: управляется системой / пользователем</string>
+    <string name="app_perm_stats_requested">Запрошено</string>
+    <string name="app_perm_stats_granted">Разрешено</string>
+    <string name="app_perm_stats_denied">Запрещено</string>
+    <string name="sensor_grant_not_supported_profile_owner">Android запрещает Profile Owner принудительно выдавать доступ к датчикам (камера, микрофон, локация)</string>
 </resources>

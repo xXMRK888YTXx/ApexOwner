@@ -28,4 +28,9 @@
     <string name="work_profile_restrictions_desc">Камера, скриншоты, установка неизвестных приложений и др.</string>
     <string name="device_owner_not_granted_desc">Для разблокировки требуются права Device Owner или создание рабочего профиля</string>
     <string name="quiet_mode_toggle">Пауза рабочего профиля (Quiet Mode)</string>
+
+    <string name="global_permissions_title_device">Глобальные разрешения (Device)</string>
+    <string name="global_permissions_title_work_profile">Глобальные разрешения профиля</string>
+    <string name="global_permissions_desc_device">Принудительное отключение разрешений (Камера, Микрофон, Локация и др.) для всех приложений</string>
+    <string name="global_permissions_desc_work_profile">Принудительное отключение разрешений для приложений рабочего профиля</string>
 </resources>

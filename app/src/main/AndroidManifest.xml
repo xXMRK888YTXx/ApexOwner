@@ -11,6 +11,10 @@
     <uses-permission
         android:name="android.permission.DELETE_PACKAGES"
         tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="false"
@@ -46,6 +50,7 @@
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_UNFREEZE_APP" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_REMOVE_WORK_PROFILE" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_OPEN_RESTRICTIONS" />
+                <action android:name="com.xxmrk888ytxx.apexowner.ACTION_OPEN_PERMISSIONS" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_INSTALL_CALLBACK" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -57,6 +62,24 @@
             <intent-filter>
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_INSTALL_CALLBACK" />
                 <action android:name="com.xxmrk888ytxx.apexowner.ACTION_UNINSTALL_CALLBACK" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".service.ApexPolicyService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Enforcing security and permission policies across profiles" />
+        </service>
+
+        <receiver
+            android:name=".service.BootCompletedReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 

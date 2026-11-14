@@ -161,6 +161,11 @@ fun WorkProfileScreen(
                     onEvent(WorkProfileUiEvent.OnCloneApp(app.packageName))
                     selectedAppForManagement = null
                 },
+                onManagePermissions = {
+                    val target = app
+                    selectedAppForManagement = null
+                    onEvent(WorkProfileUiEvent.OnManagePermissions(target.packageName, target.name))
+                },
                 onDismiss = { selectedAppForManagement = null }
             )
         }
@@ -326,7 +331,10 @@ fun WorkProfileScreen(
                         AppListItem(
                             app = app,
                             isInsideWorkProfile = state.isInsideWorkProfile,
-                            onClick = { selectedAppForManagement = app }
+                            onClick = { selectedAppForManagement = app },
+                            onManagePermissions = {
+                                onEvent(WorkProfileUiEvent.OnManagePermissions(app.packageName, app.name))
+                            }
                         )
                     }
                     item {
@@ -342,7 +350,8 @@ fun WorkProfileScreen(
 private fun AppListItem(
     app: WorkProfileApp,
     isInsideWorkProfile: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onManagePermissions: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -429,6 +438,18 @@ private fun AppListItem(
                     }
                 }
             }
+
+            IconButton(
+                onClick = onManagePermissions,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_check),
+                    contentDescription = stringResource(R.string.permissions_action),
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
@@ -441,6 +462,7 @@ private fun AppManagementSheetContent(
     onToggleFreeze: () -> Unit,
     onUninstall: () -> Unit,
     onClone: () -> Unit,
+    onManagePermissions: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val canFreeze = state.canFreezeInCurrentProfile
@@ -557,6 +579,21 @@ private fun AppManagementSheetContent(
                         stringResource(R.string.clone_to_work_profile)
                     }
                 )
+            }
+
+            // Permissions Management Action
+            FilledTonalButton(
+                onClick = onManagePermissions,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_check),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.permissions_action))
             }
 
             // Freeze / Unfreeze Action

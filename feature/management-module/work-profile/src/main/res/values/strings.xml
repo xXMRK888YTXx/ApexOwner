@@ -33,5 +33,6 @@
     <string name="badge_in_work_profile">В рабочем профиле</string>
     <string name="badge_in_personal_profile">В личном профиле</string>
     <string name="app_management_title">Управление приложением</string>
+    <string name="permissions_action">Управление разрешениями</string>
     <string name="cancel">Отмена</string>
 </resources>

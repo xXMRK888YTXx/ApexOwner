@@ -6,6 +6,7 @@ import com.xxmrk888ytxx.core.devicepolicy.model.PolicyOperatingMode
 import com.xxmrk888ytxx.core.devicepolicy.model.PolicyState
 import com.xxmrk888ytxx.core.devicepolicy.ownerComponent.BaseOwnerComponent
 import com.xxmrk888ytxx.core.devicepolicy.ownerComponent.DeviceRestrictionOwnerComponentManagerImpl
+import com.xxmrk888ytxx.core.devicepolicy.ownerComponent.PermissionManagerOwnerComponentImpl
 import com.xxmrk888ytxx.core.devicepolicy.ownerComponent.WorkProfileOwnerComponentManagerImpl
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -19,15 +20,20 @@ import javax.inject.Singleton
 internal class AndroidDeviceOwnerManager @Inject constructor(
     private val deviceRestrictionOwnerComponentManager: DeviceRestrictionOwnerComponentManagerImpl,
     private val workProfileOwnerComponentManagerImpl: WorkProfileOwnerComponentManagerImpl,
+    private val permissionManagerOwnerComponentImpl: PermissionManagerOwnerComponentImpl,
     devicePolicyManager: DevicePolicyManager,
     @ApplicationContext context: Context
 ) : BaseOwnerComponent(devicePolicyManager, context),
     DeviceOwnerManager,
     DeviceRestrictionOwnerComponentManager by deviceRestrictionOwnerComponentManager,
-    WorkProfileOwnerComponentManager by workProfileOwnerComponentManagerImpl {
+    WorkProfileOwnerComponentManager by workProfileOwnerComponentManagerImpl,
+    PermissionManagerOwnerComponent by permissionManagerOwnerComponentImpl {
 
     override val isAppDeviceOwner: Boolean
         get() = checkIsAppDeviceOwner()
+
+    override val isAppProfileOwner: Boolean
+        get() = checkIsAppProfileOwner()
 
     private val _isDeviceOwner = MutableStateFlow(checkIsAppDeviceOwner())
     private val _policyState = MutableStateFlow(buildCurrentPolicyState())

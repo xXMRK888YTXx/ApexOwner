@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -45,6 +47,13 @@ import com.xxmrk888ytxx.feature.main.model.ScreenState
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.AppRestrictionModuleScreen
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.AppRestrictionModuleViewModel
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.AppRestrictionModuleUiEvent
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.permission.GlobalPermissionScreen
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.permission.GlobalPermissionViewModel
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.permission.app.AppPermissionScreen
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.permission.app.AppPermissionViewModel
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.permission.app.model.AppPermissionUiEvent
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.permission.model.GlobalPermissionScreenState
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.permission.model.GlobalPermissionUiEvent
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.WorkProfileScreen
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.WorkProfileViewModel
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileScreenState
@@ -72,9 +81,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         profileOwnerManager.setupCrossProfileFilters()
+        com.xxmrk888ytxx.apexowner.service.ApexPolicyService.start(this)
         splashScreen.setKeepOnScreenCondition { viewModel.isScreenLoading.value }
         if (intent?.getBooleanExtra(EXTRA_OPEN_RESTRICTIONS, false) == true) {
             viewModel.navigator.navigate(Screen.DeviceRestrictionModuleScreen)
+        }
+        if (intent?.getBooleanExtra(EXTRA_OPEN_PERMISSIONS, false) == true) {
+            viewModel.navigator.navigate(Screen.GlobalPermissionModuleScreen)
         }
         setContentWithThemeAndProviders(
             navigator = viewModel.navigator,
@@ -144,6 +157,30 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        entry<Screen.GlobalPermissionModuleScreen> {
+                            ScreenContent<GlobalPermissionScreenState, GlobalPermissionUiEvent, GlobalPermissionViewModel>(
+                                ::GlobalPermissionScreen
+                            )
+                        }
+
+                        entry<Screen.AppPermissionsModuleScreen> { navKey ->
+                            val viewModel = hiltViewModel<AppPermissionViewModel>()
+                            LaunchedEffect(navKey.packageName) {
+                                viewModel.onEvent(
+                                    AppPermissionUiEvent.Init(
+                                        navKey.packageName,
+                                        navKey.appName
+                                    )
+                                )
+                            }
+                            val state by viewModel.state.collectAsState()
+                            AppPermissionScreen(
+                                screenState = state,
+                                onEvent = viewModel::onEvent,
+                                sideEffect = viewModel.sideEffectFlow
+                            )
+                        }
+
                         entry<Screen.MainScreen> {
                             ScreenContent<ScreenState, MainScreenEvent, MainViewModel>(::MainScreen)
                         }
@@ -193,12 +230,16 @@ class MainActivity : ComponentActivity() {
         if (intent.getBooleanExtra(EXTRA_OPEN_RESTRICTIONS, false)) {
             viewModel.navigator.navigate(Screen.DeviceRestrictionModuleScreen)
         }
+        if (intent.getBooleanExtra(EXTRA_OPEN_PERMISSIONS, false)) {
+            viewModel.navigator.navigate(Screen.GlobalPermissionModuleScreen)
+        }
     }
 
     companion object {
         const val ACTION_CLONE_APP = "com.xxmrk888ytxx.apexowner.ACTION_CLONE_APP"
         const val EXTRA_PACKAGE_NAME = "EXTRA_PACKAGE_NAME"
         const val EXTRA_OPEN_RESTRICTIONS = "EXTRA_OPEN_RESTRICTIONS"
+        const val EXTRA_OPEN_PERMISSIONS = "EXTRA_OPEN_PERMISSIONS"
         private const val BACK_PRESS_ANIMATION_DURATION = 300
     }
 }

@@ -1,10 +1,8 @@
 package com.xxmrk888ytxx.apexowner.bridge
 
 import android.app.PendingIntent
-import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageInstaller
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -84,6 +82,16 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
             return
         }
 
+        if (action == ACTION_OPEN_PERMISSIONS) {
+            val mainIntent = Intent(this, MainActivity::class.java).apply {
+                putExtra(MainActivity.EXTRA_OPEN_PERMISSIONS, true)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            startActivity(mainIntent)
+            finish()
+            return
+        }
+
         if (packageName.isNullOrBlank()) {
             finish()
             return
@@ -130,7 +138,11 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
                             Toast.makeText(this@WorkProfileDispatcherActivity, "Разморожено: $packageName", Toast.LENGTH_SHORT).show()
                         },
                         onFailure = {
-                            Toast.makeText(this@WorkProfileDispatcherActivity, "Ошибка разморозки: ${it.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@WorkProfileDispatcherActivity,
+                                "Ошибка: ${it.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     )
                 }
@@ -141,51 +153,54 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
 
     private fun installInCurrentProfile(
         packageName: String,
-        explicitApkPath: String?,
-        explicitSplitPaths: Array<String>?
+        apkPath: String?,
+        splitPaths: Array<String>?
     ) {
         try {
-            val pm = packageManager
-            val sourceDir = explicitApkPath ?: try {
-                pm.getApplicationInfo(packageName, PackageManager.MATCH_UNINSTALLED_PACKAGES).sourceDir
-            } catch (_: Exception) {
-                null
-            }
-
-            if (sourceDir == null) {
-                Toast.makeText(this, "Не удалось найти файл APK для $packageName", Toast.LENGTH_SHORT).show()
-                return
-            }
-
-            val packageInstaller = pm.packageInstaller
+            val packageInstaller = packageManager.packageInstaller
             val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
-            params.setAppPackageName(packageName)
             val sessionId = packageInstaller.createSession(params)
             val session = packageInstaller.openSession(sessionId)
 
-            val baseFile = File(sourceDir)
-            baseFile.inputStream().use { input ->
-                session.openWrite("base.apk", 0, baseFile.length()).use { output ->
-                    input.copyTo(output)
+            val baseFile = apkPath?.let { File(it) }
+            if (baseFile != null && baseFile.exists()) {
+                baseFile.inputStream().use { input ->
+                    session.openWrite("base.apk", 0, baseFile.length()).use { output ->
+                        input.copyTo(output)
+                        session.fsync(output)
+                    }
+                }
+            } else {
+                val uri =
+                    android.net.Uri.parse("content://com.xxmrk888ytxx.apexowner.bridge/apk/$packageName/base.apk")
+                contentResolver.openInputStream(uri)?.use { input ->
+                    session.openWrite("base.apk", 0, -1).use { output ->
+                        input.copyTo(output)
+                        session.fsync(output)
+                    }
+                } ?: run {
+                    Toast.makeText(this, "Не удалось прочитать base.apk", Toast.LENGTH_SHORT).show()
+                    session.abandon()
+                    return
                 }
             }
 
-            explicitSplitPaths?.forEachIndexed { index, splitPath ->
-                val splitFile = File(splitPath)
+            splitPaths?.forEachIndexed { index, path ->
+                val splitFile = File(path)
                 if (splitFile.exists()) {
                     splitFile.inputStream().use { input ->
                         session.openWrite("split_$index.apk", 0, splitFile.length()).use { output ->
                             input.copyTo(output)
+                            session.fsync(output)
                         }
                     }
                 }
             }
 
-            val callbackIntent = Intent().apply {
-                component = ComponentName(this@WorkProfileDispatcherActivity, PackageInstallerReceiver::class.java)
+            val callbackIntent = Intent(this, WorkProfileDispatcherActivity::class.java).apply {
                 action = ACTION_INSTALL_CALLBACK
             }
-            val pendingIntent = PendingIntent.getBroadcast(
+            val pendingIntent = PendingIntent.getActivity(
                 this,
                 sessionId,
                 callbackIntent,
@@ -208,6 +223,7 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
         const val ACTION_UNFREEZE_APP = "com.xxmrk888ytxx.apexowner.ACTION_UNFREEZE_APP"
         const val ACTION_REMOVE_WORK_PROFILE = "com.xxmrk888ytxx.apexowner.ACTION_REMOVE_WORK_PROFILE"
         const val ACTION_OPEN_RESTRICTIONS = "com.xxmrk888ytxx.apexowner.ACTION_OPEN_RESTRICTIONS"
+        const val ACTION_OPEN_PERMISSIONS = "com.xxmrk888ytxx.apexowner.ACTION_OPEN_PERMISSIONS"
         const val ACTION_INSTALL_CALLBACK = "com.xxmrk888ytxx.apexowner.ACTION_INSTALL_CALLBACK"
         const val EXTRA_PACKAGE_NAME = "EXTRA_PACKAGE_NAME"
         const val EXTRA_APK_PATH = "EXTRA_APK_PATH"
