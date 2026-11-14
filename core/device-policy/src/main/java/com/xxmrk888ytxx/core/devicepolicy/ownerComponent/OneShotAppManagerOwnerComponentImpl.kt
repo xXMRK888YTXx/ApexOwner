@@ -141,13 +141,7 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
                 saveInactivityPolicies(currentMap)
                 Logger.writeDebugLog("recordAppOpened: updated lastOpenedTimestamp for $packageName")
             } else {
-                val newPolicy = AppInactivityPolicy(
-                    packageName = packageName,
-                    lastOpenedTimestamp = System.currentTimeMillis()
-                )
-                currentMap[packageName] = newPolicy
-                saveInactivityPolicies(currentMap)
-                Logger.writeDebugLog("recordAppOpened: initialized lastOpenedTimestamp for $packageName")
+                Logger.writeDebugLog("recordAppOpened: no configured inactivity policy for $packageName")
             }
             Result.success(Unit)
         } catch (e: Exception) {
@@ -180,8 +174,8 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
                 prefs.edit().putStringSet(KEY_ONE_SHOT_PACKAGES, oneShotSet).apply()
                 _oneShotAppPackages.value = oneShotSet.toSet()
 
-                Logger.writeDebugLog("setOneShotApp: disabled for $packageName")
-                Result.success(Unit)
+                Logger.writeDebugLog("setOneShotApp: disabled for $packageName, unfreezing app")
+                unhideApp(packageName)
             }
         } catch (e: Exception) {
             Logger.writeErrorLog("setOneShotApp failed for $packageName: ${e.message}")
@@ -213,8 +207,8 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
                 prefs.edit().putStringSet(KEY_AUTO_FREEZE_PACKAGES, autoFreezeSet).apply()
                 _autoFreezeAppPackages.value = autoFreezeSet.toSet()
 
-                Logger.writeDebugLog("setAutoFreezeApp: disabled for $packageName")
-                Result.success(Unit)
+                Logger.writeDebugLog("setAutoFreezeApp: disabled for $packageName, unfreezing app")
+                unhideApp(packageName)
             }
         } catch (e: Exception) {
             Logger.writeErrorLog("setAutoFreezeApp failed for $packageName: ${e.message}")
@@ -257,10 +251,12 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
             val clearResult = clearAppData(packageName)
             if (clearResult.isFailure) {
                 Logger.writeErrorLog("resetOneShotApp: failed to clear data for $packageName: ${clearResult.exceptionOrNull()?.message}")
+                return@withContext clearResult
             }
             val hideResult = hideApp(packageName)
             if (hideResult.isFailure) {
                 Logger.writeErrorLog("resetOneShotApp: failed to hide $packageName: ${hideResult.exceptionOrNull()?.message}")
+                return@withContext hideResult
             }
             Result.success(Unit)
         } catch (e: Exception) {
@@ -376,10 +372,12 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
                             val freezeThresholdMs = currentPolicy.lockFreezeDurationMs
                             if (deviceLockedDurationMs >= freezeThresholdMs) {
                                 Logger.writeDebugLog("checkAndApplyInactivityPolicies: Freezing $pkg (locked for ${deviceLockedDurationMs / 1000}s >= ${freezeThresholdMs / 1000}s)")
-                                hideApp(pkg)
-                                if (currentPolicy.lastLockFreezeTimestamp == 0L || (now - currentPolicy.lastLockFreezeTimestamp) > 60_000L) {
+                                val hideResult = hideApp(pkg)
+                                if (hideResult.isSuccess && (currentPolicy.lastLockFreezeTimestamp == 0L || (now - currentPolicy.lastLockFreezeTimestamp) > 60_000L)) {
                                     currentPolicy = currentPolicy.copy(lastLockFreezeTimestamp = now)
                                     policyModified = true
+                                } else if (hideResult.isFailure) {
+                                    Logger.writeErrorLog("checkAndApplyInactivityPolicies: failed to freeze $pkg: ${hideResult.exceptionOrNull()?.message}")
                                 }
                             }
                         }
@@ -389,21 +387,27 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
 
                             if (deviceLockedDurationMs >= freezeThresholdMs) {
                                 Logger.writeDebugLog("checkAndApplyInactivityPolicies: Freezing $pkg (locked for ${deviceLockedDurationMs / 1000}s >= ${freezeThresholdMs / 1000}s)")
-                                hideApp(pkg)
-                                if (currentPolicy.lastLockFreezeTimestamp == 0L || (now - currentPolicy.lastLockFreezeTimestamp) > 60_000L) {
+                                val hideResult = hideApp(pkg)
+                                if (hideResult.isSuccess && (currentPolicy.lastLockFreezeTimestamp == 0L || (now - currentPolicy.lastLockFreezeTimestamp) > 60_000L)) {
                                     currentPolicy = currentPolicy.copy(lastLockFreezeTimestamp = now)
                                     policyModified = true
+                                } else if (hideResult.isFailure) {
+                                    Logger.writeErrorLog("checkAndApplyInactivityPolicies: failed to freeze $pkg: ${hideResult.exceptionOrNull()?.message}")
                                 }
                             }
 
                             if (deviceLockedDurationMs >= wipeThresholdMs) {
                                 if (!wipedPackagesInCurrentLockSession.contains(pkg)) {
                                     Logger.writeDebugLog("checkAndApplyInactivityPolicies: Wiping $pkg (locked for ${deviceLockedDurationMs / 1000}s >= ${wipeThresholdMs / 1000}s)")
-                                    clearAppData(pkg)
-                                    hideApp(pkg)
-                                    wipedPackagesInCurrentLockSession.add(pkg)
-                                    currentPolicy = currentPolicy.copy(lastLockWipeTimestamp = now)
-                                    policyModified = true
+                                    val clearResult = clearAppData(pkg)
+                                    val hideResult = if (clearResult.isSuccess) hideApp(pkg) else clearResult
+                                    if (clearResult.isSuccess && hideResult.isSuccess) {
+                                        wipedPackagesInCurrentLockSession.add(pkg)
+                                        currentPolicy = currentPolicy.copy(lastLockWipeTimestamp = now)
+                                        policyModified = true
+                                    } else {
+                                        Logger.writeErrorLog("checkAndApplyInactivityPolicies: failed to wipe $pkg: ${clearResult.exceptionOrNull()?.message ?: hideResult.exceptionOrNull()?.message}")
+                                    }
                                 }
                             }
                         }
@@ -417,13 +421,17 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
                     val unusedDurationMs = now - currentPolicy.lastOpenedTimestamp
                     if (unusedDurationMs >= unusedThresholdMs) {
                         Logger.writeDebugLog("checkAndApplyInactivityPolicies: Wiping $pkg because unused for ${unusedDurationMs / 1000}s >= ${unusedThresholdMs / 1000}s")
-                        clearAppData(pkg)
-                        hideApp(pkg)
-                        currentPolicy = currentPolicy.copy(
-                            lastOpenedTimestamp = now,
-                            lastUnusedWipeTimestamp = now
-                        )
-                        policyModified = true
+                        val clearResult = clearAppData(pkg)
+                        val hideResult = if (clearResult.isSuccess) hideApp(pkg) else clearResult
+                        if (clearResult.isSuccess && hideResult.isSuccess) {
+                            currentPolicy = currentPolicy.copy(
+                                lastOpenedTimestamp = now,
+                                lastUnusedWipeTimestamp = now
+                            )
+                            policyModified = true
+                        } else {
+                            Logger.writeErrorLog("checkAndApplyInactivityPolicies: failed to wipe unused app $pkg: ${clearResult.exceptionOrNull()?.message ?: hideResult.exceptionOrNull()?.message}")
+                        }
                     }
                 }
 

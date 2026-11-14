@@ -120,8 +120,13 @@ class ApexBridgeProvider : ContentProvider() {
                         .map { appInfo ->
                             val pkg = appInfo.packageName
                             val isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+                            val isHidden = try {
+                                profileOwnerManager.isApplicationHidden(pkg) || profileOwnerManager.isPackageSuspended(pkg)
+                            } catch (_: Exception) {
+                                false
+                            }
                             val hasLauncher = launcherPackages.contains(pkg)
-                            "$pkg\t${appInfo.loadLabel(pm)}\t$isSystem\tfalse\tfalse\t$hasLauncher"
+                            "$pkg\t${appInfo.loadLabel(pm)}\t$isSystem\t$isHidden\tfalse\t$hasLauncher"
                         }
                     response.putStringArrayList(EXTRA_APPS, ArrayList(appLines))
                     response.putBoolean(EXTRA_SUCCESS, true)

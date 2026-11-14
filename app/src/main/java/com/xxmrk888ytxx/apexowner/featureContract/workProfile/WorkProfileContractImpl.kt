@@ -344,6 +344,11 @@ class WorkProfileContractImpl @Inject constructor(
                 val pkg = appInfo.packageName
                 val isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
                 val hasLauncher = launcherPackages.contains(pkg)
+                val isFrozen = try {
+                    profileOwnerManager.isApplicationHidden(pkg) || profileOwnerManager.isPackageSuspended(pkg)
+                } catch (_: Exception) {
+                    false
+                }
                 val isInstalledInWork = workUser != null && launcherApps != null && try {
                     launcherApps.isPackageEnabled(pkg, workUser) ||
                             launcherApps.getApplicationInfo(pkg, 0, workUser) != null
@@ -373,7 +378,7 @@ class WorkProfileContractImpl @Inject constructor(
                     packageName = pkg,
                     name = appInfo.loadLabel(packageManager).toString(),
                     isSystem = isSystem,
-                    isFrozen = false,
+                    isFrozen = isFrozen,
                     isInstalledInWorkProfile = isInstalledInWork,
                     hasLauncher = hasLauncher,
                     isInstalledInOtherProfile = isInstalledInWork,

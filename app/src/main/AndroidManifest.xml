@@ -18,6 +18,10 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
+    <permission
+        android:name="com.xxmrk888ytxx.apexowner.permission.BRIDGE"
+        android:protectionLevel="signature" />
+
     <application
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -57,6 +61,7 @@
         <activity
             android:name=".bridge.WorkProfileDispatcherActivity"
             android:exported="true"
+            android:permission="com.xxmrk888ytxx.apexowner.permission.BRIDGE"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:excludeFromRecents="true"
             android:finishOnTaskLaunch="true"
@@ -118,6 +123,8 @@
             android:name=".bridge.ApexBridgeProvider"
             android:authorities="com.xxmrk888ytxx.apexowner.bridge"
             android:exported="true"
+            android:readPermission="com.xxmrk888ytxx.apexowner.permission.BRIDGE"
+            android:writePermission="com.xxmrk888ytxx.apexowner.permission.BRIDGE"
             android:multiprocess="false" />
     </application>
 

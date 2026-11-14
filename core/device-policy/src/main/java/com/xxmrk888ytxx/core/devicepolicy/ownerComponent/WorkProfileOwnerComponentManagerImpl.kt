@@ -118,6 +118,8 @@ internal class WorkProfileOwnerComponentManagerImpl @Inject constructor(
                     "com.xxmrk888ytxx.apexowner.ACTION_OPEN_PERMISSIONS",
                     "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_ONE_SHOT",
                     "com.xxmrk888ytxx.apexowner.ACTION_RESET_ONE_SHOT",
+                    "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_AUTO_FREEZE",
+                    "com.xxmrk888ytxx.apexowner.ACTION_SET_INACTIVITY_POLICY",
                     "com.xxmrk888ytxx.apexowner.ACTION_LAUNCH_APP"
                 ).forEach { actionStr ->
                     val filter = IntentFilter(actionStr).apply {
