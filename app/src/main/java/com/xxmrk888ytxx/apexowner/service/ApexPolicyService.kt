@@ -13,6 +13,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.os.UserManager
+import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.xxmrk888ytxx.apexowner.R
 import com.xxmrk888ytxx.core.base.android.extension.buildForegroundServiceNotificationChannel
@@ -54,6 +55,15 @@ class ApexPolicyService : Service() {
             if (action == Intent.ACTION_SHUTDOWN) {
                 runBlocking {
                     try {
+                        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                        val lockedSince = prefs.getLong(KEY_DEVICE_LOCKED_SINCE, 0L)
+                        val shutdownTimestamp = System.currentTimeMillis()
+                        val editor = prefs.edit().putLong(KEY_POWER_OFF_AT, shutdownTimestamp)
+                        if (lockedSince == 0L) {
+                            editor.putLong(KEY_DEVICE_LOCKED_SINCE, shutdownTimestamp)
+                            Logger.writeDebugLog("ApexPolicyService: treating shutdown as lock start at $shutdownTimestamp")
+                        }
+                        editor.apply()
                         Logger.writeDebugLog("ApexPolicyService handling triggers on ACTION_SHUTDOWN")
                         oneShotAppManagerOwnerComponent.handleLifecycleTriggers()
                     } catch (e: Exception) {
@@ -95,7 +105,10 @@ class ApexPolicyService : Service() {
                     var lockedSince = prefs.getLong(KEY_DEVICE_LOCKED_SINCE, 0L)
                     if (lockedSince == 0L) {
                         lockedSince = System.currentTimeMillis()
-                        prefs.edit().putLong(KEY_DEVICE_LOCKED_SINCE, lockedSince).apply()
+                        prefs.edit()
+                            .putLong(KEY_DEVICE_LOCKED_SINCE, lockedSince)
+                            .putLong(KEY_LOCK_BOOT_COUNT, currentBootCount(this@ApexPolicyService))
+                            .apply()
                         Logger.writeDebugLog("ApexPolicyService: device locked at $lockedSince")
                     }
                     evaluateInactivityPolicies()
@@ -105,7 +118,11 @@ class ApexPolicyService : Service() {
                 Intent.ACTION_USER_PRESENT -> {
                     Logger.writeDebugLog("ApexPolicyService: user unlocked device, resetting lock timer")
                     val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                    prefs.edit().putLong(KEY_DEVICE_LOCKED_SINCE, 0L).apply()
+                    prefs.edit()
+                        .putLong(KEY_DEVICE_LOCKED_SINCE, 0L)
+                        .remove(KEY_POWER_OFF_AT)
+                        .remove(KEY_LOCK_BOOT_COUNT)
+                        .apply()
                     evaluateInactivityPolicies()
                     scheduleNextInactivityAlarm()
                 }
@@ -150,13 +167,37 @@ class ApexPolicyService : Service() {
         val km = getSystemService(KEYGUARD_SERVICE) as? KeyguardManager
         val isLocked = km?.isKeyguardLocked == true || km?.isDeviceLocked == true
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        if (isLocked) {
+        val powerOffAt = prefs.getLong(KEY_POWER_OFF_AT, 0L)
+        if (powerOffAt > 0L) {
+            val lockedSince = prefs.getLong(KEY_DEVICE_LOCKED_SINCE, 0L)
+            val restoredLockedSince = if (lockedSince > 0L) {
+                minOf(lockedSince, powerOffAt)
+            } else {
+                powerOffAt
+            }
+            prefs.edit()
+                .putLong(KEY_DEVICE_LOCKED_SINCE, restoredLockedSince)
+                .remove(KEY_POWER_OFF_AT)
+                .apply()
+            Logger.writeDebugLog("ApexPolicyService: restored lock timer from shutdown at $restoredLockedSince")
+        } else if (isLocked) {
             val lockedSince = prefs.getLong(KEY_DEVICE_LOCKED_SINCE, 0L)
             if (lockedSince == 0L) {
-                prefs.edit().putLong(KEY_DEVICE_LOCKED_SINCE, System.currentTimeMillis()).apply()
+                prefs.edit()
+                    .putLong(KEY_DEVICE_LOCKED_SINCE, System.currentTimeMillis())
+                    .putLong(KEY_LOCK_BOOT_COUNT, currentBootCount(this))
+                    .apply()
             }
+        } else if (prefs.getLong(KEY_DEVICE_LOCKED_SINCE, 0L) > 0L &&
+            prefs.getLong(KEY_LOCK_BOOT_COUNT, currentBootCount(this)) != currentBootCount(this)) {
+            // The profile may be unlocked before BOOT_COMPLETED reaches this receiver.
+            // Keep the pre-reboot lock start until USER_PRESENT confirms a real unlock.
+            Logger.writeDebugLog("ApexPolicyService: preserving lock timer across reboot until USER_PRESENT")
         } else {
-            prefs.edit().putLong(KEY_DEVICE_LOCKED_SINCE, 0L).apply()
+            prefs.edit()
+                .putLong(KEY_DEVICE_LOCKED_SINCE, 0L)
+                .remove(KEY_LOCK_BOOT_COUNT)
+                .apply()
         }
 
         serviceScope.launch {
@@ -440,7 +481,12 @@ class ApexPolicyService : Service() {
         private const val ALARM_REQUEST_CODE = 2002
         private const val PREFS_NAME = "apex_policy_service_prefs"
         private const val KEY_DEVICE_LOCKED_SINCE = "device_locked_since"
+        private const val KEY_POWER_OFF_AT = "power_off_at"
+        private const val KEY_LOCK_BOOT_COUNT = "lock_boot_count"
         const val ACTION_CHECK_POLICIES = "com.xxmrk888ytxx.apexowner.action.CHECK_POLICIES"
+
+        private fun currentBootCount(context: Context): Long =
+            Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, -1).toLong()
 
         fun shouldServiceRun(context: Context): Boolean {
             val dpm = context.getSystemService(DEVICE_POLICY_SERVICE) as? DevicePolicyManager
