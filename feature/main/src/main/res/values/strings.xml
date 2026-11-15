@@ -1,16 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="to_use_all_of_the_app_s_features_you_need_to_grant_device_owner_privileges_tap_the_button_below_to_learn_how_to_set_this_up">To use all of the app\'s features, you need to grant Device Owner privileges. Tap the button below to learn how to set this up.</string>
+    <string name="to_use_all_of_the_app_s_features_you_need_to_grant_device_owner_privileges_tap_the_button_below_to_learn_how_to_set_this_up">To use all of the app’s features, you need to grant Device Owner privileges. Tap the button below to learn how to set this up.</string>
     <string name="permissions_granted_successfully_you_now_have_full_access_to_manage_device_policies_using_the_modules_below">Permissions granted successfully. You now have full access to manage device policies using the modules below.</string>
     <string name="device_owner_active">Device Owner: Active</string>
     <string name="action_required">Action Required</string>
     <string name="how_to_grant_permission">How to grant permission</string>
     <string name="device_restrictions">Device Restrictions</string>
     <string name="limit_device_features_to_enhance_your_privacy_e_g_camera_microphone_usb_data_transfer">Limit device features to enhance your privacy (e.g., camera, microphone, USB data transfer)</string>
-    <string name="device_management">Device Management</string>
-    <string name="management_modules">Management Modules</string>
-    <string name="work_profile_setup">Work Profile Setup</string>
-    <string name="create_a_separate_profile_to_isolate_work_apps_and_data_from_personal_ones">Create a separate profile to isolate work apps and data from personal ones.</string>
-    <string name="work_profile_created_successfully">Work profile created successfully</string>
-    <string name="couldn_t_create_a_work_profile">Couldn\'t create a work profile</string>
+    <string name="device_management">Apex Manager</string>
+    <string name="management_modules">Модули управления</string>
+    <string name="work_profile_setup">Создание рабочего профиля</string>
+    <string name="create_a_separate_profile_to_isolate_work_apps_and_data_from_personal_ones">Device Owner и рабочий профиль не настроены</string>
+    <string name="work_profile_created_successfully">Рабочий профиль успешно создан</string>
+    <string name="couldn_t_create_a_work_profile">Не удалось создать рабочий профиль</string>
+
+    <string name="mode_device_owner">Режим: Device Owner (Полный доступ)</string>
+    <string name="mode_profile_owner">Режим: Profile Owner (Рабочий профиль)</string>
+    <string name="mode_personal_host">Личный профиль</string>
+    <string name="mode_work_profile">Рабочий профиль</string>
+    <string name="mode_work_profile_desc">Вы находитесь в рабочем профиле</string>
+    <string name="mode_work_profile_created">Рабочий профиль создан</string>
+    <string name="mode_work_profile_created_desc">Рабочий профиль доступен для управления приложениями и ограничениями</string>
+    <string name="work_profile_status_created">Рабочий профиль активен (Apex Workspace)</string>
+    <string name="work_profile_status_not_created">Рабочий профиль еще не создан</string>
+    <string name="create_work_profile_one_click">Создать рабочий профиль в 1 клик</string>
+    <string name="open_work_profile_shelter">Управление приложениями</string>
+    <string name="shelter_management_desc">Заморозка, разморозка и клонирование приложений</string>
+    <string name="personal_app_management_desc">Управление приложениями личного профиля</string>
+    <string name="device_owner_restrictions_title">Ограничения всего устройства (Device Owner)</string>
+    <string name="device_owner_restrictions_desc">Аппаратные блокировки (камера, микрофон, USB, 2G сети)</string>
+    <string name="work_profile_restrictions_title">Ограничения рабочего профиля</string>
+    <string name="work_profile_restrictions_desc">Камера, скриншоты, установка неизвестных приложений и др.</string>
+    <string name="device_owner_not_granted_desc">Для разблокировки требуются права Device Owner или создание рабочего профиля</string>
+    <string name="quiet_mode_toggle">Пауза рабочего профиля (Quiet Mode)</string>
+
+    <string name="global_permissions_title_device">Глобальные разрешения (Device)</string>
+    <string name="global_permissions_title_work_profile">Глобальные разрешения профиля</string>
+    <string name="global_permissions_desc_device">Принудительное отключение разрешений (Камера, Микрофон, Локация и др.) для всех приложений</string>
+    <string name="global_permissions_desc_work_profile">Принудительное отключение разрешений для приложений рабочего профиля</string>
 </resources>

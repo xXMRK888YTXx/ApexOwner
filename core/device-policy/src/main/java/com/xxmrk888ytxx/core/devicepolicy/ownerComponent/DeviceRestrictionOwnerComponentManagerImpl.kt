@@ -3,6 +3,7 @@ package com.xxmrk888ytxx.core.devicepolicy.ownerComponent
 import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.os.Build
+import android.os.Bundle
 import android.os.UserManager
 import androidx.annotation.ChecksSdkIntAtLeast
 import com.xxmrk888ytxx.core.devicepolicy.DeviceRestrictionOwnerComponentManager
@@ -20,6 +21,12 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
     devicePolicyManager: DevicePolicyManager,
     @ApplicationContext context: Context
 ) : BaseOwnerComponent(devicePolicyManager, context), DeviceRestrictionOwnerComponentManager {
+    override val isAppDeviceOwner: Boolean
+        get() = checkIsAppDeviceOwner()
+
+    override val isAppProfileOwner: Boolean
+        get() = checkIsAppProfileOwner()
+
     private val _isCameraDisabled = MutableStateFlow(checkIsCameraDisabled())
     private val _isMicrophoneDisabled = MutableStateFlow(false)
     private val _isUSBDataSignalDisabled = MutableStateFlow(checkIsUSBDataSignalDisabled())
@@ -56,8 +63,6 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
     private val _isRoamingDisabled = MutableStateFlow(false)
     private val _isConfigMobileDataDisabled = MutableStateFlow(false)
     private val _is2GNetworkDisabled = MutableStateFlow(false)
-
-
 
     override val isCameraDisabled: Flow<Boolean> = _isCameraDisabled.asAndroidDeviceOwnerFlow()
     override val isMicrophoneDisabled: Flow<Boolean> =
@@ -116,8 +121,8 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
     override val is2GNetworkDisabled: Flow<Boolean> = _is2GNetworkDisabled.asAndroidDeviceOwnerFlow()
 
     override val isCanDisableUSBDataSignal: Boolean
-        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            devicePolicyManager.canUsbDataSignalingBeDisabled()
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && checkIsAppDeviceOwner()) {
+            try { devicePolicyManager.canUsbDataSignalingBeDisabled() } catch (_: Exception) { false }
         } else {
             false
         }
@@ -147,10 +152,15 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
 
     override suspend fun updateRestrictionState() {
-        if (!checkIsAppDeviceOwner()) return
+        if (!checkCanManageOwnerPolicies()) return
         _isCameraDisabled.value = checkIsCameraDisabled()
         _isUSBDataSignalDisabled.value = checkIsUSBDataSignalDisabled()
-        val userRestriction = devicePolicyManager.getUserRestrictions(deviceOwnerReceiver)
+        _isScreenshotsDisabled.value = checkIsScreenshotsDisabled()
+        val userRestriction = try {
+            devicePolicyManager.getUserRestrictions(deviceOwnerReceiver)
+        } catch (_: Exception) {
+            Bundle()
+        }
         _isMicrophoneDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE, false)
         _isUSBFileTransferDisabled.value =
@@ -171,7 +181,6 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
             _isContentSuggestionDisabled.value =
                 userRestriction.getBoolean(UserManager.DISALLOW_CONTENT_SUGGESTIONS, false)
         }
-        _isScreenshotsDisabled.value = checkIsScreenshotsDisabled()
         _isDebugFeaturesDisabled.value =
             userRestriction.getBoolean(UserManager.DISALLOW_DEBUGGING_FEATURES, false)
         _isFactoryResetDisabled.value =
@@ -239,167 +248,167 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         }
     }
 
-    override suspend fun setCameraDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setCameraDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = false) {
         setCameraDisabled(deviceOwnerReceiver, isDisabled)
     }
 
-    override suspend fun setMicrophoneDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setMicrophoneDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_UNMUTE_MICROPHONE, isDisabled)
     }
 
-    override suspend fun setUSBDataSignalDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setUSBDataSignalDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             devicePolicyManager.isUsbDataSignalingEnabled = !isDisabled
         }
     }
 
-    override suspend fun setUSBFileTransferDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setUSBFileTransferDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER, isDisabled)
     }
 
-    override suspend fun setInstallAppsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setInstallAppsDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = false) {
         toggleUserRestriction(UserManager.DISALLOW_INSTALL_APPS, isDisabled)
     }
 
     override suspend fun setInstallAppsFromUnknownSourcesDisabled(isDisabled: Boolean) =
-        changeDeviceOwnerPolicy {
+        changeRestrictionPolicy(requireDeviceOwner = false) {
             toggleUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, isDisabled)
         }
 
-    override suspend fun setUninstallAppsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setUninstallAppsDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = false) {
         toggleUserRestriction(UserManager.DISALLOW_UNINSTALL_APPS, isDisabled)
     }
 
-    override suspend fun setAppControlDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setAppControlDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = false) {
         toggleUserRestriction(UserManager.DISALLOW_APPS_CONTROL, isDisabled)
     }
 
     override suspend fun setScreenContentCaptureForAIDisabled(isDisabled: Boolean) =
-        changeDeviceOwnerPolicy {
+        changeRestrictionPolicy(requireDeviceOwner = true) {
             if (isCanDisableScreenContentCaptureForAI) {
                 toggleUserRestriction(UserManager.DISALLOW_CONTENT_CAPTURE, isDisabled)
             }
         }
 
     override suspend fun setContentSuggestionDisabled(isDisabled: Boolean) =
-        changeDeviceOwnerPolicy {
+        changeRestrictionPolicy(requireDeviceOwner = true) {
             if (isCanDisableContentSuggestion) {
                 toggleUserRestriction(UserManager.DISALLOW_CONTENT_SUGGESTIONS, isDisabled)
             }
         }
 
-    override suspend fun setScreenshotsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setScreenshotsDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = false) {
         devicePolicyManager.setScreenCaptureDisabled(deviceOwnerReceiver, isDisabled)
     }
 
-    override suspend fun setDebugFeaturesDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setDebugFeaturesDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, isDisabled)
     }
 
-    override suspend fun setFactoryResetDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setFactoryResetDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_FACTORY_RESET, isDisabled)
     }
 
-    override suspend fun setSafeBootDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setSafeBootDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_SAFE_BOOT, isDisabled)
     }
 
-    override suspend fun setAddUserDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setAddUserDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_ADD_USER, isDisabled)
     }
 
-    override suspend fun setRemoveUserDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setRemoveUserDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_REMOVE_USER, isDisabled)
     }
 
-    override suspend fun setSwitchUserDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setSwitchUserDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_USER_SWITCH, isDisabled)
     }
 
-    override suspend fun setBluetoothDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setBluetoothDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_BLUETOOTH, isDisabled)
     }
 
-    override suspend fun setBluetoothConfigDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setBluetoothConfigDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_CONFIG_BLUETOOTH, isDisabled)
     }
 
     override suspend fun setMountPhysicalMediaDisabled(isDisabled: Boolean) =
-        changeDeviceOwnerPolicy {
+        changeRestrictionPolicy(requireDeviceOwner = true) {
             toggleUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, isDisabled)
         }
 
-    override suspend fun setLocationDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setLocationDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_SHARE_LOCATION, isDisabled)
     }
 
-    override suspend fun setOutgoingCallsDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setOutgoingCallsDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, isDisabled)
     }
 
-    override suspend fun setSMSDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setSMSDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_SMS, isDisabled)
     }
 
-    override suspend fun setNFCDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setNFCDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         if (isCanDisableNFC) {
             toggleUserRestriction(UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO, isDisabled)
         }
     }
 
-    override suspend fun setWallpaperChangeDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setWallpaperChangeDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_SET_WALLPAPER, isDisabled)
     }
 
-    override suspend fun setFunDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setFunDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_FUN, isDisabled)
     }
 
-    override suspend fun setWifiConfigDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setWifiConfigDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, isDisabled)
     }
 
-    override suspend fun setWifiStateChangeDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setWifiStateChangeDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         if (isCanDisableChangeWifiState) {
             toggleUserRestriction(UserManager.DISALLOW_CHANGE_WIFI_STATE, isDisabled)
         }
     }
 
-    override suspend fun setHotspotDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
-        if(isCanDisableHotspot) {
+    override suspend fun setHotspotDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
+        if (isCanDisableHotspot) {
             toggleUserRestriction(UserManager.DISALLOW_WIFI_TETHERING, isDisabled)
         }
     }
 
-    override suspend fun setAddNewWifiNetworksDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setAddNewWifiNetworksDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         if (isCanDisableAddNewWifiNetworks) {
             toggleUserRestriction(UserManager.DISALLOW_ADD_WIFI_CONFIG, isDisabled)
         }
     }
 
-    override suspend fun setAirplaneModeDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setAirplaneModeDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_AIRPLANE_MODE, isDisabled)
     }
 
-    override suspend fun setConfigVPNDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setConfigVPNDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_CONFIG_VPN, isDisabled)
     }
 
-    override suspend fun setConfigPrivateDNSDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setConfigPrivateDNSDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         if (isCanDisableConfigPrivateDNS) {
             toggleUserRestriction(UserManager.DISALLOW_CONFIG_PRIVATE_DNS, isDisabled)
         }
     }
 
-    override suspend fun setRoamingDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setRoamingDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_DATA_ROAMING, isDisabled)
     }
 
-    override suspend fun setConfigMobileDataDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun setConfigMobileDataDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         toggleUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS, isDisabled)
     }
 
-    override suspend fun set2GNetworkDisabled(isDisabled: Boolean) = changeDeviceOwnerPolicy {
+    override suspend fun set2GNetworkDisabled(isDisabled: Boolean) = changeRestrictionPolicy(requireDeviceOwner = true) {
         if (isCanDisable2GNetwork) {
             toggleUserRestriction(UserManager.DISALLOW_CELLULAR_2G, isDisabled)
         }
@@ -413,8 +422,15 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         }
     }
 
-    private suspend fun changeDeviceOwnerPolicy(block: suspend DevicePolicyManager.() -> Unit) {
-        if (!checkIsAppDeviceOwner()) throw AppNotDeviceOwnerException()
+    private suspend fun changeRestrictionPolicy(
+        requireDeviceOwner: Boolean = false,
+        block: suspend DevicePolicyManager.() -> Unit
+    ) {
+        if (requireDeviceOwner) {
+            if (!checkIsAppDeviceOwner()) throw AppNotDeviceOwnerException()
+        } else {
+            if (!checkCanManageOwnerPolicies()) throw AppNotDeviceOwnerException()
+        }
         devicePolicyManager.block()
         updateRestrictionState()
     }
@@ -432,8 +448,8 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
     }
 
     private fun checkIsUSBDataSignalDisabled() =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            !devicePolicyManager.isUsbDataSignalingEnabled
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && checkIsAppDeviceOwner()) {
+            try { !devicePolicyManager.isUsbDataSignalingEnabled } catch (_: Exception) { false }
         } else {
             false
         }

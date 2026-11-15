@@ -5,8 +5,8 @@ package com.xxmrk888ytxx.apexowner.view.mainActivity
 import androidx.lifecycle.viewModelScope
 import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
-import com.xxmrk888ytxx.apexowner.domain.SettingsRepository
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.MainActivityEvent
+import com.xxmrk888ytxx.apexowner.view.mainActivity.model.ApexOwnerBottomBarItem
 import com.xxmrk888ytxx.core.base.android.viewModel.ApexOwnerViewModel
 import com.xxmrk888ytxx.core.base.android.viewModel.stub.Stub
 import com.xxmrk888ytxx.core.devicepolicy.DeviceOwnerManager
@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -28,7 +27,6 @@ import javax.inject.Inject
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
-    private val settingsRepository: SettingsRepository,
     private val deviceOwnerManager: DeviceOwnerManager
 ) : ApexOwnerViewModel<Stub, MainActivityEvent>(Stub) {
 
@@ -47,12 +45,8 @@ class MainActivityViewModel @Inject constructor(
     fun prepareScreen() {
         if (isAppReady.value) return
         prepareScreenScope.launch {
-            val isOnboardingPassed = settingsRepository.settings.map { it.isOnboardingPassed }.first()
-            if (isOnboardingPassed) {
-                navigationManager.setStartDestination(Screen.MainScreen)
-            } else {
-                navigationManager.setStartDestination(Screen.OnboardingScreen)
-            }
+            // Onboarding is temporarily disabled until its content is ready.
+            navigationManager.setStartDestination(Screen.MainScreen)
             isAppReady.value = true
             prepareScreenScope.cancel()
         }
@@ -61,7 +55,10 @@ class MainActivityViewModel @Inject constructor(
     override fun onEvent(event: MainActivityEvent) {
         when(event) {
             is MainActivityEvent.BottomItemClicked -> {
-                // TODO
+                when (event.item) {
+                    ApexOwnerBottomBarItem.MainScreen -> navigationManager.navigate(Screen.MainScreen)
+                    ApexOwnerBottomBarItem.Settings -> navigationManager.navigate(Screen.SettingsScreen)
+                }
             }
             MainActivityEvent.NavigationUp -> navigationManager.navigateUp()
             MainActivityEvent.OnResume -> updateDeviceOwnerState()

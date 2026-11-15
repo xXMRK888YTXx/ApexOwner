@@ -95,9 +95,9 @@ class AppRestrictionModuleViewModel @Inject constructor(
         val isConfigMobileDataDisabled = flowArray[34]
         val is2GNetworkDisabled = flowArray[35]
 
-
-
         ScreenState(
+            isDeviceOwner = restrictionManageContract.isAppDeviceOwner,
+            isProfileOwner = restrictionManageContract.isAppProfileOwner,
             isCameraDisabled = isCameraDisabled,
             isMicrophoneDisabled = isMicrophoneDisabled,
             isCanDisableUSBDataSignal = restrictionManageContract.isCanDisableUSBDataSignal,
@@ -145,7 +145,6 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isCanDisable2GNetwork = restrictionManageContract.isCanDisable2GNetwork,
         )
     }.stateWhileSubscribed()
-
 
     override fun onEvent(event: AppRestrictionModuleUiEvent) {
         when (event) {

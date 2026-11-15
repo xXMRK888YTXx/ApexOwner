@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ApexOwner</string>
+    <string name="main_screen">Main Screen</string>
+    <string name="settings">Settings</string>
+    <string name="settings_version_format">Version %1$d (%2$s)</string>
+    <string name="clear_device_owner_title">Disable Device Owner?</string>
+    <string name="clear_device_owner_message">All Device Owner policies will be disabled. The app will remain installed but will lose full control of the device.</string>
+    <string name="clear_device_owner_action">Disable Device Owner</string>
+    <string name="clear_device_owner_failed">Failed to disable Device Owner</string>
+    <string name="remove_work_profile_title">Remove work profile?</string>
+    <string name="remove_work_profile_message">All apps and data in the work profile will be erased.</string>
+    <string name="remove_work_profile_action">Remove work profile</string>
+    <string name="cancel">Cancel</string>
+    <string name="policy_service_channel_name">Policy and protection service</string>
+    <string name="policy_service_notification_title">ApexOwner is active</string>
+    <string name="policy_service_notification_desc">Policies and permissions are enforced in the background</string>
+    <string name="shortcut_one_shot_short">Quick launch</string>
+    <string name="shortcut_one_shot_long">Quick launch apps</string>
+    <string name="one_shot_launcher_title">Quick launch</string>
+    <string name="one_shot_apps_count">Apps: %1$d</string>
+    <string name="one_shot_launcher_empty_title">No configured apps</string>
+    <string name="one_shot_launcher_empty_desc">Configure One-shot or Auto-freeze for apps in the Work profile module.</string>
+    <string name="one_shot_open_profile">Manage apps</string>
+    <string name="one_shot_search_hint">Search apps…</string>
+    <string name="one_shot_launch_btn">Launch</string>
+    <string name="badge_auto_freeze">Auto-freeze</string>
+    <string name="badge_one_shot">One-shot</string>
+</resources>

@@ -26,16 +26,16 @@ extensions.configure<ApplicationExtension> {
         applicationId = "com.xxmrk888ytxx.apexowner"
         minSdk = catalogMinSdk
         targetSdk = catalogCompileSdk
-        versionCode = 6
-        versionName = "Final"
+        versionCode = 100
+        versionName = "Margarita.1 (Alpha)"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -71,6 +71,7 @@ dependencies {
     implementation(projects.feature.onboarding)
     implementation(projects.feature.main)
     implementation(projects.feature.managementModule.appRestriction)
+    implementation(projects.feature.managementModule.workProfile)
 
     // Dependencies
     ksp(libs.hilt.compiler)

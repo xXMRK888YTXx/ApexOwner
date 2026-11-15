@@ -3,7 +3,6 @@ package com.xxmrk888ytxx.feature.main
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,14 +11,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -27,9 +24,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -39,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.xxmrk888ytxx.core.base.android.mvi.SideEffect
 import com.xxmrk888ytxx.core.base.compose.extension.HandleSideEffects
 import com.xxmrk888ytxx.core.base.compose.ui.CoreTopBar
-import com.xxmrk888ytxx.feature.main.model.DeviceOwnerModule
+import com.xxmrk888ytxx.feature.main.model.MainOperatingMode
 import com.xxmrk888ytxx.feature.main.model.MainScreenEvent
 import com.xxmrk888ytxx.feature.main.model.MainScreenSideEffect
 import com.xxmrk888ytxx.feature.main.model.ScreenState
@@ -61,36 +58,18 @@ fun MainScreen(
             onEvent(MainScreenEvent.OnWorkProfileCreationFailed)
         }
     }
+
     HandleSideEffects<MainScreenSideEffect>(sideEffect) { effect ->
-        when(effect) {
-            is MainScreenSideEffect.SendIntentForCreateWorkProfile -> createWorkProfileLauncher.launch(effect.createWorkProfileIntent)
+        when (effect) {
+            is MainScreenSideEffect.SendIntentForCreateWorkProfile ->
+                createWorkProfileLauncher.launch(effect.createWorkProfileIntent)
         }
-    }
-    val modules = remember {
-        listOf(
-            DeviceOwnerModule(
-                id = 0,
-                title = R.string.device_restrictions,
-                description = R.string.limit_device_features_to_enhance_your_privacy_e_g_camera_microphone_usb_data_transfer,
-                iconResId = R.drawable.security,
-                onClick = { onEvent(MainScreenEvent.OnDeviveRestrictionButtonClicked) }
-            ),
-            DeviceOwnerModule(
-                id = 1,
-                title = R.string.work_profile_setup,
-                description = R.string.create_a_separate_profile_to_isolate_work_apps_and_data_from_personal_ones,
-                iconResId = R.drawable.work,
-                onClick = { onEvent(MainScreenEvent.OnWorkProfileButtonClicked) }
-            ),
-        )
     }
 
     Scaffold(
         topBar = {
             CoreTopBar(
-                title = {
-                    Text(stringResource(R.string.device_management))
-                },
+                title = { Text(stringResource(R.string.device_management)) },
                 isShouldShowBackArrow = false,
                 onNavigateBack = {}
             )
@@ -105,9 +84,11 @@ fun MainScreen(
         ) {
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                DeviceOwnerStatusCard(
-                    isGranted = screenState.isOwnerPermissionGranted,
-                    onGrantClick = { onEvent(MainScreenEvent.OnHowGrantPermissionClicked) }
+                OperatingModeStatusCard(
+                    modifier = Modifier.animateItem(),
+                    mode = screenState.operatingMode,
+                    hasWorkProfile = screenState.hasWorkProfile,
+                    isInsideWorkProfile = screenState.isInsideWorkProfile
                 )
             }
 
@@ -120,13 +101,28 @@ fun MainScreen(
                 )
             }
 
-            items(
-                items = modules,
-                key = { it.id }
-            ) { module ->
-                ModuleListItem(
-                    module = module,
-                    onClick = module.onClick
+            item {
+                WorkProfileSectionCard(
+                    modifier = Modifier.animateItem(),
+                    screenState = screenState,
+                    onOpenManagement = { onEvent(MainScreenEvent.OnWorkProfileManagementClicked) },
+                    onCreateProfile = { onEvent(MainScreenEvent.OnWorkProfileButtonClicked) }
+                )
+            }
+
+            item {
+                DeviceOwnerRestrictionsCard(
+                    modifier = Modifier.animateItem(),
+                    screenState = screenState,
+                    onClick = { onEvent(MainScreenEvent.OnDeviveRestrictionButtonClicked) }
+                )
+            }
+
+            item {
+                GlobalPermissionsCard(
+                    modifier = Modifier.animateItem(),
+                    screenState = screenState,
+                    onClick = { onEvent(MainScreenEvent.OnGlobalPermissionsButtonClicked) }
                 )
             }
 
@@ -138,47 +134,110 @@ fun MainScreen(
 }
 
 @Composable
-fun DeviceOwnerStatusCard(
-    isGranted: Boolean,
-    onGrantClick: () -> Unit
+private fun OperatingModeStatusCard(
+    modifier: Modifier = Modifier,
+    mode: MainOperatingMode,
+    hasWorkProfile: Boolean,
+    isInsideWorkProfile: Boolean
 ) {
-    val containerColor = if (isGranted) {
-        MaterialTheme.colorScheme.primaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant
-    }
-
-    val contentColor = if (isGranted) {
-        MaterialTheme.colorScheme.onPrimaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-
-    val statusIconTint = if (isGranted) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.error
-    }
-
-    val borderStroke = if (isGranted) {
-        null
-    } else {
-        BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.error
-        )
+    val (title, desc, iconRes, containerColor, contentColor) = when {
+        isInsideWorkProfile -> {
+            Tuples5(
+                stringResource(R.string.mode_work_profile),
+                stringResource(R.string.mode_work_profile_desc),
+                R.drawable.work,
+                MaterialTheme.colorScheme.primaryContainer,
+                MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+        mode == MainOperatingMode.DEVICE_OWNER -> {
+            Tuples5(
+                stringResource(R.string.mode_device_owner),
+                stringResource(R.string.permissions_granted_successfully_you_now_have_full_access_to_manage_device_policies_using_the_modules_below),
+                R.drawable.shield,
+                MaterialTheme.colorScheme.primaryContainer,
+                MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+        hasWorkProfile -> {
+            Tuples5(
+                stringResource(R.string.mode_work_profile_created),
+                stringResource(R.string.mode_work_profile_created_desc),
+                R.drawable.work,
+                MaterialTheme.colorScheme.primaryContainer,
+                MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+        else -> {
+            Tuples5(
+                stringResource(R.string.mode_personal_host),
+                stringResource(R.string.create_a_separate_profile_to_isolate_work_apps_and_data_from_personal_ones),
+                R.drawable.shield_lock,
+                MaterialTheme.colorScheme.surfaceVariant,
+                MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        ),
+        modifier = modifier
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = containerColor,
             contentColor = contentColor
         ),
-        border = borderStroke
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(36.dp)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = desc,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = contentColor.copy(alpha = 0.85f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun WorkProfileSectionCard(
+    modifier: Modifier = Modifier,
+    screenState: ScreenState,
+    onOpenManagement: () -> Unit,
+    onCreateProfile: () -> Unit
+) {
+    val isProfileActive = screenState.hasWorkProfile || screenState.operatingMode == MainOperatingMode.PROFILE_OWNER
+    val isManagementAvailable = isProfileActive || screenState.isDeviceOwner
+
+    ElevatedCard(
+        modifier = modifier
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
         Column(
             modifier = Modifier
@@ -186,48 +245,58 @@ fun DeviceOwnerStatusCard(
                 .padding(16.dp)
         ) {
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(id = if (isGranted) R.drawable.shield else R.drawable.shield_lock),
+                    painter = painterResource(R.drawable.work),
                     contentDescription = null,
-                    tint = statusIconTint,
-                    modifier = Modifier.size(28.dp)
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
                 )
+
                 Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = if (isGranted) stringResource(R.string.device_owner_active) else stringResource(
-                        R.string.action_required),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (!isGranted) MaterialTheme.colorScheme.error else contentColor
-                )
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.open_work_profile_shelter),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = if (isManagementAvailable) {
+                            if (screenState.isDeviceOwner && !screenState.hasWorkProfile) {
+                                stringResource(R.string.personal_app_management_desc)
+                            } else {
+                                stringResource(R.string.shelter_management_desc)
+                            }
+                        } else {
+                            stringResource(R.string.work_profile_status_not_created)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            if (isGranted) {
-                Text(
-                    text = stringResource(R.string.permissions_granted_successfully_you_now_have_full_access_to_manage_device_policies_using_the_modules_below),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            } else {
-                Text(
-                    text = stringResource(R.string.to_use_all_of_the_app_s_features_you_need_to_grant_device_owner_privileges_tap_the_button_below_to_learn_how_to_set_this_up),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
+            if (isManagementAvailable) {
                 Button(
-                    onClick = onGrantClick,
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
-                    )
+                    onClick = onOpenManagement,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text(stringResource(R.string.how_to_grant_permission))
+                    Text(stringResource(R.string.open_work_profile_shelter))
+                }
+
+            } else {
+                Button(
+                    onClick = onCreateProfile,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text(stringResource(R.string.create_work_profile_one_click))
                 }
             }
         }
@@ -235,55 +304,152 @@ fun DeviceOwnerStatusCard(
 }
 
 @Composable
-fun ModuleListItem(
-    module: DeviceOwnerModule,
+private fun DeviceOwnerRestrictionsCard(
+    modifier: Modifier = Modifier,
+    screenState: ScreenState,
     onClick: () -> Unit
 ) {
+    val isDeviceOwner = screenState.isDeviceOwner
+    val isProfileOwner = screenState.operatingMode == MainOperatingMode.PROFILE_OWNER
+    val hasWorkProfile = screenState.hasWorkProfile
+    val isEnabled = isDeviceOwner || isProfileOwner || hasWorkProfile
+
+    val title = when {
+        isDeviceOwner -> stringResource(R.string.device_owner_restrictions_title)
+        isProfileOwner || hasWorkProfile -> stringResource(R.string.work_profile_restrictions_title)
+        else -> stringResource(R.string.device_owner_restrictions_title)
+    }
+
+    val desc = when {
+        isDeviceOwner -> stringResource(R.string.device_owner_restrictions_desc)
+        isProfileOwner || hasWorkProfile -> stringResource(R.string.work_profile_restrictions_desc)
+        else -> stringResource(R.string.device_owner_not_granted_desc)
+    }
+
     ElevatedCard(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 75.dp)
-            .clickable(onClick = onClick),
+            .clickable(enabled = isEnabled, onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = module.iconResId),
-                contentDescription = stringResource(module.title),
-                tint = MaterialTheme.colorScheme.primary,
+                painter = painterResource(R.drawable.security),
+                contentDescription = null,
+                tint = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                 modifier = Modifier.size(32.dp)
             )
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(module.title),
-                    style = MaterialTheme.typography.titleMedium
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = stringResource(module.description),
+                    text = desc,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
             Icon(
-                painter = painterResource(id = R.drawable.arrow_forward),
-                contentDescription = "Navigate",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                painter = painterResource(R.drawable.arrow_forward),
+                contentDescription = null,
+                tint = if (isEnabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outline.copy(
+                    alpha = 0.5f
+                )
             )
         }
     }
 }
+
+@Composable
+private fun GlobalPermissionsCard(
+    modifier: Modifier = Modifier,
+    screenState: ScreenState,
+    onClick: () -> Unit
+) {
+    val isDeviceOwner = screenState.isDeviceOwner
+    val isProfileOwner = screenState.operatingMode == MainOperatingMode.PROFILE_OWNER
+    val hasWorkProfile = screenState.hasWorkProfile
+    val isEnabled = isDeviceOwner || isProfileOwner || hasWorkProfile
+
+    val title = when {
+        isDeviceOwner -> stringResource(R.string.global_permissions_title_device)
+        else -> stringResource(R.string.global_permissions_title_work_profile)
+    }
+
+    val desc = when {
+        isDeviceOwner -> stringResource(R.string.global_permissions_desc_device)
+        isProfileOwner || hasWorkProfile -> stringResource(R.string.global_permissions_desc_work_profile)
+        else -> stringResource(R.string.device_owner_not_granted_desc)
+    }
+
+    ElevatedCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(enabled = isEnabled, onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.shield),
+                contentDescription = null,
+                tint = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = desc,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Icon(
+                painter = painterResource(R.drawable.arrow_forward),
+                contentDescription = null,
+                tint = if (isEnabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            )
+        }
+    }
+}
+
+private data class Tuples5<A, B, C, D, E>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D,
+    val fifth: E
+)

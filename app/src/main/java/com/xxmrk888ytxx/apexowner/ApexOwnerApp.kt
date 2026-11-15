@@ -2,7 +2,9 @@ package com.xxmrk888ytxx.apexowner
 
 import android.app.Application
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
+import com.xxmrk888ytxx.apexowner.service.ApexPolicyService
 import com.xxmrk888ytxx.core.base.android.logs.Logger
+import com.xxmrk888ytxx.core.devicepolicy.ProfileOwnerManager
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -12,9 +14,14 @@ class ApexOwnerApp : Application() {
     @Inject
     lateinit var navigationManager: NavigationManager
 
+    @Inject
+    lateinit var profileOwnerManager: ProfileOwnerManager
+
     override fun onCreate() {
         super.onCreate()
         Logger.init(MAIN_DEBUG_TAG)
+        profileOwnerManager.setupCrossProfileFilters()
+        ApexPolicyService.start(this)
     }
 
     private companion object {

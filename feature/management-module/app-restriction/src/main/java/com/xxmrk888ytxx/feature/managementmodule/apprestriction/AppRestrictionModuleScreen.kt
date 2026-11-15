@@ -1,5 +1,6 @@
 package com.xxmrk888ytxx.feature.managementmodule.apprestriction
 
+import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,9 +16,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -54,7 +58,9 @@ fun AppRestrictionModuleScreen(
     onEvent: (AppRestrictionModuleUiEvent) -> Unit,
     sideEffect: Flow<SideEffect>
 ) {
-    val groupedRestrictions = remember(screenState) {
+    val profileOwnerSupportedIds = remember { setOf<Short>(0, 10, 4, 5, 6, 7) }
+    var showUnavailable by remember(screenState.isProfileOwner) { mutableStateOf(false) }
+    val rawGroupedRestrictions = remember(screenState) {
         mapOf(
             R.string.category_hardware_and_media.uiText() to listOf(
                 Restriction(
@@ -80,7 +86,12 @@ fun AppRestrictionModuleScreen(
                     description = R.string.restriction_usb_data_description.uiText(),
                     isEnabled = screenState.isUSBDataSignalDisabled,
                     isAvailable = screenState.isCanDisableUSBDataSignal,
-                    unavailableMessage = R.string.restriction_usb_data_unavailable.uiText(),
+                    unavailableMessage = when {
+                        !screenState.isDeviceOwner -> R.string.device_owner_required.uiText()
+                        Build.VERSION.SDK_INT < Build.VERSION_CODES.S ->
+                            R.string.restriction_usb_data_unavailable_android_version.uiText()
+                        else -> R.string.restriction_usb_data_unavailable_device.uiText()
+                    },
                     uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUSBDataSignalDisable
                 ),
                 Restriction(
@@ -369,14 +380,35 @@ fun AppRestrictionModuleScreen(
         )
     }
 
+    val groupedRestrictions = remember(rawGroupedRestrictions, screenState.isDeviceOwner) {
+        rawGroupedRestrictions.mapValues { (_, list) ->
+            list.map { restriction ->
+                val isDoOnly = restriction.id !in profileOwnerSupportedIds
+                if (!screenState.isDeviceOwner && isDoOnly) {
+                    restriction.copy(
+                        isAvailable = false,
+                        unavailableMessage = R.string.device_owner_required.uiText()
+                    )
+                } else {
+                    restriction
+                }
+            }
+        }
+    }
+
     HandleSideEffects(sideEffect)
+    val titleText = when {
+        screenState.isDeviceOwner -> stringResource(R.string.restrictions_title_device)
+        screenState.isProfileOwner -> stringResource(R.string.restrictions_title_work_profile)
+        else -> stringResource(R.string.app_restriction)
+    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(),
         topBar = {
             CoreTopBar(
                 title = {
-                    Text(text = stringResource(R.string.app_restriction))
+                    Text(text = titleText)
                 }
             )
         }
@@ -388,7 +420,46 @@ fun AppRestrictionModuleScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            if (screenState.isProfileOwner) {
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp, vertical = 4.dp)
+                            .toggleable(
+                                value = showUnavailable,
+                                role = Role.Checkbox,
+                                onValueChange = { showUnavailable = it }
+                            ),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = showUnavailable,
+                            onCheckedChange = null,
+                            modifier = Modifier.padding(end = 12.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.show_unavailable_restrictions),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
             groupedRestrictions.forEach { (categoryTitle, restrictions) ->
+                val visibleRestrictions = if (screenState.isProfileOwner && !showUnavailable) {
+                    restrictions.filter { it.isAvailable }
+                } else {
+                    restrictions
+                }
+                if (visibleRestrictions.isEmpty()) return@forEach
+
                 item {
                     CategoryHeader(
                         title = categoryTitle.asString(),
@@ -397,10 +468,11 @@ fun AppRestrictionModuleScreen(
                 }
 
                 items(
-                    items = restrictions,
+                    items = visibleRestrictions,
                     key = { restriction -> restriction.id }
                 ) { restriction ->
                     RestrictionCard(
+                        modifier = Modifier.animateItem(),
                         restriction = restriction,
                         onEvent = onEvent
                     )
@@ -522,3 +594,4 @@ fun RestrictionCard(
         }
     }
 }
+

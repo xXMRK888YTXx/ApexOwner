@@ -19,4 +19,12 @@ object Logger {
             else -> Timber.d(message.toString())
         }
     }
+
+    fun writeErrorLog(message: Any) {
+        when (message) {
+            is Throwable -> Timber.e(message)
+            is String -> Timber.e(message)
+            else -> Timber.e(message.toString())
+        }
+    }
 }
