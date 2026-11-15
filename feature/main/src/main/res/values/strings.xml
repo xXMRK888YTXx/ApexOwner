@@ -10,13 +10,17 @@
     <string name="device_management">Apex Manager</string>
     <string name="management_modules">Модули управления</string>
     <string name="work_profile_setup">Создание рабочего профиля</string>
-    <string name="create_a_separate_profile_to_isolate_work_apps_and_data_from_personal_ones">Изоляция приложений и данных от личного профиля</string>
+    <string name="create_a_separate_profile_to_isolate_work_apps_and_data_from_personal_ones">Device Owner и рабочий профиль не настроены</string>
     <string name="work_profile_created_successfully">Рабочий профиль успешно создан</string>
     <string name="couldn_t_create_a_work_profile">Не удалось создать рабочий профиль</string>
 
     <string name="mode_device_owner">Режим: Device Owner (Полный доступ)</string>
     <string name="mode_profile_owner">Режим: Profile Owner (Рабочий профиль)</string>
-    <string name="mode_personal_host">Режим: Личный профиль (Personal)</string>
+    <string name="mode_personal_host">Личный профиль</string>
+    <string name="mode_work_profile">Рабочий профиль</string>
+    <string name="mode_work_profile_desc">Вы находитесь в рабочем профиле</string>
+    <string name="mode_work_profile_created">Рабочий профиль создан</string>
+    <string name="mode_work_profile_created_desc">Рабочий профиль доступен для управления приложениями и ограничениями</string>
     <string name="work_profile_status_created">Рабочий профиль активен (Apex Workspace)</string>
     <string name="work_profile_status_not_created">Рабочий профиль еще не создан</string>
     <string name="create_work_profile_one_click">Создать рабочий профиль в 1 клик</string>

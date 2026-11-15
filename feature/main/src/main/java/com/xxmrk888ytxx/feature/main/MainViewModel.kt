@@ -28,12 +28,14 @@ class MainViewModel @Inject constructor(
         deviceOwnerStateProvider.operatingMode,
         deviceOwnerStateProvider.isDeviceOwner,
         deviceOwnerStateProvider.hasWorkProfile,
+        deviceOwnerStateProvider.isInsideWorkProfile,
         deviceOwnerStateProvider.isWorkProfileQuietMode
-    ) { mode, isDO, hasProfile, isQuiet ->
+    ) { mode, isDO, hasProfile, isInside, isQuiet ->
         ScreenState(
             operatingMode = mode,
             isDeviceOwner = isDO,
             hasWorkProfile = hasProfile,
+            isInsideWorkProfile = isInside,
             isWorkProfileQuietMode = isQuiet
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ScreenState())

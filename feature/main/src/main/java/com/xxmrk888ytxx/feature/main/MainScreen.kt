@@ -84,7 +84,12 @@ fun MainScreen(
         ) {
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                OperatingModeStatusCard(modifier = Modifier.animateItem(), mode = screenState.operatingMode)
+                OperatingModeStatusCard(
+                    modifier = Modifier.animateItem(),
+                    mode = screenState.operatingMode,
+                    hasWorkProfile = screenState.hasWorkProfile,
+                    isInsideWorkProfile = screenState.isInsideWorkProfile
+                )
             }
 
             item {
@@ -131,10 +136,21 @@ fun MainScreen(
 @Composable
 private fun OperatingModeStatusCard(
     modifier: Modifier = Modifier,
-    mode: MainOperatingMode
+    mode: MainOperatingMode,
+    hasWorkProfile: Boolean,
+    isInsideWorkProfile: Boolean
 ) {
-    val (title, desc, iconRes, containerColor, contentColor) = when (mode) {
-        MainOperatingMode.DEVICE_OWNER -> {
+    val (title, desc, iconRes, containerColor, contentColor) = when {
+        isInsideWorkProfile -> {
+            Tuples5(
+                stringResource(R.string.mode_work_profile),
+                stringResource(R.string.mode_work_profile_desc),
+                R.drawable.work,
+                MaterialTheme.colorScheme.primaryContainer,
+                MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+        mode == MainOperatingMode.DEVICE_OWNER -> {
             Tuples5(
                 stringResource(R.string.mode_device_owner),
                 stringResource(R.string.permissions_granted_successfully_you_now_have_full_access_to_manage_device_policies_using_the_modules_below),
@@ -143,16 +159,16 @@ private fun OperatingModeStatusCard(
                 MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
-        MainOperatingMode.PROFILE_OWNER -> {
+        hasWorkProfile -> {
             Tuples5(
-                stringResource(R.string.mode_profile_owner),
-                stringResource(R.string.work_profile_status_created),
+                stringResource(R.string.mode_work_profile_created),
+                stringResource(R.string.mode_work_profile_created_desc),
                 R.drawable.work,
                 MaterialTheme.colorScheme.primaryContainer,
                 MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
-        MainOperatingMode.PERSONAL_HOST -> {
+        else -> {
             Tuples5(
                 stringResource(R.string.mode_personal_host),
                 stringResource(R.string.create_a_separate_profile_to_isolate_work_apps_and_data_from_personal_ones),

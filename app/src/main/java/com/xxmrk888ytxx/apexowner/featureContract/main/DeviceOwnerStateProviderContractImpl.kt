@@ -25,6 +25,8 @@ class DeviceOwnerStateProviderContractImpl @Inject constructor(
 
     override val hasWorkProfile: Flow<Boolean> = deviceOwnerManager.hasWorkProfile
 
+    override val isInsideWorkProfile: Flow<Boolean> = deviceOwnerManager.policyState.map { it.isInsideWorkProfile }
+
     override val isWorkProfileQuietMode: Flow<Boolean> = deviceOwnerManager.isWorkProfileQuietMode
 
     override suspend fun setWorkProfileQuietMode(isQuietMode: Boolean): Result<Unit> {

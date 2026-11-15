@@ -6,5 +6,6 @@ data class ScreenState(
     val operatingMode: MainOperatingMode = MainOperatingMode.PERSONAL_HOST,
     val isDeviceOwner: Boolean = false,
     val hasWorkProfile: Boolean = false,
+    val isInsideWorkProfile: Boolean = false,
     val isWorkProfileQuietMode: Boolean = false
 ) : UiState
