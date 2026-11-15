@@ -35,8 +35,6 @@ import com.xxmrk888ytxx.apexowner.view.mainActivity.model.ApexOwnerBottomBarItem
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.MainActivityEvent
 import com.xxmrk888ytxx.apexowner.view.mainActivity.ui.ApexOwnerBottomBar
 import com.xxmrk888ytxx.core.base.android.ToastManager
-import com.xxmrk888ytxx.core.base.android.mvi.UiEvent
-import com.xxmrk888ytxx.core.base.android.viewModel.stub.Stub
 import com.xxmrk888ytxx.core.base.compose.extension.setContentWithThemeAndProviders
 import com.xxmrk888ytxx.core.base.compose.theme.AppSeedColors.MustardYellow
 import com.xxmrk888ytxx.core.devicepolicy.ProfileOwnerManager
@@ -58,8 +56,6 @@ import com.xxmrk888ytxx.feature.managementmodule.workprofile.WorkProfileScreen
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.WorkProfileViewModel
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileScreenState
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileUiEvent
-import com.xxmrk888ytxx.feature.onboarding.OnboardingScreen
-import com.xxmrk888ytxx.feature.onboarding.OnboardingViewModel
 import com.xxmrk888ytxx.feature.settings.SettingsScreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -191,7 +187,9 @@ class MainActivity : ComponentActivity() {
                         }
 
                         entry<Screen.OnboardingScreen> {
-                            ScreenContent<Stub, UiEvent, OnboardingViewModel>(::OnboardingScreen)
+                            // Onboarding is disabled for now. Keep the route as a compatibility
+                            // fallback so an old/restored navigation state cannot show it.
+                            ScreenContent<ScreenState, MainScreenEvent, MainViewModel>(::MainScreen)
                         }
 
                         entry<Screen.Stub> {
