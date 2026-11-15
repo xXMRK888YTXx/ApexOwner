@@ -122,33 +122,7 @@ fun WorkProfileScreen(
         }
     }
 
-    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
     var selectedAppForManagement by remember { mutableStateOf<WorkProfileApp?>(null) }
-
-    // Dialog for removing the entire work profile
-    if (showDeleteConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteConfirmDialog = false },
-            title = { Text(stringResource(R.string.remove_work_profile_btn)) },
-            text = { Text(stringResource(R.string.remove_work_profile_message)) },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showDeleteConfirmDialog = false
-                        onEvent(WorkProfileUiEvent.OnRemoveWorkProfile)
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text(stringResource(R.string.uninstall_action))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteConfirmDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
-    }
 
     // App Management Modal Bottom Sheet
     selectedAppForManagement?.let { app ->
@@ -232,14 +206,7 @@ fun WorkProfileScreen(
                     )
                 },
                 isShouldShowBackArrow = true,
-                onNavigateBack = { onEvent(WorkProfileUiEvent.OnNavigateBack) },
-                actions = {
-                    if (state.hasWorkProfile) {
-                        IconButton(onClick = { showDeleteConfirmDialog = true }) {
-                            Text("🗑️", style = MaterialTheme.typography.titleMedium)
-                        }
-                    }
-                }
+                onNavigateBack = { onEvent(WorkProfileUiEvent.OnNavigateBack) }
             )
         }
     ) { paddingValues ->

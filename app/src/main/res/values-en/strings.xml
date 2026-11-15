@@ -4,6 +4,14 @@
     <string name="main_screen">Main Screen</string>
     <string name="settings">Settings</string>
     <string name="settings_version_format">Version %1$d (%2$s)</string>
+    <string name="clear_device_owner_title">Disable Device Owner?</string>
+    <string name="clear_device_owner_message">All Device Owner policies will be disabled. The app will remain installed but will lose full control of the device.</string>
+    <string name="clear_device_owner_action">Disable Device Owner</string>
+    <string name="clear_device_owner_failed">Failed to disable Device Owner</string>
+    <string name="remove_work_profile_title">Remove work profile?</string>
+    <string name="remove_work_profile_message">All apps and data in the work profile will be erased.</string>
+    <string name="remove_work_profile_action">Remove work profile</string>
+    <string name="cancel">Cancel</string>
     <string name="policy_service_channel_name">Policy and protection service</string>
     <string name="policy_service_notification_title">ApexOwner is active</string>
     <string name="policy_service_notification_desc">Policies and permissions are enforced in the background</string>

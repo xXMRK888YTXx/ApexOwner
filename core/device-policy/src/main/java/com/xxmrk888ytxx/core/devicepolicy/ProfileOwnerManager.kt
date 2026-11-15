@@ -32,4 +32,5 @@ interface ProfileOwnerManager {
 
     suspend fun setWorkProfileQuietMode(isQuietMode: Boolean): Result<Unit>
     suspend fun removeWorkProfile(): Result<Unit>
+    suspend fun clearDeviceOwner(): Result<Unit>
 }

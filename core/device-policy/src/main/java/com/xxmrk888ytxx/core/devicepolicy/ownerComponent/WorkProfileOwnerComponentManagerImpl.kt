@@ -190,6 +190,18 @@ internal class WorkProfileOwnerComponentManagerImpl @Inject constructor(
         }
     }
 
+    override suspend fun clearDeviceOwner(): Result<Unit> {
+        if (!checkIsAppDeviceOwner()) {
+            return Result.failure(AppNotProfileOwnerException())
+        }
+        return try {
+            devicePolicyManager.clearDeviceOwnerApp(context.packageName)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override fun getWorkProfileUserHandle(): UserHandle? {
         val myUser = Process.myUserHandle()
         return launcherApps?.profiles?.firstOrNull { it != myUser }
