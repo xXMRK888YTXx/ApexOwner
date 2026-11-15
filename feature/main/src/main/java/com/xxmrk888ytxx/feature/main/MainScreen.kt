@@ -101,8 +101,7 @@ fun MainScreen(
                     modifier = Modifier.animateItem(),
                     screenState = screenState,
                     onOpenManagement = { onEvent(MainScreenEvent.OnWorkProfileManagementClicked) },
-                    onCreateProfile = { onEvent(MainScreenEvent.OnWorkProfileButtonClicked) },
-                    onToggleQuietMode = { onEvent(MainScreenEvent.OnToggleWorkProfileQuietMode(it)) }
+                    onCreateProfile = { onEvent(MainScreenEvent.OnWorkProfileButtonClicked) }
                 )
             }
 
@@ -211,8 +210,7 @@ private fun WorkProfileSectionCard(
     modifier: Modifier = Modifier,
     screenState: ScreenState,
     onOpenManagement: () -> Unit,
-    onCreateProfile: () -> Unit,
-    onToggleQuietMode: (Boolean) -> Unit
+    onCreateProfile: () -> Unit
 ) {
     val isProfileActive = screenState.hasWorkProfile || screenState.operatingMode == MainOperatingMode.PROFILE_OWNER
 
@@ -271,23 +269,6 @@ private fun WorkProfileSectionCard(
                     Text(stringResource(R.string.open_work_profile_shelter))
                 }
 
-                if (screenState.operatingMode != MainOperatingMode.PROFILE_OWNER) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.quiet_mode_toggle),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Switch(
-                            checked = screenState.isWorkProfileQuietMode,
-                            onCheckedChange = onToggleQuietMode
-                        )
-                    }
-                }
             } else {
                 Button(
                     onClick = onCreateProfile,

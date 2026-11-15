@@ -60,6 +60,7 @@ import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileSc
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileUiEvent
 import com.xxmrk888ytxx.feature.onboarding.OnboardingScreen
 import com.xxmrk888ytxx.feature.onboarding.OnboardingViewModel
+import com.xxmrk888ytxx.feature.settings.SettingsScreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
@@ -183,6 +184,10 @@ class MainActivity : ComponentActivity() {
 
                         entry<Screen.MainScreen> {
                             ScreenContent<ScreenState, MainScreenEvent, MainViewModel>(::MainScreen)
+                        }
+
+                        entry<Screen.SettingsScreen> {
+                            SettingsScreen()
                         }
 
                         entry<Screen.OnboardingScreen> {

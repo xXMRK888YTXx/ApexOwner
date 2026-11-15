@@ -2,12 +2,14 @@
     <string name="app_name">ApexOwner</string>
     <string name="main_screen">Main Screen</string>
     <string name="settings">Settings</string>
+    <string name="settings_version_format">Версия %1$d (%2$s)</string>
     <string name="policy_service_channel_name">Служба политик и защиты</string>
     <string name="policy_service_notification_title">ApexOwner активен</string>
     <string name="policy_service_notification_desc">Контроль политик и разрешений выполняется в фоновом режиме</string>
     <string name="shortcut_one_shot_short">Быстрый запуск</string>
     <string name="shortcut_one_shot_long">Быстрый запуск приложений</string>
     <string name="one_shot_launcher_title">Быстрый запуск</string>
+    <string name="one_shot_apps_count">Приложений: %1$d</string>
     <string name="one_shot_launcher_empty_title">Нет настроенных приложений</string>
     <string name="one_shot_launcher_empty_desc">Настройте режим One-shot или Автозаморозку для приложений в модуле «Рабочий профиль».</string>
     <string name="one_shot_open_profile">Управление приложениями</string>

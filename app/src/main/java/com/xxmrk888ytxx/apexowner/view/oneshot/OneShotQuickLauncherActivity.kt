@@ -144,7 +144,7 @@ class OneShotQuickLauncherActivity : ComponentActivity() {
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = if (apps.isNotEmpty()) "Приложений: ${apps.size}" else "0 приложений",
+                                text = stringResource(R.string.one_shot_apps_count, apps.size),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

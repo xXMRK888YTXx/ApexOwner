@@ -7,6 +7,7 @@ import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
 import com.xxmrk888ytxx.apexowner.domain.SettingsRepository
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.MainActivityEvent
+import com.xxmrk888ytxx.apexowner.view.mainActivity.model.ApexOwnerBottomBarItem
 import com.xxmrk888ytxx.core.base.android.viewModel.ApexOwnerViewModel
 import com.xxmrk888ytxx.core.base.android.viewModel.stub.Stub
 import com.xxmrk888ytxx.core.devicepolicy.DeviceOwnerManager
@@ -61,7 +62,10 @@ class MainActivityViewModel @Inject constructor(
     override fun onEvent(event: MainActivityEvent) {
         when(event) {
             is MainActivityEvent.BottomItemClicked -> {
-                // TODO
+                when (event.item) {
+                    ApexOwnerBottomBarItem.MainScreen -> navigationManager.navigate(Screen.MainScreen)
+                    ApexOwnerBottomBarItem.Settings -> navigationManager.navigate(Screen.SettingsScreen)
+                }
             }
             MainActivityEvent.NavigationUp -> navigationManager.navigateUp()
             MainActivityEvent.OnResume -> updateDeviceOwnerState()
