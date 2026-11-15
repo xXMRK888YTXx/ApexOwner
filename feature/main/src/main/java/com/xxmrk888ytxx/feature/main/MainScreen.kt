@@ -213,6 +213,7 @@ private fun WorkProfileSectionCard(
     onCreateProfile: () -> Unit
 ) {
     val isProfileActive = screenState.hasWorkProfile || screenState.operatingMode == MainOperatingMode.PROFILE_OWNER
+    val isManagementAvailable = isProfileActive || screenState.isDeviceOwner
 
     ElevatedCard(
         modifier = modifier
@@ -247,8 +248,12 @@ private fun WorkProfileSectionCard(
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = if (isProfileActive) {
-                            stringResource(R.string.shelter_management_desc)
+                        text = if (isManagementAvailable) {
+                            if (screenState.isDeviceOwner && !screenState.hasWorkProfile) {
+                                stringResource(R.string.personal_app_management_desc)
+                            } else {
+                                stringResource(R.string.shelter_management_desc)
+                            }
                         } else {
                             stringResource(R.string.work_profile_status_not_created)
                         },
@@ -260,7 +265,7 @@ private fun WorkProfileSectionCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (isProfileActive) {
+            if (isManagementAvailable) {
                 Button(
                     onClick = onOpenManagement,
                     modifier = Modifier.fillMaxWidth(),

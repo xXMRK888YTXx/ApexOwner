@@ -675,26 +675,28 @@ private fun AppManagementSheetContent(
                 Text(stringResource(R.string.launch_action))
             }
 
-            // Clone to other profile Action
-            Button(
-                onClick = onClone,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_add),
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    if (state.isInsideWorkProfile) {
-                        stringResource(R.string.clone_to_personal_profile)
-                    } else {
-                        stringResource(R.string.clone_to_work_profile)
-                    }
-                )
+            // Cloning is available only when the other profile exists.
+            if (state.hasWorkProfile) {
+                Button(
+                    onClick = onClone,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_add),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        if (state.isInsideWorkProfile) {
+                            stringResource(R.string.clone_to_personal_profile)
+                        } else {
+                            stringResource(R.string.clone_to_work_profile)
+                        }
+                    )
+                }
             }
 
             // Permissions Management Action
@@ -712,7 +714,7 @@ private fun AppManagementSheetContent(
                 Text(stringResource(R.string.permissions_action))
             }
 
-            Card(
+            if (state.hasWorkProfile) Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(

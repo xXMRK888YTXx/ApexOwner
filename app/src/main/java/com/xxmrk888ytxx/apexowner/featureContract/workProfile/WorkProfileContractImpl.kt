@@ -243,7 +243,9 @@ class WorkProfileContractImpl @Inject constructor(
                 }
                 return@withContext res
             }
-            if (profileOwnerManager.isInsideWorkProfile && profileOwnerManager.isApplicationHidden(packageName)) {
+            if ((profileOwnerManager.isInsideWorkProfile || profileOwnerManager.isAppDeviceOwner) &&
+                profileOwnerManager.isApplicationHidden(packageName)
+            ) {
                 profileOwnerManager.setApplicationHidden(packageName, false)
             }
             oneShotAppManagerOwnerComponent.recordAppOpened(packageName)
@@ -383,7 +385,11 @@ class WorkProfileContractImpl @Inject constructor(
             .mapNotNull { it.activityInfo?.packageName }
             .toSet()
 
-        val installed = packageManager.getInstalledApplications(0)
+        // Include hidden/disabled packages so frozen personal-profile apps remain
+        // visible and can be unfrozen from the management list.
+        val installed = packageManager.getInstalledApplications(
+            PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS
+        )
         return installed
             .filter { it.packageName != myPackage }
             .map { appInfo ->

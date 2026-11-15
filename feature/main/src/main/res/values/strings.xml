@@ -22,6 +22,7 @@
     <string name="create_work_profile_one_click">Создать рабочий профиль в 1 клик</string>
     <string name="open_work_profile_shelter">Управление приложениями</string>
     <string name="shelter_management_desc">Заморозка, разморозка и клонирование приложений</string>
+    <string name="personal_app_management_desc">Управление приложениями личного профиля</string>
     <string name="device_owner_restrictions_title">Ограничения всего устройства (Device Owner)</string>
     <string name="device_owner_restrictions_desc">Аппаратные блокировки (камера, микрофон, USB, 2G сети)</string>
     <string name="work_profile_restrictions_title">Ограничения рабочего профиля</string>

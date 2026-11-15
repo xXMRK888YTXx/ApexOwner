@@ -21,6 +21,7 @@
     <string name="create_work_profile_one_click">Create work profile in one click</string>
     <string name="open_work_profile_shelter">App management</string>
     <string name="shelter_management_desc">Freeze, unfreeze, and clone apps</string>
+    <string name="personal_app_management_desc">Manage apps in the personal profile</string>
     <string name="device_owner_restrictions_title">Device-wide restrictions (Device Owner)</string>
     <string name="device_owner_restrictions_desc">Hardware restrictions (camera, microphone, USB, 2G networks)</string>
     <string name="work_profile_restrictions_title">Work profile restrictions</string>
