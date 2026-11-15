@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="show_unavailable_restrictions">Show unavailable restrictions</string>
     <string name="restrictions_title_device">Device restrictions</string>
     <string name="restrictions_title_work_profile">Work profile restrictions</string>
     <string name="device_owner_required">Device Owner privileges required</string>

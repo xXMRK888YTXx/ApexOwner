@@ -9,6 +9,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -217,10 +218,12 @@ class OneShotQuickLauncherActivity : ComponentActivity() {
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(filteredApps, key = { it.packageName }) { app ->
-                                QuickLaunchAppItem(
-                                    app = app,
-                                    onClick = { launchApp(app.packageName) }
-                                )
+                                androidx.compose.animation.AnimatedVisibility(visible = true, enter = fadeIn()) {
+                                    QuickLaunchAppItem(
+                                        app = app,
+                                        onClick = { launchApp(app.packageName) }
+                                    )
+                                }
                             }
                         }
                     }

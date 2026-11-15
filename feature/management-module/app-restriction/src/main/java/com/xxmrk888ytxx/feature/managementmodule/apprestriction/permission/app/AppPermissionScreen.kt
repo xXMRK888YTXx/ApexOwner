@@ -1,12 +1,16 @@
 package com.xxmrk888ytxx.feature.managementmodule.apprestriction.permission.app
 
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -60,7 +64,7 @@ import com.xxmrk888ytxx.feature.managementmodule.apprestriction.permission.app.m
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.permission.app.model.AppPermissionUiModel
 import kotlinx.coroutines.flow.Flow
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AppPermissionScreen(
     screenState: AppPermissionScreenState,
@@ -152,12 +156,14 @@ fun AppPermissionScreen(
                 items = screenState.permissions,
                 key = { it.id }
             ) { item ->
-                AppPermissionCard(
-                    model = item,
-                    onPolicyChange = { newPolicy ->
-                        onEvent(AppPermissionUiEvent.ChangePolicy(item.id, newPolicy))
-                    }
-                )
+                androidx.compose.animation.AnimatedVisibility(visible = true, enter = fadeIn()) {
+                    AppPermissionCard(
+                        model = item,
+                        onPolicyChange = { newPolicy ->
+                            onEvent(AppPermissionUiEvent.ChangePolicy(item.id, newPolicy))
+                        }
+                    )
+                }
             }
         }
     }
@@ -217,9 +223,10 @@ private fun AppHeaderCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 BadgeChip(
                     text = "${stringResource(R.string.app_perm_stats_requested)}: $requestedCount",
@@ -247,14 +254,15 @@ private fun AppHeaderCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun AppPermissionCard(
+    modifier: Modifier = Modifier,
     model: AppPermissionUiModel,
     onPolicyChange: (AppPermissionPolicy) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = when (model.policy) {
@@ -295,9 +303,10 @@ private fun AppPermissionCard(
 
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Surface(
                             shape = RoundedCornerShape(4.dp),
@@ -365,7 +374,9 @@ private fun AppPermissionCard(
                     AppPermissionPolicy.FORCE_DENIED -> MaterialTheme.colorScheme.error
                     AppPermissionPolicy.DEFAULT -> MaterialTheme.colorScheme.onSurfaceVariant
                 },
-                fontWeight = if (model.policy != AppPermissionPolicy.DEFAULT) FontWeight.Medium else FontWeight.Normal
+                fontWeight = if (model.policy != AppPermissionPolicy.DEFAULT) FontWeight.Medium else FontWeight.Normal,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -434,7 +445,10 @@ private fun BadgeChip(
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
-            color = contentColor
+            color = contentColor,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -447,7 +461,11 @@ private fun AppIcon(
     val context = LocalContext.current
     val iconBitmap = remember(packageName) {
         try {
-            val drawable = context.packageManager.getApplicationIcon(packageName)
+            val appInfo = context.packageManager.getApplicationInfo(
+                packageName,
+                PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS
+            )
+            val drawable = context.packageManager.getApplicationIcon(appInfo)
             val bitmap = Bitmap.createBitmap(
                 drawable.intrinsicWidth.coerceAtLeast(64),
                 drawable.intrinsicHeight.coerceAtLeast(64),

@@ -3,6 +3,7 @@ package com.xxmrk888ytxx.feature.managementmodule.workprofile
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,7 +32,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
@@ -46,6 +46,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -238,13 +240,6 @@ fun WorkProfileScreen(
                             Text("🗑️", style = MaterialTheme.typography.titleMedium)
                         }
                     }
-                    IconButton(onClick = { onEvent(WorkProfileUiEvent.OnRefresh) }) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_refresh),
-                            contentDescription = stringResource(R.string.refresh_action),
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
                 }
             )
         }
@@ -340,52 +335,50 @@ fun WorkProfileScreen(
                 }
             }
 
-            if (state.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(28.dp))
-                }
-            }
-
-            if (filteredApps.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.no_apps_found),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(
-                        items = filteredApps,
-                        key = { it.packageName }
-                    ) { app ->
-                        AppListItem(
-                            app = app,
-                            isInsideWorkProfile = state.isInsideWorkProfile,
-                            onClick = { selectedAppForManagement = app },
-                            onManagePermissions = {
-                                onEvent(WorkProfileUiEvent.OnManagePermissions(app.packageName, app.name))
-                            }
+            PullToRefreshBox(
+                isRefreshing = state.isLoading,
+                onRefresh = { onEvent(WorkProfileUiEvent.OnRefresh) },
+                state = rememberPullToRefreshState(),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (filteredApps.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.no_apps_found),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(
+                            items = filteredApps,
+                            key = { it.packageName }
+                        ) { app ->
+                            androidx.compose.animation.AnimatedVisibility(visible = true, enter = fadeIn()) {
+                                AppListItem(
+                                    app = app,
+                                    isInsideWorkProfile = state.isInsideWorkProfile,
+                                    onClick = { selectedAppForManagement = app },
+                                    onManagePermissions = {
+                                        onEvent(WorkProfileUiEvent.OnManagePermissions(app.packageName, app.name))
+                                    }
+                                )
+                            }
+                        }
+                        item {
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
                     }
                 }
             }
