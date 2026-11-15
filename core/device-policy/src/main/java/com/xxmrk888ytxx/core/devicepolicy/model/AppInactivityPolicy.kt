@@ -13,6 +13,10 @@ data class AppInactivityPolicy(
     val lockAction: LockInactivityAction = LockInactivityAction.NONE,
     val lockFreezeHours: Int = 12,
     val lockWipeHours: Int = 12,
+    val freezeIfUnusedEnabled: Boolean = false,
+    val freezeIfUnusedDays: Int = 30,
+    val freezeIfUnusedHours: Int = 0,
+    val freezeIfUnusedMinutes: Int = 0,
     val wipeIfUnusedEnabled: Boolean = false,
     val wipeIfUnusedDays: Int = 30,
     val lastOpenedTimestamp: Long = 0L,
@@ -20,10 +24,11 @@ data class AppInactivityPolicy(
     val lockWipeMinutes: Int = 0,
     val lastLockFreezeTimestamp: Long = 0L,
     val lastLockWipeTimestamp: Long = 0L,
-    val lastUnusedWipeTimestamp: Long = 0L
+    val lastUnusedWipeTimestamp: Long = 0L,
+    val lastUnusedFreezeTimestamp: Long = 0L
 ) {
     val isConfigured: Boolean
-        get() = lockAction != LockInactivityAction.NONE || wipeIfUnusedEnabled
+        get() = lockAction != LockInactivityAction.NONE || freezeIfUnusedEnabled || wipeIfUnusedEnabled
 
     val lockFreezeDurationMs: Long
         get() = if (lockFreezeMinutes > 0) lockFreezeMinutes * 60_000L else lockFreezeHours * 3600_000L
@@ -34,12 +39,23 @@ data class AppInactivityPolicy(
     val unusedWipeDurationMs: Long
         get() = wipeIfUnusedDays * 86400_000L
 
+    val unusedFreezeDurationMs: Long
+        get() = when {
+            freezeIfUnusedMinutes > 0 -> freezeIfUnusedMinutes * 60_000L
+            freezeIfUnusedHours > 0 -> freezeIfUnusedHours * 3600_000L
+            else -> freezeIfUnusedDays * 86400_000L
+        }
+
     fun toJson(): String {
         val obj = JSONObject()
         obj.put("packageName", packageName)
         obj.put("lockAction", lockAction.name)
         obj.put("lockFreezeHours", lockFreezeHours)
         obj.put("lockWipeHours", lockWipeHours)
+        obj.put("freezeIfUnusedEnabled", freezeIfUnusedEnabled)
+        obj.put("freezeIfUnusedDays", freezeIfUnusedDays)
+        obj.put("freezeIfUnusedHours", freezeIfUnusedHours)
+        obj.put("freezeIfUnusedMinutes", freezeIfUnusedMinutes)
         obj.put("wipeIfUnusedEnabled", wipeIfUnusedEnabled)
         obj.put("wipeIfUnusedDays", wipeIfUnusedDays)
         obj.put("lastOpenedTimestamp", lastOpenedTimestamp)
@@ -48,6 +64,7 @@ data class AppInactivityPolicy(
         obj.put("lastLockFreezeTimestamp", lastLockFreezeTimestamp)
         obj.put("lastLockWipeTimestamp", lastLockWipeTimestamp)
         obj.put("lastUnusedWipeTimestamp", lastUnusedWipeTimestamp)
+        obj.put("lastUnusedFreezeTimestamp", lastUnusedFreezeTimestamp)
         return obj.toString()
     }
 
@@ -62,6 +79,10 @@ data class AppInactivityPolicy(
                     ),
                     lockFreezeHours = obj.optInt("lockFreezeHours", 12),
                     lockWipeHours = obj.optInt("lockWipeHours", 12),
+                    freezeIfUnusedEnabled = obj.optBoolean("freezeIfUnusedEnabled", false),
+                    freezeIfUnusedDays = obj.optInt("freezeIfUnusedDays", 30),
+                    freezeIfUnusedHours = obj.optInt("freezeIfUnusedHours", 0),
+                    freezeIfUnusedMinutes = obj.optInt("freezeIfUnusedMinutes", 0),
                     wipeIfUnusedEnabled = obj.optBoolean("wipeIfUnusedEnabled", false),
                     wipeIfUnusedDays = obj.optInt("wipeIfUnusedDays", 30),
                     lastOpenedTimestamp = obj.optLong("lastOpenedTimestamp", 0L),
@@ -69,7 +90,8 @@ data class AppInactivityPolicy(
                     lockWipeMinutes = obj.optInt("lockWipeMinutes", 0),
                     lastLockFreezeTimestamp = obj.optLong("lastLockFreezeTimestamp", 0L),
                     lastLockWipeTimestamp = obj.optLong("lastLockWipeTimestamp", 0L),
-                    lastUnusedWipeTimestamp = obj.optLong("lastUnusedWipeTimestamp", 0L)
+                    lastUnusedWipeTimestamp = obj.optLong("lastUnusedWipeTimestamp", 0L),
+                    lastUnusedFreezeTimestamp = obj.optLong("lastUnusedFreezeTimestamp", 0L)
                 )
             } catch (e: Exception) {
                 null

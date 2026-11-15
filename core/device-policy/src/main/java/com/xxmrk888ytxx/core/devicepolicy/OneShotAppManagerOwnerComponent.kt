@@ -10,6 +10,7 @@ interface OneShotAppManagerOwnerComponent {
 
     fun isOneShotApp(packageName: String): Boolean
     fun isAutoFreezeApp(packageName: String): Boolean
+    fun isPackageInForeground(packageName: String): Boolean
     fun getInactivityPolicy(packageName: String): AppInactivityPolicy?
 
     suspend fun setOneShotApp(packageName: String, isOneShot: Boolean): Result<Unit>

@@ -75,12 +75,20 @@ class WorkProfileContractImpl @Inject constructor(
             if (profileOwnerManager.isInsideWorkProfile) {
                 val result = profileOwnerManager.setApplicationHidden(packageName, shouldFreeze)
                 if (result.isSuccess) {
+                    if (!shouldFreeze) {
+                        oneShotAppManagerOwnerComponent.recordAppOpened(packageName)
+                        ApexPolicyService.triggerInactivityCheck(context)
+                    }
                     refresh()
                 }
                 result
             } else if (profileOwnerManager.isAppDeviceOwner) {
                 val result = profileOwnerManager.setApplicationHidden(packageName, shouldFreeze)
                 if (result.isSuccess) {
+                    if (!shouldFreeze) {
+                        oneShotAppManagerOwnerComponent.recordAppOpened(packageName)
+                        ApexPolicyService.triggerInactivityCheck(context)
+                    }
                     refresh()
                 }
                 result
@@ -209,6 +217,7 @@ class WorkProfileContractImpl @Inject constructor(
                 profileOwnerManager.setApplicationHidden(packageName, false)
             }
             oneShotAppManagerOwnerComponent.recordAppOpened(packageName)
+            ApexPolicyService.triggerInactivityCheck(context)
             val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
             if (launchIntent != null) {
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -301,6 +310,10 @@ class WorkProfileContractImpl @Inject constructor(
                         lockAction = com.xxmrk888ytxx.feature.managementmodule.workprofile.model.LockInactivityAction.valueOf(it.lockAction.name),
                         lockFreezeHours = it.lockFreezeHours,
                         lockWipeHours = it.lockWipeHours,
+                        freezeIfUnusedEnabled = it.freezeIfUnusedEnabled,
+                        freezeIfUnusedDays = it.freezeIfUnusedDays,
+                        freezeIfUnusedHours = it.freezeIfUnusedHours,
+                        freezeIfUnusedMinutes = it.freezeIfUnusedMinutes,
                         wipeIfUnusedEnabled = it.wipeIfUnusedEnabled,
                         wipeIfUnusedDays = it.wipeIfUnusedDays,
                         lastOpenedTimestamp = it.lastOpenedTimestamp,
@@ -308,7 +321,8 @@ class WorkProfileContractImpl @Inject constructor(
                         lockWipeMinutes = it.lockWipeMinutes,
                         lastLockFreezeTimestamp = it.lastLockFreezeTimestamp,
                         lastLockWipeTimestamp = it.lastLockWipeTimestamp,
-                        lastUnusedWipeTimestamp = it.lastUnusedWipeTimestamp
+                        lastUnusedWipeTimestamp = it.lastUnusedWipeTimestamp,
+                        lastUnusedFreezeTimestamp = it.lastUnusedFreezeTimestamp
                     )
                 }
 
@@ -363,6 +377,10 @@ class WorkProfileContractImpl @Inject constructor(
                         lockAction = com.xxmrk888ytxx.feature.managementmodule.workprofile.model.LockInactivityAction.valueOf(it.lockAction.name),
                         lockFreezeHours = it.lockFreezeHours,
                         lockWipeHours = it.lockWipeHours,
+                        freezeIfUnusedEnabled = it.freezeIfUnusedEnabled,
+                        freezeIfUnusedDays = it.freezeIfUnusedDays,
+                        freezeIfUnusedHours = it.freezeIfUnusedHours,
+                        freezeIfUnusedMinutes = it.freezeIfUnusedMinutes,
                         wipeIfUnusedEnabled = it.wipeIfUnusedEnabled,
                         wipeIfUnusedDays = it.wipeIfUnusedDays,
                         lastOpenedTimestamp = it.lastOpenedTimestamp,
@@ -370,7 +388,8 @@ class WorkProfileContractImpl @Inject constructor(
                         lockWipeMinutes = it.lockWipeMinutes,
                         lastLockFreezeTimestamp = it.lastLockFreezeTimestamp,
                         lastLockWipeTimestamp = it.lastLockWipeTimestamp,
-                        lastUnusedWipeTimestamp = it.lastUnusedWipeTimestamp
+                        lastUnusedWipeTimestamp = it.lastUnusedWipeTimestamp,
+                        lastUnusedFreezeTimestamp = it.lastUnusedFreezeTimestamp
                     )
                 }
 
@@ -482,6 +501,10 @@ class WorkProfileContractImpl @Inject constructor(
             lockAction = com.xxmrk888ytxx.core.devicepolicy.model.LockInactivityAction.valueOf(policy.lockAction.name),
             lockFreezeHours = policy.lockFreezeHours,
             lockWipeHours = policy.lockWipeHours,
+            freezeIfUnusedEnabled = policy.freezeIfUnusedEnabled,
+            freezeIfUnusedDays = policy.freezeIfUnusedDays,
+            freezeIfUnusedHours = policy.freezeIfUnusedHours,
+            freezeIfUnusedMinutes = policy.freezeIfUnusedMinutes,
             wipeIfUnusedEnabled = policy.wipeIfUnusedEnabled,
             wipeIfUnusedDays = policy.wipeIfUnusedDays,
             lastOpenedTimestamp = policy.lastOpenedTimestamp,
@@ -489,7 +512,8 @@ class WorkProfileContractImpl @Inject constructor(
             lockWipeMinutes = policy.lockWipeMinutes,
             lastLockFreezeTimestamp = policy.lastLockFreezeTimestamp,
             lastLockWipeTimestamp = policy.lastLockWipeTimestamp,
-            lastUnusedWipeTimestamp = policy.lastUnusedWipeTimestamp
+            lastUnusedWipeTimestamp = policy.lastUnusedWipeTimestamp,
+            lastUnusedFreezeTimestamp = policy.lastUnusedFreezeTimestamp
         )
 
         if (profileOwnerManager.isInsideWorkProfile || profileOwnerManager.isAppDeviceOwner) {

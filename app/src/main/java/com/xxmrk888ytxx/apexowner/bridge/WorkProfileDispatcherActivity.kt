@@ -139,6 +139,8 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
                 ACTION_UNFREEZE_APP -> {
                     profileOwnerManager.setApplicationHidden(packageName, false).fold(
                         onSuccess = {
+                            oneShotAppManagerOwnerComponent.recordAppOpened(packageName)
+                            com.xxmrk888ytxx.apexowner.service.ApexPolicyService.triggerInactivityCheck(this@WorkProfileDispatcherActivity)
                             Toast.makeText(this@WorkProfileDispatcherActivity, "Разморожено: $packageName", Toast.LENGTH_SHORT).show()
                         },
                         onFailure = {
@@ -208,6 +210,7 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
 
                 ACTION_LAUNCH_APP -> {
                     oneShotAppManagerOwnerComponent.recordAppOpened(packageName)
+                    com.xxmrk888ytxx.apexowner.service.ApexPolicyService.triggerInactivityCheck(this@WorkProfileDispatcherActivity)
                     if (oneShotAppManagerOwnerComponent.isOneShotApp(packageName) || oneShotAppManagerOwnerComponent.isAutoFreezeApp(packageName)) {
                         oneShotAppManagerOwnerComponent.launchOneShotApp(packageName)
                     } else {

@@ -11,6 +11,10 @@ data class AppInactivityPolicy(
     val lockAction: LockInactivityAction = LockInactivityAction.NONE,
     val lockFreezeHours: Int = 12,
     val lockWipeHours: Int = 12,
+    val freezeIfUnusedEnabled: Boolean = false,
+    val freezeIfUnusedDays: Int = 30,
+    val freezeIfUnusedHours: Int = 0,
+    val freezeIfUnusedMinutes: Int = 0,
     val wipeIfUnusedEnabled: Boolean = false,
     val wipeIfUnusedDays: Int = 30,
     val lastOpenedTimestamp: Long = 0L,
@@ -18,10 +22,11 @@ data class AppInactivityPolicy(
     val lockWipeMinutes: Int = 0,
     val lastLockFreezeTimestamp: Long = 0L,
     val lastLockWipeTimestamp: Long = 0L,
-    val lastUnusedWipeTimestamp: Long = 0L
+    val lastUnusedWipeTimestamp: Long = 0L,
+    val lastUnusedFreezeTimestamp: Long = 0L
 ) {
     val isConfigured: Boolean
-        get() = lockAction != LockInactivityAction.NONE || wipeIfUnusedEnabled
+        get() = lockAction != LockInactivityAction.NONE || freezeIfUnusedEnabled || wipeIfUnusedEnabled
 
     val lockFreezeDurationMs: Long
         get() = if (lockFreezeMinutes > 0) lockFreezeMinutes * 60_000L else lockFreezeHours * 3600_000L
@@ -31,4 +36,11 @@ data class AppInactivityPolicy(
 
     val unusedWipeDurationMs: Long
         get() = wipeIfUnusedDays * 86400_000L
+
+    val unusedFreezeDurationMs: Long
+        get() = when {
+            freezeIfUnusedMinutes > 0 -> freezeIfUnusedMinutes * 60_000L
+            freezeIfUnusedHours > 0 -> freezeIfUnusedHours * 3600_000L
+            else -> freezeIfUnusedDays * 86400_000L
+        }
 }

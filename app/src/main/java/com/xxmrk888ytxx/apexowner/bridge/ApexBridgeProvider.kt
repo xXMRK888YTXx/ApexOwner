@@ -7,6 +7,7 @@ import android.content.pm.ApplicationInfo
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import com.xxmrk888ytxx.apexowner.service.ApexPolicyService
 import com.xxmrk888ytxx.core.base.android.logs.Logger
 import com.xxmrk888ytxx.core.devicepolicy.OneShotAppManagerOwnerComponent
 import com.xxmrk888ytxx.core.devicepolicy.ProfileOwnerManager
@@ -32,6 +33,7 @@ class ApexBridgeProvider : ContentProvider() {
         val appContext = context?.applicationContext ?: return null
         val entryPoint = EntryPointAccessors.fromApplication(appContext, BridgeEntryPoint::class.java)
         val profileOwnerManager = entryPoint.profileOwnerManager()
+        val oneShotAppManagerOwnerComponent = entryPoint.oneShotAppManagerOwnerComponent()
         val pm = appContext.packageManager
 
         val response = Bundle()
@@ -71,7 +73,12 @@ class ApexBridgeProvider : ContentProvider() {
                 val packageName = arg ?: return null
                 Logger.writeDebugLog("ApexBridgeProvider: received unfreeze request for $packageName")
                 val result = runBlocking {
-                    profileOwnerManager.setApplicationHidden(packageName, false)
+                    profileOwnerManager.setApplicationHidden(packageName, false).also { unfreezeResult ->
+                        if (unfreezeResult.isSuccess) {
+                            oneShotAppManagerOwnerComponent.recordAppOpened(packageName)
+                            ApexPolicyService.triggerInactivityCheck(appContext)
+                        }
+                    }
                 }
                 response.putBoolean(EXTRA_SUCCESS, result.isSuccess)
                 if (result.isFailure) {

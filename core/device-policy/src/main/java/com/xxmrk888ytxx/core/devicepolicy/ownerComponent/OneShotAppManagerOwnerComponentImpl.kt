@@ -1,6 +1,9 @@
 package com.xxmrk888ytxx.core.devicepolicy.ownerComponent
 
+import android.app.ActivityManager
 import android.app.admin.DevicePolicyManager
+import android.app.usage.UsageEvents
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
@@ -104,6 +107,50 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
         return _autoFreezeAppPackages.value.contains(packageName)
     }
 
+    override fun isPackageInForeground(packageName: String): Boolean {
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+            ?: return false
+        return try {
+            val runningTasks = activityManager.getRunningTasks(10)
+            val taskPackages = runningTasks.flatMap { task ->
+                listOfNotNull(
+                    task.topActivity?.packageName,
+                    task.baseActivity?.packageName
+                )
+            }
+            val foregroundProcess = activityManager.runningAppProcesses.orEmpty().any { process ->
+                process.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND &&
+                    packageName in process.pkgList
+            }
+            val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+            val usageEvent = UsageEvents.Event()
+            var latestUsageEventType = -1
+            var latestUsageEventTime = 0L
+            usageStatsManager
+                ?.queryEvents(System.currentTimeMillis() - 60 * 60 * 1000L, System.currentTimeMillis())
+                ?.let { events ->
+                    while (events.hasNextEvent()) {
+                        events.getNextEvent(usageEvent)
+                        if (usageEvent.packageName == packageName && usageEvent.timeStamp >= latestUsageEventTime &&
+                            (usageEvent.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND ||
+                                usageEvent.eventType == UsageEvents.Event.MOVE_TO_BACKGROUND)
+                        ) {
+                            latestUsageEventTime = usageEvent.timeStamp
+                            latestUsageEventType = usageEvent.eventType
+                        }
+                    }
+                }
+            val usageForeground = latestUsageEventType == UsageEvents.Event.MOVE_TO_FOREGROUND
+            packageName in taskPackages || foregroundProcess || usageForeground
+        } catch (e: SecurityException) {
+            Logger.writeDebugLog("isPackageInForeground: access denied for $packageName: ${e.message}")
+            false
+        } catch (e: Exception) {
+            Logger.writeErrorLog("isPackageInForeground failed for $packageName: ${e.message}")
+            false
+        }
+    }
+
     override fun getInactivityPolicy(packageName: String): AppInactivityPolicy? {
         return _appInactivityPolicies.value[packageName]
     }
@@ -111,8 +158,21 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
     override suspend fun setInactivityPolicy(policy: AppInactivityPolicy): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val currentMap = _appInactivityPolicies.value.toMutableMap()
-            val effectivePolicy = if (policy.wipeIfUnusedEnabled && policy.lastOpenedTimestamp == 0L) {
-                policy.copy(lastOpenedTimestamp = System.currentTimeMillis())
+            val previousPolicy = currentMap[policy.packageName]
+            val hasUnusedPolicy = policy.freezeIfUnusedEnabled || policy.wipeIfUnusedEnabled
+            val wasUnusedPolicyEnabled = previousPolicy?.freezeIfUnusedEnabled == true ||
+                previousPolicy?.wipeIfUnusedEnabled == true
+            val startsNewUnusedCycle = hasUnusedPolicy && !wasUnusedPolicyEnabled
+            val effectivePolicy = if (
+                hasUnusedPolicy && (policy.lastOpenedTimestamp == 0L || startsNewUnusedCycle)
+            ) {
+                policy.copy(
+                    lastOpenedTimestamp = System.currentTimeMillis(),
+                    lastUnusedFreezeTimestamp = 0L
+                )
+            } else if (policy.freezeIfUnusedEnabled) {
+                // Changing the timeout after a previous freeze starts a new cycle.
+                policy.copy(lastUnusedFreezeTimestamp = 0L)
             } else {
                 policy
             }
@@ -123,7 +183,18 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
                 currentMap.remove(policy.packageName)
             }
             saveInactivityPolicies(currentMap)
-            Logger.writeDebugLog("setInactivityPolicy for ${policy.packageName}: lockAction=${effectivePolicy.lockAction}, lockFreezeHours=${effectivePolicy.lockFreezeHours}, lockWipeHours=${effectivePolicy.lockWipeHours}, wipeUnused=${effectivePolicy.wipeIfUnusedEnabled}, wipeDays=${effectivePolicy.wipeIfUnusedDays}")
+            Logger.writeDebugLog(
+                "setInactivityPolicy for ${policy.packageName}: " +
+                    "lockAction=${effectivePolicy.lockAction}, " +
+                    "lockFreezeHours=${effectivePolicy.lockFreezeHours}, " +
+                    "lockWipeHours=${effectivePolicy.lockWipeHours}, " +
+                    "freezeUnused=${effectivePolicy.freezeIfUnusedEnabled}, " +
+                    "freezeMinutes=${effectivePolicy.freezeIfUnusedMinutes}, " +
+                    "freezeHours=${effectivePolicy.freezeIfUnusedHours}, " +
+                    "wipeUnused=${effectivePolicy.wipeIfUnusedEnabled}, " +
+                    "wipeDays=${effectivePolicy.wipeIfUnusedDays}, " +
+                    "lastOpened=${effectivePolicy.lastOpenedTimestamp}"
+            )
             Result.success(Unit)
         } catch (e: Exception) {
             Logger.writeErrorLog("setInactivityPolicy failed for ${policy.packageName}: ${e.message}")
@@ -136,7 +207,10 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
             val currentMap = _appInactivityPolicies.value.toMutableMap()
             val existing = currentMap[packageName]
             if (existing != null) {
-                val updated = existing.copy(lastOpenedTimestamp = System.currentTimeMillis())
+                val updated = existing.copy(
+                    lastOpenedTimestamp = System.currentTimeMillis(),
+                    lastUnusedFreezeTimestamp = 0L
+                )
                 currentMap[packageName] = updated
                 saveInactivityPolicies(currentMap)
                 Logger.writeDebugLog("recordAppOpened: updated lastOpenedTimestamp for $packageName")
@@ -365,6 +439,25 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
                 var currentPolicy = policy
                 var policyModified = false
 
+                if ((currentPolicy.freezeIfUnusedEnabled || currentPolicy.wipeIfUnusedEnabled) &&
+                    isPackageInForeground(pkg)
+                ) {
+                    Logger.writeDebugLog("checkAndApplyInactivityPolicies: $pkg is in foreground, resetting unused timer")
+                    currentPolicy = currentPolicy.copy(
+                        lastOpenedTimestamp = now,
+                        lastUnusedFreezeTimestamp = 0L,
+                        lastUnusedWipeTimestamp = 0L
+                    )
+                    policyModified = true
+                }
+
+                if (policyModified) {
+                    val updatedMap = _appInactivityPolicies.value.toMutableMap()
+                    updatedMap[pkg] = currentPolicy
+                    saveInactivityPolicies(updatedMap)
+                    continue
+                }
+
                 // 1. Device locked inactivity checks
                 if (isDeviceLocked && deviceLockedDurationMs > 0L) {
                     when (currentPolicy.lockAction) {
@@ -416,6 +509,23 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
                 }
 
                 // 2. Unused app checks (e.g. 30 days)
+                if (currentPolicy.freezeIfUnusedEnabled && currentPolicy.lastOpenedTimestamp > 0L) {
+                    val unusedFreezeThresholdMs = currentPolicy.unusedFreezeDurationMs
+                    val unusedDurationMs = now - currentPolicy.lastOpenedTimestamp
+                    if (unusedDurationMs >= unusedFreezeThresholdMs &&
+                        currentPolicy.lastUnusedFreezeTimestamp == 0L
+                    ) {
+                        Logger.writeDebugLog("checkAndApplyInactivityPolicies: Freezing $pkg because unused for ${unusedDurationMs / 1000}s >= ${unusedFreezeThresholdMs / 1000}s")
+                        val hideResult = hideApp(pkg)
+                        if (hideResult.isSuccess) {
+                            currentPolicy = currentPolicy.copy(lastUnusedFreezeTimestamp = now)
+                            policyModified = true
+                        } else {
+                            Logger.writeErrorLog("checkAndApplyInactivityPolicies: failed to freeze unused app $pkg: ${hideResult.exceptionOrNull()?.message}")
+                        }
+                    }
+                }
+
                 if (currentPolicy.wipeIfUnusedEnabled && currentPolicy.lastOpenedTimestamp > 0L) {
                     val unusedThresholdMs = currentPolicy.unusedWipeDurationMs
                     val unusedDurationMs = now - currentPolicy.lastOpenedTimestamp

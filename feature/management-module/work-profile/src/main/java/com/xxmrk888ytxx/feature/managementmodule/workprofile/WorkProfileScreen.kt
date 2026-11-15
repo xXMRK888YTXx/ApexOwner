@@ -1306,9 +1306,12 @@ private fun AppUnusedPolicyCard(
         )
     }
 
-    val isEnabled = currentPolicy.wipeIfUnusedEnabled
+    val isFreezeEnabled = currentPolicy.freezeIfUnusedEnabled
+    val isWipeEnabled = currentPolicy.wipeIfUnusedEnabled
+    val isEnabled = isFreezeEnabled || isWipeEnabled
+    val isFreezeMinutesMode = currentPolicy.freezeIfUnusedMinutes > 0
 
-    LaunchedEffect(isEnabled, currentPolicy.lastOpenedTimestamp) {
+    LaunchedEffect(isFreezeEnabled, isWipeEnabled, currentPolicy.lastOpenedTimestamp) {
         if (isEnabled && currentPolicy.lastOpenedTimestamp == 0L) {
             onUpdateInactivityPolicy(currentPolicy.copy(lastOpenedTimestamp = System.currentTimeMillis()))
         }
@@ -1343,10 +1346,17 @@ private fun AppUnusedPolicyCard(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = if (isEnabled) {
-                            stringResource(R.string.app_unused_enabled_desc, currentPolicy.wipeIfUnusedDays)
-                        } else {
-                            stringResource(R.string.app_unused_disabled_desc)
+                        text = when {
+                            isWipeEnabled && isFreezeEnabled ->
+                                "Очистка данных и заморозка, если приложение не открывалось ${currentPolicy.wipeIfUnusedDays} дн."
+                            isWipeEnabled ->
+                                stringResource(R.string.app_unused_enabled_desc, currentPolicy.wipeIfUnusedDays)
+                            isFreezeEnabled -> "Заморозка через ${if (isFreezeMinutesMode) {
+                                "${currentPolicy.freezeIfUnusedMinutes} мин"
+                            } else {
+                                "${if (currentPolicy.freezeIfUnusedHours > 0) currentPolicy.freezeIfUnusedHours else currentPolicy.freezeIfUnusedDays * 24} ч"
+                            }} без запуска"
+                            else -> stringResource(R.string.app_unused_disabled_desc)
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1354,7 +1364,7 @@ private fun AppUnusedPolicyCard(
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Switch(
-                    checked = isEnabled,
+                    checked = isWipeEnabled,
                     onCheckedChange = { checked ->
                         val updated = currentPolicy.copy(
                             wipeIfUnusedEnabled = checked,
@@ -1369,7 +1379,93 @@ private fun AppUnusedPolicyCard(
                 )
             }
 
-            if (isEnabled) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Замораживать при неиспользовании",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "Скрыть приложение после 30 дней без запуска",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = isFreezeEnabled,
+                    onCheckedChange = { checked ->
+                        onUpdateInactivityPolicy(currentPolicy.copy(
+                            freezeIfUnusedEnabled = checked,
+                                freezeIfUnusedHours = if (checked && currentPolicy.freezeIfUnusedHours <= 0 && currentPolicy.freezeIfUnusedMinutes <= 0) {
+                                    currentPolicy.freezeIfUnusedDays * 24
+                                } else currentPolicy.freezeIfUnusedHours,
+                            lastOpenedTimestamp = if (checked && currentPolicy.lastOpenedTimestamp == 0L) {
+                                System.currentTimeMillis()
+                            } else currentPolicy.lastOpenedTimestamp
+                        ))
+                    }
+                )
+            }
+
+            if (isFreezeEnabled) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = !isFreezeMinutesMode,
+                        onClick = {
+                            onUpdateInactivityPolicy(currentPolicy.copy(
+                                freezeIfUnusedHours = if (currentPolicy.freezeIfUnusedHours > 0) currentPolicy.freezeIfUnusedHours else currentPolicy.freezeIfUnusedDays * 24,
+                                freezeIfUnusedMinutes = 0
+                            ))
+                        },
+                        label = { Text("Часы") }
+                    )
+                    FilterChip(
+                        selected = isFreezeMinutesMode,
+                        onClick = {
+                            onUpdateInactivityPolicy(currentPolicy.copy(
+                                freezeIfUnusedHours = 0,
+                                freezeIfUnusedMinutes = if (currentPolicy.freezeIfUnusedMinutes > 0) currentPolicy.freezeIfUnusedMinutes else 1
+                            ))
+                        },
+                        label = { Text("Минуты (тест)") }
+                    )
+                }
+                SettingStepperRow(
+                    label = "Срок до заморозки",
+                    value = if (isFreezeMinutesMode) currentPolicy.freezeIfUnusedMinutes
+                    else if (currentPolicy.freezeIfUnusedHours > 0) currentPolicy.freezeIfUnusedHours
+                    else currentPolicy.freezeIfUnusedDays * 24,
+                    unit = if (isFreezeMinutesMode) "мин" else "ч",
+                    minValue = 1,
+                    maxValue = if (isFreezeMinutesMode) 120 else 720,
+                    onValueChange = { value ->
+                        onUpdateInactivityPolicy(if (isFreezeMinutesMode) {
+                            currentPolicy.copy(freezeIfUnusedMinutes = value)
+                        } else {
+                            currentPolicy.copy(freezeIfUnusedHours = value, freezeIfUnusedDays = (value / 24).coerceAtLeast(1))
+                        })
+                    }
+                )
+                TextButton(
+                    onClick = {
+                        val pastTime = System.currentTimeMillis() - currentPolicy.unusedFreezeDurationMs - 60_000L
+                        onUpdateInactivityPolicy(currentPolicy.copy(lastOpenedTimestamp = pastTime))
+                    },
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = "Тест заморозки (срок истёк)",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            if (isWipeEnabled) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
                 SettingStepperRow(

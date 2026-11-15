@@ -111,8 +111,7 @@ class ApexPolicyService : Service() {
                             .apply()
                         Logger.writeDebugLog("ApexPolicyService: device locked at $lockedSince")
                     }
-                    evaluateInactivityPolicies()
-                    scheduleNextInactivityAlarm()
+                    evaluateAndScheduleInactivityPolicies()
                 }
 
                 Intent.ACTION_USER_PRESENT -> {
@@ -123,8 +122,7 @@ class ApexPolicyService : Service() {
                         .remove(KEY_POWER_OFF_AT)
                         .remove(KEY_LOCK_BOOT_COUNT)
                         .apply()
-                    evaluateInactivityPolicies()
-                    scheduleNextInactivityAlarm()
+                    evaluateAndScheduleInactivityPolicies()
                 }
 
                 Intent.ACTION_SCREEN_ON -> {
@@ -136,8 +134,7 @@ class ApexPolicyService : Service() {
                         Logger.writeDebugLog("ApexPolicyService: screen on and no keyguard, resetting lock timer")
                         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                         prefs.edit().putLong(KEY_DEVICE_LOCKED_SINCE, 0L).apply()
-                        evaluateInactivityPolicies()
-                        scheduleNextInactivityAlarm()
+                        evaluateAndScheduleInactivityPolicies()
                     }
                 }
             }
@@ -204,8 +201,7 @@ class ApexPolicyService : Service() {
             try {
                 Logger.writeDebugLog("ApexPolicyService: handling triggers on service start")
                 oneShotAppManagerOwnerComponent.handleLifecycleTriggers()
-                evaluateInactivityPolicies()
-                scheduleNextInactivityAlarm()
+                evaluateAndScheduleInactivityPolicies()
             } catch (e: Exception) {
                 Logger.writeErrorLog("Failed to handle triggers on service start: ${e.message}")
             }
@@ -216,8 +212,7 @@ class ApexPolicyService : Service() {
             while (isActive) {
                 delay(15 * 60 * 1000L)
                 try {
-                    evaluateInactivityPolicies()
-                    scheduleNextInactivityAlarm()
+                    evaluateAndScheduleInactivityPolicies()
                 } catch (e: Exception) {
                     Logger.writeErrorLog("ApexPolicyService ticker error: ${e.message}")
                 }
@@ -241,8 +236,7 @@ class ApexPolicyService : Service() {
         startForegroundInternal()
 
         if (intent?.action == ACTION_CHECK_POLICIES) {
-            evaluateInactivityPolicies()
-            scheduleNextInactivityAlarm()
+            evaluateAndScheduleInactivityPolicies()
         }
 
         return START_STICKY
@@ -325,8 +319,14 @@ class ApexPolicyService : Service() {
         }
     }
 
-    private fun evaluateInactivityPolicies() {
+    private fun evaluateAndScheduleInactivityPolicies() {
         serviceScope.launch {
+            evaluateInactivityPoliciesNow()
+            scheduleNextInactivityAlarmNow()
+        }
+    }
+
+    private suspend fun evaluateInactivityPoliciesNow() {
             try {
                 val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 val lockedSince = prefs.getLong(KEY_DEVICE_LOCKED_SINCE, 0L)
@@ -344,13 +344,11 @@ class ApexPolicyService : Service() {
             } catch (e: Exception) {
                 Logger.writeErrorLog("Failed to evaluate inactivity policies in ApexPolicyService: ${e.message}")
             }
-        }
     }
 
-    private fun scheduleNextInactivityAlarm() {
-        serviceScope.launch {
+    private suspend fun scheduleNextInactivityAlarmNow() {
             try {
-                val alarmManager = getSystemService(ALARM_SERVICE) as? AlarmManager ?: return@launch
+                val alarmManager = getSystemService(ALARM_SERVICE) as? AlarmManager ?: return
                 val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 val lockedSince = prefs.getLong(KEY_DEVICE_LOCKED_SINCE, 0L)
                 val km = getSystemService(KEYGUARD_SERVICE) as? KeyguardManager
@@ -359,9 +357,25 @@ class ApexPolicyService : Service() {
                 val now = System.currentTimeMillis()
 
                 val policies = oneShotAppManagerOwnerComponent.appInactivityPolicies.first()
+                Logger.writeDebugLog(
+                    "ApexPolicyService: scheduling from ${policies.size} policies: " +
+                        policies.values.joinToString { policy ->
+                            "${policy.packageName}(freeze=${policy.freezeIfUnusedEnabled}, " +
+                                "minutes=${policy.freezeIfUnusedMinutes}, hours=${policy.freezeIfUnusedHours}, " +
+                                "lastOpened=${policy.lastOpenedTimestamp})"
+                        }
+                )
                 var earliestDeadline = Long.MAX_VALUE
 
                 for ((_, policy) in policies) {
+                    if ((policy.freezeIfUnusedEnabled || policy.wipeIfUnusedEnabled) &&
+                        oneShotAppManagerOwnerComponent.isPackageInForeground(policy.packageName)
+                    ) {
+                        val foregroundPollDeadline = now + FOREGROUND_POLL_INTERVAL_MS
+                        if (foregroundPollDeadline < earliestDeadline) {
+                            earliestDeadline = foregroundPollDeadline
+                        }
+                    }
                     if (isLocked && lockedSince > 0L) {
                         when (policy.lockAction) {
                             LockInactivityAction.FREEZE_ONLY -> {
@@ -383,9 +397,25 @@ class ApexPolicyService : Service() {
                             LockInactivityAction.NONE -> {}
                         }
                     }
-                    if (policy.wipeIfUnusedEnabled && policy.lastOpenedTimestamp > 0L) {
+                    if (policy.freezeIfUnusedEnabled &&
+                        policy.lastOpenedTimestamp > 0L &&
+                        policy.lastUnusedFreezeTimestamp == 0L
+                    ) {
+                        val unusedFreezeDeadline = policy.lastOpenedTimestamp + policy.unusedFreezeDurationMs
+                        if (unusedFreezeDeadline <= now) {
+                            earliestDeadline = now
+                        } else if (unusedFreezeDeadline < earliestDeadline) {
+                            earliestDeadline = unusedFreezeDeadline
+                        }
+                    }
+                    if (policy.wipeIfUnusedEnabled &&
+                        policy.lastOpenedTimestamp > 0L &&
+                        policy.lastUnusedWipeTimestamp == 0L
+                    ) {
                         val unusedDeadline = policy.lastOpenedTimestamp + policy.unusedWipeDurationMs
-                        if (unusedDeadline > now && unusedDeadline < earliestDeadline) {
+                        if (unusedDeadline <= now) {
+                            earliestDeadline = now
+                        } else if (unusedDeadline < earliestDeadline) {
                             earliestDeadline = unusedDeadline
                         }
                     }
@@ -412,12 +442,12 @@ class ApexPolicyService : Service() {
                         alarmManager.set(AlarmManager.RTC_WAKEUP, earliestDeadline, pendingIntent)
                     }
                 } else {
+                    Logger.writeDebugLog("ApexPolicyService: no future inactivity deadline, cancelling alarm")
                     cancelInactivityAlarm()
                 }
             } catch (e: Exception) {
                 Logger.writeErrorLog("Failed to schedule inactivity alarm: ${e.message}")
             }
-        }
     }
 
     private fun cancelInactivityAlarm() {
@@ -479,6 +509,7 @@ class ApexPolicyService : Service() {
         private const val CHANNEL_ID = "apex_policy_service_channel"
         private const val NOTIFICATION_ID = 1001
         private const val ALARM_REQUEST_CODE = 2002
+        private const val FOREGROUND_POLL_INTERVAL_MS = 15_000L
         private const val PREFS_NAME = "apex_policy_service_prefs"
         private const val KEY_DEVICE_LOCKED_SINCE = "device_locked_since"
         private const val KEY_POWER_OFF_AT = "power_off_at"
