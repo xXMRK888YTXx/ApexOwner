@@ -1,5 +1,6 @@
 package com.xxmrk888ytxx.feature.managementmodule.apprestriction
 
+import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -85,7 +86,12 @@ fun AppRestrictionModuleScreen(
                     description = R.string.restriction_usb_data_description.uiText(),
                     isEnabled = screenState.isUSBDataSignalDisabled,
                     isAvailable = screenState.isCanDisableUSBDataSignal,
-                    unavailableMessage = R.string.restriction_usb_data_unavailable.uiText(),
+                    unavailableMessage = when {
+                        !screenState.isDeviceOwner -> R.string.device_owner_required.uiText()
+                        Build.VERSION.SDK_INT < Build.VERSION_CODES.S ->
+                            R.string.restriction_usb_data_unavailable_android_version.uiText()
+                        else -> R.string.restriction_usb_data_unavailable_device.uiText()
+                    },
                     uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUSBDataSignalDisable
                 ),
                 Restriction(

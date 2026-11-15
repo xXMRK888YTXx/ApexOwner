@@ -4,6 +4,9 @@
     <string name="restrictions_title_device">Device restrictions</string>
     <string name="restrictions_title_work_profile">Work profile restrictions</string>
     <string name="device_owner_required">Device Owner privileges required</string>
+    <string name="restriction_usb_data_unavailable">This restriction is not supported on this device.</string>
+    <string name="restriction_usb_data_unavailable_device">Android reports that this device does not support disabling USB data signaling.</string>
+    <string name="restriction_usb_data_unavailable_android_version">Disabling USB data signaling requires Android 12 (API 31) or newer.</string>
     <string name="permissions_title_device">Global device permissions</string>
     <string name="permissions_title_work_profile">Work profile permissions</string>
     <string name="permissions_banner_desc">Disabling a permission forcefully denies it for apps. Apps cannot request access, and the user cannot enable it in system settings.</string>
