@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="to_use_all_of_the_app_s_features_you_need_to_grant_device_owner_privileges_tap_the_button_below_to_learn_how_to_set_this_up">To use all of the app’s features, you need to grant Device Owner privileges. Tap the button below to learn how to set this up.</string>
+    <string name="permissions_granted_successfully_you_now_have_full_access_to_manage_device_policies_using_the_modules_below">Permissions granted successfully. You now have full access to manage device policies using the modules below.</string>
+    <string name="device_owner_active">Device Owner: Active</string>
+    <string name="action_required">Action Required</string>
+    <string name="how_to_grant_permission">How to grant permission</string>
+    <string name="device_restrictions">Device Restrictions</string>
+    <string name="limit_device_features_to_enhance_your_privacy_e_g_camera_microphone_usb_data_transfer">Limit device features to enhance your privacy (e.g. camera, microphone, USB data transfer)</string>
+    <string name="device_management">Apex Manager</string>
+    <string name="management_modules">Management modules</string>
+    <string name="work_profile_setup">Work profile setup</string>
+    <string name="create_a_separate_profile_to_isolate_work_apps_and_data_from_personal_ones">Isolate work apps and data from personal ones</string>
+    <string name="work_profile_created_successfully">Work profile created successfully</string>
+    <string name="couldn_t_create_a_work_profile">Could not create a work profile</string>
+    <string name="mode_device_owner">Mode: Device Owner (Full access)</string>
+    <string name="mode_profile_owner">Mode: Profile Owner (Work profile)</string>
+    <string name="mode_personal_host">Mode: Personal profile (Personal)</string>
+    <string name="work_profile_status_created">Work profile active (Apex Workspace)</string>
+    <string name="work_profile_status_not_created">Work profile has not been created yet</string>
+    <string name="create_work_profile_one_click">Create work profile in one click</string>
+    <string name="open_work_profile_shelter">App management (Shelter)</string>
+    <string name="shelter_management_desc">Freeze, unfreeze, and clone apps</string>
+    <string name="device_owner_restrictions_title">Device-wide restrictions (Device Owner)</string>
+    <string name="device_owner_restrictions_desc">Hardware restrictions (camera, microphone, USB, 2G networks)</string>
+    <string name="work_profile_restrictions_title">Work profile restrictions</string>
+    <string name="work_profile_restrictions_desc">Camera, screenshots, unknown app installs, and more</string>
+    <string name="device_owner_not_granted_desc">Device Owner privileges or a work profile are required to unlock this feature</string>
+    <string name="quiet_mode_toggle">Pause work profile (Quiet Mode)</string>
+    <string name="global_permissions_title_device">Global permissions (Device)</string>
+    <string name="global_permissions_title_work_profile">Global profile permissions</string>
+    <string name="global_permissions_desc_device">Force-disable permissions (camera, microphone, location, and more) for all apps</string>
+    <string name="global_permissions_desc_work_profile">Force-disable permissions for work profile apps</string>
+</resources>

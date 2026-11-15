@@ -1,5 +1,6 @@
 package com.xxmrk888ytxx.feature.managementmodule.workprofile
 
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.compose.foundation.Image
@@ -128,7 +129,7 @@ fun WorkProfileScreen(
         AlertDialog(
             onDismissRequest = { showDeleteConfirmDialog = false },
             title = { Text(stringResource(R.string.remove_work_profile_btn)) },
-            text = { Text("Вы уверены, что хотите удалить рабочий профиль? Все данные и приложения внутри рабочего профиля будут стерты.") },
+            text = { Text(stringResource(R.string.remove_work_profile_message)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -137,7 +138,7 @@ fun WorkProfileScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Удалить")
+                    Text(stringResource(R.string.uninstall_action))
                 }
             },
             dismissButton = {
@@ -223,9 +224,9 @@ fun WorkProfileScreen(
                 title = {
                     Text(
                         if (state.isInsideWorkProfile) {
-                            "Рабочий профиль (Shelter)"
+                            stringResource(R.string.profile_work_shelter)
                         } else {
-                            "Личный профиль (Shelter)"
+                            stringResource(R.string.profile_personal_shelter)
                         }
                     )
                 },
@@ -240,7 +241,7 @@ fun WorkProfileScreen(
                     IconButton(onClick = { onEvent(WorkProfileUiEvent.OnRefresh) }) {
                         Icon(
                             painter = painterResource(R.drawable.ic_refresh),
-                            contentDescription = "Refresh",
+                            contentDescription = stringResource(R.string.refresh_action),
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -318,7 +319,7 @@ fun WorkProfileScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Приложений: ${filteredApps.size}",
+                        text = stringResource(R.string.apps_count, filteredApps.size),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary
@@ -973,7 +974,11 @@ private fun AppIconImage(
     val context = LocalContext.current
     val iconBitmap = remember(packageName) {
         try {
-            val drawable = context.packageManager.getApplicationIcon(packageName)
+            val appInfo = context.packageManager.getApplicationInfo(
+                packageName,
+                PackageManager.MATCH_UNINSTALLED_PACKAGES or PackageManager.MATCH_DISABLED_COMPONENTS
+            )
+            val drawable = context.packageManager.getApplicationIcon(appInfo)
             val bitmap = Bitmap.createBitmap(
                 drawable.intrinsicWidth.coerceAtLeast(64),
                 drawable.intrinsicHeight.coerceAtLeast(64),
@@ -1055,7 +1060,7 @@ private fun LockInactivityPolicyCard(
                             LockInactivityAction.NONE -> stringResource(R.string.lock_action_none_desc)
                             LockInactivityAction.FREEZE_ONLY -> {
                                 if (currentPolicy.lockFreezeMinutes > 0) {
-                                    "Заморозка через ${currentPolicy.lockFreezeMinutes} мин без разблокировки"
+                                    stringResource(R.string.lock_freeze_after_minutes, currentPolicy.lockFreezeMinutes)
                                 } else {
                                     stringResource(R.string.lock_freeze_summary, currentPolicy.lockFreezeHours)
                                 }
@@ -1063,7 +1068,7 @@ private fun LockInactivityPolicyCard(
                             LockInactivityAction.FREEZE_AND_WIPE -> {
                                 val freezeStr = if (currentPolicy.lockFreezeMinutes > 0) "${currentPolicy.lockFreezeMinutes} мин" else "${currentPolicy.lockFreezeHours} ч"
                                 val wipeStr = if (currentPolicy.lockWipeMinutes > 0) "${currentPolicy.lockWipeMinutes} мин" else "${currentPolicy.lockWipeHours} ч"
-                                "Заморозка через $freezeStr, сброс через $wipeStr"
+                                stringResource(R.string.lock_freeze_and_wipe_summary, freezeStr, wipeStr)
                             }
                         },
                         style = MaterialTheme.typography.bodySmall,
@@ -1119,7 +1124,7 @@ private fun LockInactivityPolicyCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Единицы:",
+                        text = stringResource(R.string.unit_label),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1135,7 +1140,7 @@ private fun LockInactivityPolicyCard(
                                 )
                             )
                         },
-                        label = { Text("Часы") }
+                        label = { Text(stringResource(R.string.unit_hours)) }
                     )
                     FilterChip(
                         selected = isMinutesMode,
@@ -1147,7 +1152,7 @@ private fun LockInactivityPolicyCard(
                                 )
                             )
                         },
-                        label = { Text("Минуты (тест)") }
+                        label = { Text(stringResource(R.string.unit_minutes_test)) }
                     )
                 }
 
@@ -1156,7 +1161,7 @@ private fun LockInactivityPolicyCard(
                         SettingStepperRow(
                             label = stringResource(R.string.hours_without_unlock_label),
                             value = currentPolicy.lockFreezeHours,
-                            unit = "ч",
+                            unit = stringResource(R.string.unit_hour_short),
                             minValue = 1,
                             maxValue = 168,
                             onValueChange = { hours ->
@@ -1167,7 +1172,7 @@ private fun LockInactivityPolicyCard(
                         SettingStepperRow(
                             label = stringResource(R.string.hours_to_freeze_label),
                             value = currentPolicy.lockFreezeHours,
-                            unit = "ч",
+                            unit = stringResource(R.string.unit_hour_short),
                             minValue = 1,
                             maxValue = currentPolicy.lockWipeHours,
                             onValueChange = { hours ->
@@ -1177,7 +1182,7 @@ private fun LockInactivityPolicyCard(
                         SettingStepperRow(
                             label = stringResource(R.string.hours_to_wipe_label),
                             value = currentPolicy.lockWipeHours,
-                            unit = "ч",
+                            unit = stringResource(R.string.unit_hour_short),
                             minValue = currentPolicy.lockFreezeHours,
                             maxValue = 168,
                             onValueChange = { hours ->
@@ -1190,7 +1195,7 @@ private fun LockInactivityPolicyCard(
                         SettingStepperRow(
                             label = stringResource(R.string.hours_without_unlock_label),
                             value = currentPolicy.lockFreezeMinutes,
-                            unit = "мин",
+                            unit = stringResource(R.string.unit_minute_short),
                             minValue = 1,
                             maxValue = 120,
                             onValueChange = { mins ->
@@ -1201,7 +1206,7 @@ private fun LockInactivityPolicyCard(
                         SettingStepperRow(
                             label = stringResource(R.string.hours_to_freeze_label),
                             value = currentPolicy.lockFreezeMinutes,
-                            unit = "мин",
+                            unit = stringResource(R.string.unit_minute_short),
                             minValue = 1,
                             maxValue = currentPolicy.lockWipeMinutes,
                             onValueChange = { mins ->
@@ -1211,7 +1216,7 @@ private fun LockInactivityPolicyCard(
                         SettingStepperRow(
                             label = stringResource(R.string.hours_to_wipe_label),
                             value = currentPolicy.lockWipeMinutes,
-                            unit = "мин",
+                            unit = stringResource(R.string.unit_minute_short),
                             minValue = currentPolicy.lockFreezeMinutes,
                             maxValue = 120,
                             onValueChange = { mins ->
@@ -1245,7 +1250,7 @@ private fun LockInactivityPolicyCard(
                                     .background(Color(0xFF4CAF50), CircleShape)
                             )
                             Text(
-                                text = "Экран разблокирован — таймер ждёт выключения",
+                                text = stringResource(R.string.lock_screen_unlocked_status),
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -1253,7 +1258,7 @@ private fun LockInactivityPolicyCard(
                         }
 
                         Text(
-                            text = "Отсчёт ведётся только пока телефон непрерывно заблокирован (экран выключен). Разблокировка сбрасывает таймер.",
+                            text = stringResource(R.string.lock_screen_timer_description),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1261,9 +1266,9 @@ private fun LockInactivityPolicyCard(
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
 
                         val freezeText = if (currentPolicy.lockFreezeMinutes > 0) {
-                            "через ${currentPolicy.lockFreezeMinutes} мин сна"
+                            stringResource(R.string.sleep_after_minutes, currentPolicy.lockFreezeMinutes)
                         } else {
-                            "через ${currentPolicy.lockFreezeHours} ч сна"
+                            stringResource(R.string.sleep_after_hours, currentPolicy.lockFreezeHours)
                         }
 
                         Row(
@@ -1272,7 +1277,7 @@ private fun LockInactivityPolicyCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "❄️ Заморозка приложения:",
+                                text = stringResource(R.string.freeze_schedule_label),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -1286,9 +1291,9 @@ private fun LockInactivityPolicyCard(
 
                         if (currentPolicy.lockAction == LockInactivityAction.FREEZE_AND_WIPE) {
                             val wipeText = if (currentPolicy.lockWipeMinutes > 0) {
-                                "через ${currentPolicy.lockWipeMinutes} мин сна"
+                                stringResource(R.string.sleep_after_minutes, currentPolicy.lockWipeMinutes)
                             } else {
-                                "через ${currentPolicy.lockWipeHours} ч сна"
+                                stringResource(R.string.sleep_after_hours, currentPolicy.lockWipeHours)
                             }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -1296,7 +1301,7 @@ private fun LockInactivityPolicyCard(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "🗑️ Очистка данных:",
+                                    text = stringResource(R.string.wipe_schedule_label),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -1391,14 +1396,14 @@ private fun AppUnusedPolicyCard(
                     Text(
                         text = when {
                             isWipeEnabled && isFreezeEnabled ->
-                                "Очистка данных и заморозка, если приложение не открывалось ${currentPolicy.wipeIfUnusedDays} дн."
+                                stringResource(R.string.unused_wipe_and_freeze_desc, currentPolicy.wipeIfUnusedDays)
                             isWipeEnabled ->
                                 stringResource(R.string.app_unused_enabled_desc, currentPolicy.wipeIfUnusedDays)
-                            isFreezeEnabled -> "Заморозка через ${if (isFreezeMinutesMode) {
-                                "${currentPolicy.freezeIfUnusedMinutes} мин"
+                            isFreezeEnabled -> stringResource(R.string.unused_freeze_desc, if (isFreezeMinutesMode) {
+                                "${currentPolicy.freezeIfUnusedMinutes} ${stringResource(R.string.unit_minute_short)}"
                             } else {
-                                "${if (currentPolicy.freezeIfUnusedHours > 0) currentPolicy.freezeIfUnusedHours else currentPolicy.freezeIfUnusedDays * 24} ч"
-                            }} без запуска"
+                                "${if (currentPolicy.freezeIfUnusedHours > 0) currentPolicy.freezeIfUnusedHours else currentPolicy.freezeIfUnusedDays * 24} ${stringResource(R.string.unit_hour_short)}"
+                            })
                             else -> stringResource(R.string.app_unused_disabled_desc)
                         },
                         style = MaterialTheme.typography.bodySmall,
@@ -1428,12 +1433,12 @@ private fun AppUnusedPolicyCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Замораживать при неиспользовании",
+                        text = stringResource(R.string.freeze_if_unused_title),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "Скрыть приложение после 30 дней без запуска",
+                        text = stringResource(R.string.freeze_if_unused_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1464,7 +1469,7 @@ private fun AppUnusedPolicyCard(
                                 freezeIfUnusedMinutes = 0
                             ))
                         },
-                        label = { Text("Часы") }
+                        label = { Text(stringResource(R.string.unit_hours)) }
                     )
                     FilterChip(
                         selected = isFreezeMinutesMode,
@@ -1474,15 +1479,15 @@ private fun AppUnusedPolicyCard(
                                 freezeIfUnusedMinutes = if (currentPolicy.freezeIfUnusedMinutes > 0) currentPolicy.freezeIfUnusedMinutes else 1
                             ))
                         },
-                        label = { Text("Минуты (тест)") }
+                        label = { Text(stringResource(R.string.unit_minutes_test)) }
                     )
                 }
                 SettingStepperRow(
-                    label = "Срок до заморозки",
+                    label = stringResource(R.string.freeze_deadline_label),
                     value = if (isFreezeMinutesMode) currentPolicy.freezeIfUnusedMinutes
                     else if (currentPolicy.freezeIfUnusedHours > 0) currentPolicy.freezeIfUnusedHours
                     else currentPolicy.freezeIfUnusedDays * 24,
-                    unit = if (isFreezeMinutesMode) "мин" else "ч",
+                    unit = if (isFreezeMinutesMode) stringResource(R.string.unit_minute_short) else stringResource(R.string.unit_hour_short),
                     minValue = 1,
                     maxValue = if (isFreezeMinutesMode) 120 else 720,
                     onValueChange = { value ->
@@ -1501,7 +1506,7 @@ private fun AppUnusedPolicyCard(
                     contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
                 ) {
                     Text(
-                        text = "Тест заморозки (срок истёк)",
+                        text = stringResource(R.string.freeze_expired_test),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -1514,7 +1519,7 @@ private fun AppUnusedPolicyCard(
                 SettingStepperRow(
                     label = stringResource(R.string.days_unused_label),
                     value = currentPolicy.wipeIfUnusedDays,
-                    unit = "дн",
+                    unit = stringResource(R.string.unit_day_short),
                     minValue = 1,
                     maxValue = 365,
                     onValueChange = { days ->
@@ -1534,9 +1539,9 @@ private fun AppUnusedPolicyCard(
                 val remainingText = if (diffMs > 0) {
                     val days = diffMs / 86400_000L
                     val hours = (diffMs % 86400_000L) / 3600_000L
-                    if (days > 0) "$days дн. $hours ч" else "$hours ч"
+                    if (days > 0) "$days ${stringResource(R.string.unit_day_short)}. $hours ${stringResource(R.string.unit_hour_short)}" else "$hours ${stringResource(R.string.unit_hour_short)}"
                 } else {
-                    "Срок истёк (очистится при проверке)"
+                    stringResource(R.string.unused_wipe_expired)
                 }
 
                 Card(
@@ -1553,7 +1558,7 @@ private fun AppUnusedPolicyCard(
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
-                            text = "Точное расписание очистки данных:",
+                            text = stringResource(R.string.exact_wipe_schedule),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1565,7 +1570,7 @@ private fun AppUnusedPolicyCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "🗑️ Дата и время сброса:",
+                                text = stringResource(R.string.wipe_date_time),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -1583,7 +1588,7 @@ private fun AppUnusedPolicyCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "⏳ До сброса данных:",
+                                text = stringResource(R.string.wipe_remaining),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -1597,7 +1602,7 @@ private fun AppUnusedPolicyCard(
 
                         if (currentPolicy.lastUnusedWipeTimestamp > 0L) {
                             Text(
-                                text = "🗑️ Последний сброс данных: ${formatTargetDateTime(currentPolicy.lastUnusedWipeTimestamp)}",
+                                text = stringResource(R.string.last_wipe_time, formatTargetDateTime(currentPolicy.lastUnusedWipeTimestamp)),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -1612,12 +1617,12 @@ private fun AppUnusedPolicyCard(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Отсчёт с: ${formatTargetDateTime(baseTimestamp)}",
+                                    text = stringResource(R.string.countdown_from, formatTargetDateTime(baseTimestamp)),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "Обновляется при каждом запуске приложения",
+                                    text = stringResource(R.string.countdown_refresh_note),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
@@ -1635,7 +1640,7 @@ private fun AppUnusedPolicyCard(
                                     contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
                                 ) {
                                     Text(
-                                        text = "Тест (30+ дн)",
+                                        text = stringResource(R.string.wipe_test_button),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.error
                                     )
@@ -1650,7 +1655,7 @@ private fun AppUnusedPolicyCard(
                                     contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
                                 ) {
                                     Text(
-                                        text = "Сбросить отсчёт",
+                                        text = stringResource(R.string.reset_countdown),
                                         style = MaterialTheme.typography.labelSmall
                                     )
                                 }
@@ -1769,7 +1774,7 @@ private fun SettingStepperRow(
                         showDialog = false
                     }
                 ) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok_action))
                 }
             },
             dismissButton = {
