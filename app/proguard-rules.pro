@@ -1,21 +1,20 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Keep metadata required by dependency injection, Kotlin reflection, and
+# generated serializers while allowing R8 to optimize and obfuscate code.
+-keepattributes RuntimeVisibleAnnotations,RuntimeInvisibleAnnotations,AnnotationDefault,Signature,InnerClasses,EnclosingMethod
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Android creates these classes from the merged manifest or system callbacks.
+-keep class com.xxmrk888ytxx.apexowner.ApexOwnerApp { *; }
+-keep class com.xxmrk888ytxx.apexowner.view.mainActivity.MainActivity { *; }
+-keep class com.xxmrk888ytxx.apexowner.view.oneshot.OneShotQuickLauncherActivity { *; }
+-keep class com.xxmrk888ytxx.apexowner.bridge.WorkProfileDispatcherActivity { *; }
+-keep class com.xxmrk888ytxx.apexowner.bridge.PackageInstallerReceiver { *; }
+-keep class com.xxmrk888ytxx.apexowner.bridge.ApexBridgeProvider { *; }
+-keep class com.xxmrk888ytxx.apexowner.service.ApexPolicyService { *; }
+-keep class com.xxmrk888ytxx.apexowner.service.InactivityAlarmReceiver { *; }
+-keep class com.xxmrk888ytxx.apexowner.service.BootCompletedReceiver { *; }
+-keep class com.xxmrk888ytxx.core.devicepolicy.ApexDeviceOwnerReceiver { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep Hilt-generated entry points and members used by generated injection code.
+-keep class dagger.hilt.** { *; }
+-keep class com.xxmrk888ytxx.apexowner.**_GeneratedInjector { *; }
+-keep class com.xxmrk888ytxx.apexowner.**_HiltComponents* { *; }
