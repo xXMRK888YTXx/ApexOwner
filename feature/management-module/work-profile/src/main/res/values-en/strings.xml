@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="work_profile_title">Work profile (Shelter)</string>
+    <string name="work_profile_title">Work profile</string>
     <string name="profile_apps_tab">Profile apps</string>
     <string name="clone_apps_tab">Clone from personal</string>
     <string name="search_apps_hint">Search apps…</string>
@@ -69,8 +69,8 @@
     <string name="badge_lock_wipe">⏱ %1$d/%2$d h</string>
     <string name="badge_unused_wipe">⏳ %1$d days</string>
     <string name="remove_work_profile_message">Are you sure you want to remove the work profile? All data and apps inside it will be erased.</string>
-    <string name="profile_work_shelter">Work profile (Shelter)</string>
-    <string name="profile_personal_shelter">Personal profile (Shelter)</string>
+    <string name="profile_work_shelter">Work profile</string>
+    <string name="profile_personal_shelter">Personal profile</string>
     <string name="refresh_action">Refresh</string>
     <string name="unit_hours">Hours</string>
     <string name="unit_minutes_test">Minutes (test)</string>

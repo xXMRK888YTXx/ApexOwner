@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="work_profile_title">Рабочий профиль (Shelter)</string>
+    <string name="work_profile_title">Рабочий профиль</string>
     <string name="profile_apps_tab">Приложения профиля</string>
     <string name="clone_apps_tab">Клонировать из личного</string>
     <string name="search_apps_hint">Поиск приложений…</string>
@@ -69,8 +69,8 @@
     <string name="badge_lock_wipe">⏱ %1$d/%2$d ч</string>
     <string name="badge_unused_wipe">⏳ %1$d дн</string>
     <string name="remove_work_profile_message">Вы уверены, что хотите удалить рабочий профиль? Все данные и приложения внутри рабочего профиля будут стерты.</string>
-    <string name="profile_work_shelter">Рабочий профиль (Shelter)</string>
-    <string name="profile_personal_shelter">Личный профиль (Shelter)</string>
+    <string name="profile_work_shelter">Рабочий профиль</string>
+    <string name="profile_personal_shelter">Личный профиль</string>
     <string name="refresh_action">Обновить</string>
     <string name="unit_hours">Часы</string>
     <string name="unit_minutes_test">Минуты (тест)</string>

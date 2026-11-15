@@ -19,7 +19,7 @@
     <string name="work_profile_status_created">Work profile active (Apex Workspace)</string>
     <string name="work_profile_status_not_created">Work profile has not been created yet</string>
     <string name="create_work_profile_one_click">Create work profile in one click</string>
-    <string name="open_work_profile_shelter">App management (Shelter)</string>
+    <string name="open_work_profile_shelter">App management</string>
     <string name="shelter_management_desc">Freeze, unfreeze, and clone apps</string>
     <string name="device_owner_restrictions_title">Device-wide restrictions (Device Owner)</string>
     <string name="device_owner_restrictions_desc">Hardware restrictions (camera, microphone, USB, 2G networks)</string>

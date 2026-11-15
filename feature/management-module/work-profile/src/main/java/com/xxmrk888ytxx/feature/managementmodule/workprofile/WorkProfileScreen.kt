@@ -368,10 +368,7 @@ fun WorkProfileScreen(
                                 modifier = Modifier.animateItem(),
                                 app = app,
                                 isInsideWorkProfile = state.isInsideWorkProfile,
-                                onClick = { selectedAppForManagement = app },
-                                onManagePermissions = {
-                                    onEvent(WorkProfileUiEvent.OnManagePermissions(app.packageName, app.name))
-                                }
+                                onClick = { selectedAppForManagement = app }
                             )
                         }
                         item {
@@ -389,8 +386,7 @@ private fun AppListItem(
     modifier: Modifier = Modifier,
     app: WorkProfileApp,
     isInsideWorkProfile: Boolean,
-    onClick: () -> Unit,
-    onManagePermissions: () -> Unit
+    onClick: () -> Unit
 ) {
     Card(
         modifier = modifier
@@ -521,17 +517,6 @@ private fun AppListItem(
                 }
             }
 
-            IconButton(
-                onClick = onManagePermissions,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_check),
-                    contentDescription = stringResource(R.string.permissions_action),
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
         }
     }
 }
@@ -1357,25 +1342,27 @@ private fun AppUnusedPolicyCard(
         }
     }
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isEnabled) {
-                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            }
-        )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
+            Card(
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isWipeEnabled) {
+                        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    }
+                )
+            ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -1387,15 +1374,8 @@ private fun AppUnusedPolicyCard(
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = when {
-                            isWipeEnabled && isFreezeEnabled ->
-                                stringResource(R.string.unused_wipe_and_freeze_desc, currentPolicy.wipeIfUnusedDays)
                             isWipeEnabled ->
                                 stringResource(R.string.app_unused_enabled_desc, currentPolicy.wipeIfUnusedDays)
-                            isFreezeEnabled -> stringResource(R.string.unused_freeze_desc, if (isFreezeMinutesMode) {
-                                "${currentPolicy.freezeIfUnusedMinutes} ${stringResource(R.string.unit_minute_short)}"
-                            } else {
-                                "${if (currentPolicy.freezeIfUnusedHours > 0) currentPolicy.freezeIfUnusedHours else currentPolicy.freezeIfUnusedDays * 24} ${stringResource(R.string.unit_hour_short)}"
-                            })
                             else -> stringResource(R.string.app_unused_disabled_desc)
                         },
                         style = MaterialTheme.typography.bodySmall,
@@ -1418,9 +1398,23 @@ private fun AppUnusedPolicyCard(
                     }
                 )
             }
+            }
 
-            Row(
+            Card(
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isFreezeEnabled) {
+                        MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    }
+                )
+            ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -1449,6 +1443,7 @@ private fun AppUnusedPolicyCard(
                         ))
                     }
                 )
+            }
             }
 
             if (isFreezeEnabled) {
@@ -1658,7 +1653,6 @@ private fun AppUnusedPolicyCard(
             }
         }
     }
-}
 
 private fun formatTargetDateTime(timestampMs: Long): String {
     val sdf = SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault())
