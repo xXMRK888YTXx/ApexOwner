@@ -27,7 +27,7 @@ extensions.configure<ApplicationExtension> {
         minSdk = catalogMinSdk
         targetSdk = catalogCompileSdk
         versionCode = 100
-        versionName = "Margarita.1"
+        versionName = "Margarita.1 (Alpha)"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
