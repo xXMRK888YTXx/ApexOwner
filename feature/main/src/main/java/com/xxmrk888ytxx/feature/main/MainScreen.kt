@@ -3,7 +3,6 @@ package com.xxmrk888ytxx.feature.main
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -85,9 +84,7 @@ fun MainScreen(
         ) {
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                androidx.compose.animation.AnimatedVisibility(visible = true, enter = fadeIn()) {
-                    OperatingModeStatusCard(mode = screenState.operatingMode)
-                }
+                OperatingModeStatusCard(modifier = Modifier.animateItem(), mode = screenState.operatingMode)
             }
 
             item {
@@ -100,32 +97,29 @@ fun MainScreen(
             }
 
             item {
-                androidx.compose.animation.AnimatedVisibility(visible = true, enter = fadeIn()) {
-                    WorkProfileSectionCard(
-                        screenState = screenState,
-                        onOpenManagement = { onEvent(MainScreenEvent.OnWorkProfileManagementClicked) },
-                        onCreateProfile = { onEvent(MainScreenEvent.OnWorkProfileButtonClicked) },
-                        onToggleQuietMode = { onEvent(MainScreenEvent.OnToggleWorkProfileQuietMode(it)) }
-                    )
-                }
+                WorkProfileSectionCard(
+                    modifier = Modifier.animateItem(),
+                    screenState = screenState,
+                    onOpenManagement = { onEvent(MainScreenEvent.OnWorkProfileManagementClicked) },
+                    onCreateProfile = { onEvent(MainScreenEvent.OnWorkProfileButtonClicked) },
+                    onToggleQuietMode = { onEvent(MainScreenEvent.OnToggleWorkProfileQuietMode(it)) }
+                )
             }
 
             item {
-                androidx.compose.animation.AnimatedVisibility(visible = true, enter = fadeIn()) {
-                    DeviceOwnerRestrictionsCard(
-                        screenState = screenState,
-                        onClick = { onEvent(MainScreenEvent.OnDeviveRestrictionButtonClicked) }
-                    )
-                }
+                DeviceOwnerRestrictionsCard(
+                    modifier = Modifier.animateItem(),
+                    screenState = screenState,
+                    onClick = { onEvent(MainScreenEvent.OnDeviveRestrictionButtonClicked) }
+                )
             }
 
             item {
-                androidx.compose.animation.AnimatedVisibility(visible = true, enter = fadeIn()) {
-                    GlobalPermissionsCard(
-                        screenState = screenState,
-                        onClick = { onEvent(MainScreenEvent.OnGlobalPermissionsButtonClicked) }
-                    )
-                }
+                GlobalPermissionsCard(
+                    modifier = Modifier.animateItem(),
+                    screenState = screenState,
+                    onClick = { onEvent(MainScreenEvent.OnGlobalPermissionsButtonClicked) }
+                )
             }
 
             item {
@@ -136,7 +130,10 @@ fun MainScreen(
 }
 
 @Composable
-private fun OperatingModeStatusCard(mode: MainOperatingMode) {
+private fun OperatingModeStatusCard(
+    modifier: Modifier = Modifier,
+    mode: MainOperatingMode
+) {
     val (title, desc, iconRes, containerColor, contentColor) = when (mode) {
         MainOperatingMode.DEVICE_OWNER -> {
             Tuples5(
@@ -168,7 +165,7 @@ private fun OperatingModeStatusCard(mode: MainOperatingMode) {
     }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -211,6 +208,7 @@ private fun OperatingModeStatusCard(mode: MainOperatingMode) {
 
 @Composable
 private fun WorkProfileSectionCard(
+    modifier: Modifier = Modifier,
     screenState: ScreenState,
     onOpenManagement: () -> Unit,
     onCreateProfile: () -> Unit,
@@ -219,7 +217,7 @@ private fun WorkProfileSectionCard(
     val isProfileActive = screenState.hasWorkProfile || screenState.operatingMode == MainOperatingMode.PROFILE_OWNER
 
     ElevatedCard(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.elevatedCardColors(
@@ -305,6 +303,7 @@ private fun WorkProfileSectionCard(
 
 @Composable
 private fun DeviceOwnerRestrictionsCard(
+    modifier: Modifier = Modifier,
     screenState: ScreenState,
     onClick: () -> Unit
 ) {
@@ -326,7 +325,7 @@ private fun DeviceOwnerRestrictionsCard(
     }
 
     ElevatedCard(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(enabled = isEnabled, onClick = onClick),
         shape = RoundedCornerShape(16.dp),
@@ -377,6 +376,7 @@ private fun DeviceOwnerRestrictionsCard(
 
 @Composable
 private fun GlobalPermissionsCard(
+    modifier: Modifier = Modifier,
     screenState: ScreenState,
     onClick: () -> Unit
 ) {
@@ -397,7 +397,7 @@ private fun GlobalPermissionsCard(
     }
 
     ElevatedCard(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(enabled = isEnabled, onClick = onClick),
         shape = RoundedCornerShape(16.dp),

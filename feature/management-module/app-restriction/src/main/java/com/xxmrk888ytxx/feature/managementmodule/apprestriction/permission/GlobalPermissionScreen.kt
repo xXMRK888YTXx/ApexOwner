@@ -1,6 +1,5 @@
 package com.xxmrk888ytxx.feature.managementmodule.apprestriction.permission
 
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -134,14 +133,13 @@ fun GlobalPermissionScreen(
                 items = screenState.permissions,
                 key = { it.id }
             ) { item ->
-                androidx.compose.animation.AnimatedVisibility(visible = true, enter = fadeIn()) {
-                    PermissionCard(
-                        model = item,
-                        onToggle = { isDisable ->
-                            onEvent(GlobalPermissionUiEvent.TogglePermission(item.id, isDisable))
-                        }
-                    )
-                }
+                PermissionCard(
+                    modifier = Modifier.animateItem(),
+                    model = item,
+                    onToggle = { isDisable ->
+                        onEvent(GlobalPermissionUiEvent.TogglePermission(item.id, isDisable))
+                    }
+                )
             }
         }
     }

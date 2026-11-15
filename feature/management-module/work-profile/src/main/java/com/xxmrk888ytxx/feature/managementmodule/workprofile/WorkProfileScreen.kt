@@ -3,7 +3,6 @@ package com.xxmrk888ytxx.feature.managementmodule.workprofile
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -365,16 +364,15 @@ fun WorkProfileScreen(
                             items = filteredApps,
                             key = { it.packageName }
                         ) { app ->
-                            androidx.compose.animation.AnimatedVisibility(visible = true, enter = fadeIn()) {
-                                AppListItem(
-                                    app = app,
-                                    isInsideWorkProfile = state.isInsideWorkProfile,
-                                    onClick = { selectedAppForManagement = app },
-                                    onManagePermissions = {
-                                        onEvent(WorkProfileUiEvent.OnManagePermissions(app.packageName, app.name))
-                                    }
-                                )
-                            }
+                            AppListItem(
+                                modifier = Modifier.animateItem(),
+                                app = app,
+                                isInsideWorkProfile = state.isInsideWorkProfile,
+                                onClick = { selectedAppForManagement = app },
+                                onManagePermissions = {
+                                    onEvent(WorkProfileUiEvent.OnManagePermissions(app.packageName, app.name))
+                                }
+                            )
                         }
                         item {
                             Spacer(modifier = Modifier.height(16.dp))
@@ -388,13 +386,14 @@ fun WorkProfileScreen(
 
 @Composable
 private fun AppListItem(
+    modifier: Modifier = Modifier,
     app: WorkProfileApp,
     isInsideWorkProfile: Boolean,
     onClick: () -> Unit,
     onManagePermissions: () -> Unit
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),

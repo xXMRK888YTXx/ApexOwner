@@ -1,6 +1,5 @@
 package com.xxmrk888ytxx.feature.managementmodule.apprestriction
 
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -466,12 +465,11 @@ fun AppRestrictionModuleScreen(
                     items = visibleRestrictions,
                     key = { restriction -> restriction.id }
                 ) { restriction ->
-                    androidx.compose.animation.AnimatedVisibility(visible = true, enter = fadeIn()) {
-                        RestrictionCard(
-                            restriction = restriction,
-                            onEvent = onEvent
-                        )
-                    }
+                    RestrictionCard(
+                        modifier = Modifier.animateItem(),
+                        restriction = restriction,
+                        onEvent = onEvent
+                    )
                 }
             }
         }

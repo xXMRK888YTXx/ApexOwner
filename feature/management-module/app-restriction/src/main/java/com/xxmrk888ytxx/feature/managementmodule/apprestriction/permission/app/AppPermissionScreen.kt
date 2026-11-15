@@ -3,7 +3,6 @@ package com.xxmrk888ytxx.feature.managementmodule.apprestriction.permission.app
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -156,14 +155,13 @@ fun AppPermissionScreen(
                 items = screenState.permissions,
                 key = { it.id }
             ) { item ->
-                androidx.compose.animation.AnimatedVisibility(visible = true, enter = fadeIn()) {
-                    AppPermissionCard(
-                        model = item,
-                        onPolicyChange = { newPolicy ->
-                            onEvent(AppPermissionUiEvent.ChangePolicy(item.id, newPolicy))
-                        }
-                    )
-                }
+                AppPermissionCard(
+                    modifier = Modifier.animateItem(),
+                    model = item,
+                    onPolicyChange = { newPolicy ->
+                        onEvent(AppPermissionUiEvent.ChangePolicy(item.id, newPolicy))
+                    }
+                )
             }
         }
     }
