@@ -44,6 +44,7 @@ class WorkProfileContractImpl @Inject constructor(
         context.getSystemService(Context.CROSS_PROFILE_APPS_SERVICE) as? CrossProfileApps
 
     private val _apps = MutableStateFlow<List<WorkProfileApp>>(emptyList())
+    private val crossProfileOverrides = mutableMapOf<String, Boolean>()
     override val apps: Flow<List<WorkProfileApp>> = _apps.asStateFlow()
 
     override val workProfileApps: Flow<List<WorkProfileApp>> = apps
@@ -94,6 +95,35 @@ class WorkProfileContractImpl @Inject constructor(
                 result
             } else {
                 Result.failure(SecurityException("Для заморозки приложений требуются права Device Owner"))
+            }
+        }
+
+    override suspend fun toggleCrossProfile(packageName: String, isAllowed: Boolean): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            if (profileOwnerManager.isInsideWorkProfile || profileOwnerManager.isAppDeviceOwner) {
+                val result = profileOwnerManager.setCrossProfilePackage(packageName, isAllowed)
+                if (result.isSuccess) {
+                    crossProfileOverrides.remove(packageName)
+                    refresh()
+                }
+                result
+            } else {
+                try {
+                    val intent = Intent(WorkProfileDispatcherActivity.ACTION_TOGGLE_CROSS_PROFILE).apply {
+                        addCategory(Intent.CATEGORY_DEFAULT)
+                        putExtra(WorkProfileDispatcherActivity.EXTRA_PACKAGE_NAME, packageName)
+                        putExtra(WorkProfileDispatcherActivity.EXTRA_IS_CROSS_PROFILE_ALLOWED, isAllowed)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                    crossProfileOverrides[packageName] = isAllowed
+                    delay(300)
+                    refresh()
+                    Result.success(Unit)
+                } catch (e: Exception) {
+                    Logger.writeErrorLog("Failed to dispatch cross-profile toggle: ${e.message}")
+                    Result.failure(e)
+                }
             }
         }
 
@@ -334,6 +364,8 @@ class WorkProfileContractImpl @Inject constructor(
                     isInstalledInWorkProfile = true,
                     hasLauncher = hasLauncher,
                     isInstalledInOtherProfile = false,
+                    isCrossProfileAllowed = crossProfileOverrides[pkg]
+                        ?: profileOwnerManager.isCrossProfilePackage(pkg),
                     isOneShot = oneShotAppManagerOwnerComponent.isOneShotApp(pkg),
                     isAutoFreeze = oneShotAppManagerOwnerComponent.isAutoFreezeApp(pkg),
                     inactivityPolicy = policyUi
@@ -401,6 +433,8 @@ class WorkProfileContractImpl @Inject constructor(
                     isInstalledInWorkProfile = isInstalledInWork,
                     hasLauncher = hasLauncher,
                     isInstalledInOtherProfile = isInstalledInWork,
+                    isCrossProfileAllowed = crossProfileOverrides[pkg]
+                        ?: profileOwnerManager.isCrossProfilePackage(pkg),
                     isOneShot = oneShotAppManagerOwnerComponent.isOneShotApp(pkg),
                     isAutoFreeze = oneShotAppManagerOwnerComponent.isAutoFreezeApp(pkg),
                     inactivityPolicy = policyUi

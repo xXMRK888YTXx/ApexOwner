@@ -180,6 +180,10 @@ fun WorkProfileScreen(
                     selectedAppForManagement = null
                     onEvent(WorkProfileUiEvent.OnManagePermissions(target.packageName, target.name))
                 },
+                onToggleCrossProfile = { isAllowed ->
+                    onEvent(WorkProfileUiEvent.OnToggleCrossProfile(app.packageName, isAllowed))
+                    selectedAppForManagement = selectedAppForManagement?.copy(isCrossProfileAllowed = isAllowed)
+                },
                 onToggleOneShot = { isOneShot ->
                     onEvent(WorkProfileUiEvent.OnToggleOneShot(app.packageName, isOneShot))
                     selectedAppForManagement = selectedAppForManagement?.copy(
@@ -548,6 +552,7 @@ private fun AppManagementSheetContent(
     onUninstall: () -> Unit,
     onClone: () -> Unit,
     onManagePermissions: () -> Unit,
+    onToggleCrossProfile: (Boolean) -> Unit,
     onToggleOneShot: (Boolean) -> Unit,
     onResetOneShot: () -> Unit,
     onToggleAutoFreeze: (Boolean) -> Unit,
@@ -727,6 +732,44 @@ private fun AppManagementSheetContent(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.permissions_action))
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (app.isCrossProfileAllowed) {
+                        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    }
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.cross_profile_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = stringResource(R.string.cross_profile_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Switch(
+                        checked = app.isCrossProfileAllowed,
+                        onCheckedChange = onToggleCrossProfile
+                    )
+                }
             }
 
             // Freeze / Unfreeze Action

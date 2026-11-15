@@ -79,6 +79,35 @@ internal class WorkProfileOwnerComponentManagerImpl @Inject constructor(
             putExtra(DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED, true)
         }
 
+    override fun isCrossProfilePackage(packageName: String): Boolean {
+        return !(Build.VERSION.SDK_INT < Build.VERSION_CODES.R || !checkCanManageOwnerPolicies()) && try {
+            devicePolicyManager.getCrossProfilePackages(deviceOwnerReceiver).contains(packageName)
+        } catch (e: Exception) {
+            Logger.writeErrorLog("Failed to query cross-profile packages: ${e.message}")
+            false
+        }
+    }
+
+    override suspend fun setCrossProfilePackage(
+        packageName: String,
+        isAllowed: Boolean
+    ): Result<Unit> {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return Result.failure(UnsupportedOperationException("Cross-profile packages require Android 11 or newer"))
+        }
+        if (!checkCanManageOwnerPolicies()) return Result.failure(AppNotProfileOwnerException())
+        return try {
+            val packages = devicePolicyManager.getCrossProfilePackages(deviceOwnerReceiver).toMutableSet()
+            if (isAllowed) packages += packageName else packages -= packageName
+            devicePolicyManager.setCrossProfilePackages(deviceOwnerReceiver, packages)
+            Logger.writeDebugLog("Cross-profile interaction ${if (isAllowed) "enabled" else "disabled"} for $packageName")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Logger.writeErrorLog("Failed to update cross-profile package $packageName: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
     override suspend fun updateProfileOwnerState() {
         _isProfileOwner.value = checkIsAppProfileOwner()
         _hasWorkProfile.value = checkHasWorkProfile()
@@ -119,6 +148,7 @@ internal class WorkProfileOwnerComponentManagerImpl @Inject constructor(
                     "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_ONE_SHOT",
                     "com.xxmrk888ytxx.apexowner.ACTION_RESET_ONE_SHOT",
                     "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_AUTO_FREEZE",
+                    "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_CROSS_PROFILE",
                     "com.xxmrk888ytxx.apexowner.ACTION_SET_INACTIVITY_POLICY",
                     "com.xxmrk888ytxx.apexowner.ACTION_LAUNCH_APP"
                 ).forEach { actionStr ->

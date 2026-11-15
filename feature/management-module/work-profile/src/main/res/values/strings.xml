@@ -34,6 +34,10 @@
     <string name="badge_in_personal_profile">В личном профиле</string>
     <string name="app_management_title">Управление приложением</string>
     <string name="permissions_action">Управление разрешениями</string>
+    <string name="cross_profile_title">Взаимодействие между профилями</string>
+    <string name="cross_profile_desc">Разрешить приложению взаимодействовать с его копией в другом профиле</string>
+    <string name="cross_profile_enabled">Взаимодействие между профилями разрешено</string>
+    <string name="cross_profile_disabled">Взаимодействие между профилями запрещено</string>
     <string name="badge_one_shot">One-shot</string>
     <string name="one_shot_mode_title">One-shot режим</string>
     <string name="one_shot_mode_desc">Приложение заморожено. При выключении профиля или перезагрузке данные очищаются.</string>

@@ -190,6 +190,19 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
                     )
                 }
 
+                ACTION_TOGGLE_CROSS_PROFILE -> {
+                    val isAllowed = intent?.getBooleanExtra(EXTRA_IS_CROSS_PROFILE_ALLOWED, false) ?: false
+                    profileOwnerManager.setCrossProfilePackage(packageName, isAllowed).fold(
+                        onSuccess = {
+                            val msg = if (isAllowed) "Взаимодействие между профилями разрешено" else "Взаимодействие между профилями запрещено"
+                            Toast.makeText(this@WorkProfileDispatcherActivity, msg, Toast.LENGTH_SHORT).show()
+                        },
+                        onFailure = {
+                            Toast.makeText(this@WorkProfileDispatcherActivity, "Ошибка: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+
                 ACTION_SET_INACTIVITY_POLICY -> {
                     val json = intent?.getStringExtra(EXTRA_POLICY_JSON)
                     if (json != null) {
@@ -306,12 +319,14 @@ class WorkProfileDispatcherActivity : ComponentActivity() {
         const val ACTION_TOGGLE_ONE_SHOT = "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_ONE_SHOT"
         const val ACTION_RESET_ONE_SHOT = "com.xxmrk888ytxx.apexowner.ACTION_RESET_ONE_SHOT"
         const val ACTION_TOGGLE_AUTO_FREEZE = "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_AUTO_FREEZE"
+        const val ACTION_TOGGLE_CROSS_PROFILE = "com.xxmrk888ytxx.apexowner.ACTION_TOGGLE_CROSS_PROFILE"
         const val ACTION_SET_INACTIVITY_POLICY = "com.xxmrk888ytxx.apexowner.ACTION_SET_INACTIVITY_POLICY"
         const val ACTION_LAUNCH_APP = "com.xxmrk888ytxx.apexowner.ACTION_LAUNCH_APP"
         const val EXTRA_PACKAGE_NAME = "EXTRA_PACKAGE_NAME"
         const val EXTRA_POLICY_JSON = "EXTRA_POLICY_JSON"
         const val EXTRA_IS_ONE_SHOT = "EXTRA_IS_ONE_SHOT"
         const val EXTRA_IS_AUTO_FREEZE = "EXTRA_IS_AUTO_FREEZE"
+        const val EXTRA_IS_CROSS_PROFILE_ALLOWED = "EXTRA_IS_CROSS_PROFILE_ALLOWED"
         const val EXTRA_APK_PATH = "EXTRA_APK_PATH"
         const val EXTRA_SPLIT_PATHS = "EXTRA_SPLIT_PATHS"
     }

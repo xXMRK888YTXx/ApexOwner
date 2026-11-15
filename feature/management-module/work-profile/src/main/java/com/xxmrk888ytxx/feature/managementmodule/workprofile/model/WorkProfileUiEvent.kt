@@ -6,6 +6,7 @@ sealed interface WorkProfileUiEvent : UiEvent {
     data class OnSearchQueryChanged(val query: String) : WorkProfileUiEvent
     data class OnToggleSystemApps(val show: Boolean) : WorkProfileUiEvent
     data class OnToggleFreezeApp(val packageName: String, val shouldFreeze: Boolean) : WorkProfileUiEvent
+    data class OnToggleCrossProfile(val packageName: String, val isAllowed: Boolean) : WorkProfileUiEvent
     data class OnCloneApp(val packageName: String) : WorkProfileUiEvent
     data class OnLaunchApp(val packageName: String) : WorkProfileUiEvent
     data class OnUninstallApp(val packageName: String) : WorkProfileUiEvent

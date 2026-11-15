@@ -14,6 +14,7 @@ interface WorkProfileContract {
 
     suspend fun refresh()
     suspend fun toggleFreeze(packageName: String, shouldFreeze: Boolean): Result<Unit>
+    suspend fun toggleCrossProfile(packageName: String, isAllowed: Boolean): Result<Unit>
     suspend fun cloneApp(packageName: String): Result<Unit>
     suspend fun launchApp(packageName: String): Result<Unit>
     suspend fun uninstallApp(packageName: String): Result<Unit>

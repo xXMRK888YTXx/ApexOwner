@@ -71,6 +71,7 @@ class WorkProfileViewModel @Inject constructor(
             is WorkProfileUiEvent.OnSearchQueryChanged -> searchQuery.value = event.query
             is WorkProfileUiEvent.OnToggleSystemApps -> showSystemApps.value = event.show
             is WorkProfileUiEvent.OnToggleFreezeApp -> toggleFreeze(event.packageName, event.shouldFreeze)
+            is WorkProfileUiEvent.OnToggleCrossProfile -> toggleCrossProfile(event.packageName, event.isAllowed)
             is WorkProfileUiEvent.OnCloneApp -> cloneApp(event.packageName)
             is WorkProfileUiEvent.OnLaunchApp -> launchApp(event.packageName)
             is WorkProfileUiEvent.OnUninstallApp -> uninstallApp(event.packageName)
@@ -117,6 +118,23 @@ class WorkProfileViewModel @Inject constructor(
                 onFailure = {
                     sendToastSideEffect(R.string.app_action_failed.uiText())
                 }
+            )
+            isLoading.value = false
+        }
+    }
+
+    private fun toggleCrossProfile(packageName: String, isAllowed: Boolean) {
+        viewModelScope.launch {
+            isLoading.value = true
+            contract.toggleCrossProfile(packageName, isAllowed).fold(
+                onSuccess = {
+                    sendToastSideEffect(
+                        if (isAllowed) R.string.cross_profile_enabled.uiText()
+                        else R.string.cross_profile_disabled.uiText()
+                    )
+                    contract.refresh()
+                },
+                onFailure = { sendToastSideEffect(R.string.app_action_failed.uiText()) }
             )
             isLoading.value = false
         }

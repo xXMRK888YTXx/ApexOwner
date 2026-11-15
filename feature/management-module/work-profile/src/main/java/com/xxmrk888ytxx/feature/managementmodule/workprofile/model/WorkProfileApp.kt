@@ -8,6 +8,7 @@ data class WorkProfileApp(
     val isInstalledInWorkProfile: Boolean,
     val hasLauncher: Boolean = true,
     val isInstalledInOtherProfile: Boolean = false,
+    val isCrossProfileAllowed: Boolean = false,
     val isOneShot: Boolean = false,
     val isAutoFreeze: Boolean = false,
     val inactivityPolicy: AppInactivityPolicy? = null

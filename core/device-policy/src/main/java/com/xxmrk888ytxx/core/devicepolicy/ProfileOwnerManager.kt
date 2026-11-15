@@ -26,6 +26,8 @@ interface ProfileOwnerManager {
     fun isApplicationHidden(packageName: String): Boolean
     suspend fun setPackageSuspended(packageName: String, isSuspended: Boolean): Result<Unit>
     fun isPackageSuspended(packageName: String): Boolean
+    fun isCrossProfilePackage(packageName: String): Boolean
+    suspend fun setCrossProfilePackage(packageName: String, isAllowed: Boolean): Result<Unit>
     suspend fun clearApplicationUserData(packageName: String): Result<Unit>
 
     suspend fun setWorkProfileQuietMode(isQuietMode: Boolean): Result<Unit>
