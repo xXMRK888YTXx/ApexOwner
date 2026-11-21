@@ -25,6 +25,7 @@ class AppPermissionManageContractImpl @Inject constructor(
             map.mapValues { (_, v) ->
                 when (v) {
                     OwnerAppPermissionPolicy.DEFAULT -> AppPermissionPolicy.DEFAULT
+                    OwnerAppPermissionPolicy.USER_CONTROLLED -> AppPermissionPolicy.USER_CONTROLLED
                     OwnerAppPermissionPolicy.FORCE_DENIED -> AppPermissionPolicy.FORCE_DENIED
                     OwnerAppPermissionPolicy.FORCE_GRANTED -> AppPermissionPolicy.FORCE_GRANTED
                 }
@@ -39,6 +40,7 @@ class AppPermissionManageContractImpl @Inject constructor(
     override suspend fun setAppPermissionPolicy(packageName: String, permissionId: String, policy: AppPermissionPolicy) {
         val ownerPolicy = when (policy) {
             AppPermissionPolicy.DEFAULT -> OwnerAppPermissionPolicy.DEFAULT
+            AppPermissionPolicy.USER_CONTROLLED -> OwnerAppPermissionPolicy.USER_CONTROLLED
             AppPermissionPolicy.FORCE_DENIED -> OwnerAppPermissionPolicy.FORCE_DENIED
             AppPermissionPolicy.FORCE_GRANTED -> OwnerAppPermissionPolicy.FORCE_GRANTED
         }

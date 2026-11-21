@@ -200,6 +200,7 @@
     <!-- App Specific Permissions -->
     <string name="app_permissions_title">Разрешения приложения</string>
     <string name="app_perm_policy_default">По умолч.</string>
+    <string name="app_perm_policy_user_controlled">Пользователь</string>
     <string name="app_perm_policy_force_deny">Запретить</string>
     <string name="app_perm_policy_force_grant">Разрешить</string>
     <string name="app_perm_only_requested">Только запрашиваемые</string>
@@ -209,6 +210,7 @@
     <string name="app_perm_globally_disabled_badge">Глобально запрещено</string>
     <string name="app_perm_forced_granted_desc">Принудительно выдано всегда (даже если отключено глобально)</string>
     <string name="app_perm_forced_denied_desc">Принудительно запрещено всегда</string>
+    <string name="app_perm_user_controlled_desc">Управляется пользователем (глобальное правило не применяется)</string>
     <string name="app_perm_default_globally_denied_desc">По умолчанию: заблокировано глобальным правилом</string>
     <string name="app_perm_default_system_desc">По умолчанию: управляется системой / пользователем</string>
     <string name="app_perm_stats_requested">Запрошено</string>

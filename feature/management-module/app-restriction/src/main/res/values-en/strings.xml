@@ -96,6 +96,7 @@
     <string name="perm_activity_recognition_desc">Deny recognition of steps, walking, and running</string>
     <string name="app_permissions_title">App permissions</string>
     <string name="app_perm_policy_default">Default</string>
+    <string name="app_perm_policy_user_controlled">User</string>
     <string name="app_perm_policy_force_deny">Deny</string>
     <string name="app_perm_policy_force_grant">Allow</string>
     <string name="app_perm_only_requested">Requested only</string>
@@ -105,6 +106,7 @@
     <string name="app_perm_globally_disabled_badge">Globally denied</string>
     <string name="app_perm_forced_granted_desc">Always force-granted (even when globally disabled)</string>
     <string name="app_perm_forced_denied_desc">Always force-denied</string>
+    <string name="app_perm_user_controlled_desc">Managed by the user (global policy is ignored)</string>
     <string name="app_perm_default_globally_denied_desc">Default: blocked by global policy</string>
     <string name="app_perm_default_system_desc">Default: controlled by the system / user</string>
     <string name="app_perm_stats_requested">Requested</string>
