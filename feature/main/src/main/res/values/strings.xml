@@ -38,4 +38,6 @@
     <string name="global_permissions_title_work_profile">Глобальные разрешения профиля</string>
     <string name="global_permissions_desc_device">Принудительное отключение разрешений (Камера, Микрофон, Локация и др.) для всех приложений</string>
     <string name="global_permissions_desc_work_profile">Принудительное отключение разрешений для приложений рабочего профиля</string>
+    <string name="location_spoof_title">Подмена геолокации</string>
+    <string name="location_spoof_main_desc">Задать и использовать фиксированную точку</string>
 </resources>

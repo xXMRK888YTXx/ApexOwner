@@ -26,8 +26,8 @@ extensions.configure<ApplicationExtension> {
         applicationId = "com.xxmrk888ytxx.apexowner"
         minSdk = catalogMinSdk
         targetSdk = catalogCompileSdk
-        versionCode = 100
-        versionName = "Margarita.1 (Alpha)"
+        versionCode = 101
+        versionName = "Margarita.2 (Alpha)"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.androidx.material3.adaptive.navigation3)
     implementation(libs.androidx.splashScreen)
     implementation(libs.androidx.fragment.ktx)
+    implementation(libs.androidx.biometric)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
 

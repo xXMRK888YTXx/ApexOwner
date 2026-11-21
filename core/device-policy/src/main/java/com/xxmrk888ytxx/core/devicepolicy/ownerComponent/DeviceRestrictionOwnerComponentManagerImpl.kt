@@ -63,6 +63,7 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
     private val _isRoamingDisabled = MutableStateFlow(false)
     private val _isConfigMobileDataDisabled = MutableStateFlow(false)
     private val _is2GNetworkDisabled = MutableStateFlow(false)
+    private val _enabledUserRestrictions = MutableStateFlow<Set<String>>(emptySet())
 
     override val isCameraDisabled: Flow<Boolean> = _isCameraDisabled.asAndroidDeviceOwnerFlow()
     override val isMicrophoneDisabled: Flow<Boolean> =
@@ -119,6 +120,8 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
     override val isRoamingDisabled: Flow<Boolean> = _isRoamingDisabled.asAndroidDeviceOwnerFlow()
     override val isConfigMobileDataDisabled: Flow<Boolean> = _isConfigMobileDataDisabled.asAndroidDeviceOwnerFlow()
     override val is2GNetworkDisabled: Flow<Boolean> = _is2GNetworkDisabled.asAndroidDeviceOwnerFlow()
+    override val enabledUserRestrictions: Flow<Set<String>> =
+        _enabledUserRestrictions.asAndroidDeviceOwnerFlow()
 
     override val isCanDisableUSBDataSignal: Boolean
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && checkIsAppDeviceOwner()) {
@@ -245,6 +248,9 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         if (isCanDisable2GNetwork) {
             _is2GNetworkDisabled.value =
                 userRestriction.getBoolean(UserManager.DISALLOW_CELLULAR_2G, false)
+        }
+        _enabledUserRestrictions.value = additionalProfileOwnerRestrictions.filterTo(mutableSetOf()) {
+            userRestriction.getBoolean(it, false)
         }
     }
 
@@ -414,6 +420,14 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
         }
     }
 
+    override suspend fun setUserRestriction(restrictionKey: String, isDisabled: Boolean) =
+        changeRestrictionPolicy(requireDeviceOwner = false) {
+            if (restrictionKey !in additionalProfileOwnerRestrictions) {
+                throw IllegalArgumentException("Unsupported profile restriction: $restrictionKey")
+            }
+            toggleUserRestriction(restrictionKey, isDisabled)
+        }
+
     private suspend fun toggleUserRestriction(restrictionKey: String, isEnabled: Boolean) {
         if (isEnabled) {
             devicePolicyManager.addUserRestriction(deviceOwnerReceiver, restrictionKey)
@@ -456,4 +470,20 @@ internal class DeviceRestrictionOwnerComponentManagerImpl @Inject constructor(
 
     private fun <T> MutableStateFlow<T>.asAndroidDeviceOwnerFlow(): Flow<T> =
         asStateFlow().onSubscription { updateRestrictionState() }
+
+    private companion object {
+        val additionalProfileOwnerRestrictions = setOf(
+            UserManager.DISALLOW_ASSIST_CONTENT,
+            UserManager.DISALLOW_AUTOFILL,
+            UserManager.DISALLOW_CONFIG_CREDENTIALS,
+            UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE,
+            UserManager.DISALLOW_MODIFY_ACCOUNTS,
+            UserManager.DISALLOW_OUTGOING_BEAM,
+            UserManager.DISALLOW_PRINTING,
+            UserManager.DISALLOW_SET_USER_ICON,
+            UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE,
+            UserManager.DISALLOW_UNIFIED_PASSWORD,
+            UserManager.ENSURE_VERIFY_APPS
+        )
+    }
 }

@@ -17,6 +17,8 @@ data class AppInactivityPolicy(
     val freezeIfUnusedMinutes: Int = 0,
     val wipeIfUnusedEnabled: Boolean = false,
     val wipeIfUnusedDays: Int = 30,
+    val wipeIfUnusedHours: Int = 0,
+    val wipeIfUnusedMinutes: Int = 0,
     val lastOpenedTimestamp: Long = 0L,
     val lockFreezeMinutes: Int = 0,
     val lockWipeMinutes: Int = 0,
@@ -35,7 +37,11 @@ data class AppInactivityPolicy(
         get() = if (lockWipeMinutes > 0) lockWipeMinutes * 60_000L else lockWipeHours * 3600_000L
 
     val unusedWipeDurationMs: Long
-        get() = wipeIfUnusedDays * 86400_000L
+        get() = when {
+            wipeIfUnusedMinutes > 0 -> wipeIfUnusedMinutes * 60_000L
+            wipeIfUnusedHours > 0 -> wipeIfUnusedHours * 3600_000L
+            else -> wipeIfUnusedDays * 86400_000L
+        }
 
     val unusedFreezeDurationMs: Long
         get() = when {

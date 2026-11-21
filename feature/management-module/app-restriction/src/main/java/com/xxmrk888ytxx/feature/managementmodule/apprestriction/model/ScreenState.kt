@@ -47,6 +47,7 @@ data class ScreenState(
     val isRoamingDisabled: Boolean = false,
     val isConfigMobileDataDisabled: Boolean = false,
     val is2GNetworkDisabled: Boolean = false,
+    val enabledUserRestrictions: Set<String> = emptySet(),
 
     val isCanDisableChangeWifiState: Boolean = true,
     val isCanDisableHotspot: Boolean = true,

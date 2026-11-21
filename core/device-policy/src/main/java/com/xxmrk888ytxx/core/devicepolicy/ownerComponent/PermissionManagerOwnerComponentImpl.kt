@@ -9,6 +9,7 @@ import com.xxmrk888ytxx.core.base.android.logs.Logger
 import com.xxmrk888ytxx.core.devicepolicy.PermissionManagerOwnerComponent
 import com.xxmrk888ytxx.core.devicepolicy.exception.AppNotDeviceOwnerException
 import com.xxmrk888ytxx.core.devicepolicy.model.AppPermissionPolicy
+import com.xxmrk888ytxx.core.devicepolicy.model.PermissionGrantPolicyResolver
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -121,17 +122,12 @@ internal class PermissionManagerOwnerComponentImpl @Inject constructor(
         }
         _appPolicies.value = currentMap
 
-        val targetState = when (policy) {
-            AppPermissionPolicy.FORCE_GRANTED -> DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
-            AppPermissionPolicy.FORCE_DENIED -> DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
-            AppPermissionPolicy.DEFAULT -> {
-                if (permissionId in _disabledPermissions.value) {
-                    DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
-                } else {
-                    DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT
-                }
-            }
-        }
+        val targetState = requireNotNull(
+            PermissionGrantPolicyResolver.resolve(
+                policy = policy,
+                isGloballyDisabled = permissionId in _disabledPermissions.value,
+            )
+        )
 
         val permissionsToApply = getManifestPermissions(permissionId)
         val requestedPermissions = getAppRequestedPermissions(packageName)
@@ -188,15 +184,12 @@ internal class PermissionManagerOwnerComponentImpl @Inject constructor(
             if (pkgName == myPackage) continue
 
             val appPolicy = getAppPermissionPolicy(pkgName, permissionId)
-            val targetState = when (appPolicy) {
-                AppPermissionPolicy.FORCE_GRANTED -> DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
-                AppPermissionPolicy.FORCE_DENIED -> DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
-                AppPermissionPolicy.DEFAULT -> if (isDisable) {
-                    DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
-                } else {
-                    DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT
-                }
-            }
+            val targetState = requireNotNull(
+                PermissionGrantPolicyResolver.resolve(
+                    policy = appPolicy,
+                    isGloballyDisabled = isDisable,
+                )
+            )
 
             val requestedPermissions: Array<out String>? = try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -238,17 +231,11 @@ internal class PermissionManagerOwnerComponentImpl @Inject constructor(
 
         for (permissionId in ALL_SUPPORTED_PERMISSIONS) {
             val policy = getAppPermissionPolicy(packageName, permissionId)
-            val targetState = when (policy) {
-                AppPermissionPolicy.FORCE_GRANTED -> DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
-                AppPermissionPolicy.FORCE_DENIED -> DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
-                AppPermissionPolicy.DEFAULT -> {
-                    if (permissionId in currentDisabled) {
-                        DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
-                    } else {
-                        null
-                    }
-                }
-            }
+            val targetState = PermissionGrantPolicyResolver.resolve(
+                policy = policy,
+                isGloballyDisabled = permissionId in currentDisabled,
+                applyDefaultPolicy = false,
+            )
 
             if (targetState != null) {
                 val permissions = getManifestPermissions(permissionId)

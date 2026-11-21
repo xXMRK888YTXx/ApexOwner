@@ -71,4 +71,8 @@ class NavigateToModuleContractImpl @Inject constructor(
         }
         navigationManager.navigate(Screen.GlobalPermissionModuleScreen)
     }
+
+    override suspend fun toLocationSpoof() {
+        navigationManager.navigate(Screen.LocationSpoofScreen)
+    }
 }

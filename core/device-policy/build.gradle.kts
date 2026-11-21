@@ -5,3 +5,7 @@ plugins {
 android {
     namespace = "com.xxmrk888ytxx.core.devicepolicy"
 }
+
+dependencies {
+    testImplementation(libs.junit)
+}

@@ -66,6 +66,7 @@ class RestrictionManageContractImpl @Inject constructor(
     override val isRoamingDisabled: Flow<Boolean> = deviceRestrictionOwnerComponentManager.isRoamingDisabled
     override val isConfigMobileDataDisabled: Flow<Boolean> = deviceRestrictionOwnerComponentManager.isConfigMobileDataDisabled
     override val is2GNetworkDisabled: Flow<Boolean> = deviceRestrictionOwnerComponentManager.is2GNetworkDisabled
+    override val enabledUserRestrictions: Flow<Set<String>> = deviceRestrictionOwnerComponentManager.enabledUserRestrictions
 
 
     override val isCanDisableUSBDataSignal: Boolean
@@ -272,5 +273,10 @@ class RestrictionManageContractImpl @Inject constructor(
     override suspend fun set2GNetworkDisabled(isDisabled: Boolean): Result<Unit> =
         coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
             deviceRestrictionOwnerComponentManager.set2GNetworkDisabled(isDisabled)
+        }
+
+    override suspend fun setUserRestriction(restrictionKey: String, isDisabled: Boolean): Result<Unit> =
+        coRunCatching(Dispatchers.Default, onMapException = exceptionMapper) {
+            deviceRestrictionOwnerComponentManager.setUserRestriction(restrictionKey, isDisabled)
         }
 }

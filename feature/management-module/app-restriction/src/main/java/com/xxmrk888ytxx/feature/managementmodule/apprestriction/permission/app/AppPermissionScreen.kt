@@ -266,6 +266,7 @@ private fun AppPermissionCard(
             containerColor = when (model.policy) {
                 AppPermissionPolicy.FORCE_GRANTED -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
                 AppPermissionPolicy.FORCE_DENIED -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+                AppPermissionPolicy.USER_CONTROLLED -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.35f)
                 AppPermissionPolicy.DEFAULT -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
             }
         )
@@ -285,6 +286,7 @@ private fun AppPermissionCard(
                     tint = when (model.policy) {
                         AppPermissionPolicy.FORCE_GRANTED -> MaterialTheme.colorScheme.primary
                         AppPermissionPolicy.FORCE_DENIED -> MaterialTheme.colorScheme.error
+                        AppPermissionPolicy.USER_CONTROLLED -> MaterialTheme.colorScheme.secondary
                         AppPermissionPolicy.DEFAULT -> MaterialTheme.colorScheme.primary
                     }
                 )
@@ -353,6 +355,7 @@ private fun AppPermissionCard(
             val statusDesc = when (model.policy) {
                 AppPermissionPolicy.FORCE_GRANTED -> stringResource(R.string.app_perm_forced_granted_desc)
                 AppPermissionPolicy.FORCE_DENIED -> stringResource(R.string.app_perm_forced_denied_desc)
+                AppPermissionPolicy.USER_CONTROLLED -> stringResource(R.string.app_perm_user_controlled_desc)
                 AppPermissionPolicy.DEFAULT -> {
                     if (!model.canForceGrant) {
                         stringResource(R.string.sensor_grant_not_supported_profile_owner)
@@ -370,6 +373,7 @@ private fun AppPermissionCard(
                 color = when (model.policy) {
                     AppPermissionPolicy.FORCE_GRANTED -> MaterialTheme.colorScheme.primary
                     AppPermissionPolicy.FORCE_DENIED -> MaterialTheme.colorScheme.error
+                    AppPermissionPolicy.USER_CONTROLLED -> MaterialTheme.colorScheme.secondary
                     AppPermissionPolicy.DEFAULT -> MaterialTheme.colorScheme.onSurfaceVariant
                 },
                 fontWeight = if (model.policy != AppPermissionPolicy.DEFAULT) FontWeight.Medium else FontWeight.Normal,
@@ -379,14 +383,14 @@ private fun AppPermissionCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 3-Segmented button row for policy selection
+            // Four policy modes: global default, user controlled, forced deny, forced grant.
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 SegmentedButton(
                     selected = model.policy == AppPermissionPolicy.DEFAULT,
                     onClick = { onPolicyChange(AppPermissionPolicy.DEFAULT) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3)
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 4)
                 ) {
                     Text(
                         text = stringResource(R.string.app_perm_policy_default),
@@ -395,9 +399,24 @@ private fun AppPermissionCard(
                 }
 
                 SegmentedButton(
+                    selected = model.policy == AppPermissionPolicy.USER_CONTROLLED,
+                    onClick = { onPolicyChange(AppPermissionPolicy.USER_CONTROLLED) },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 4),
+                    colors = SegmentedButtonDefaults.colors(
+                        activeContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        activeContentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                ) {
+                    Text(
+                        text = stringResource(R.string.app_perm_policy_user_controlled),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+
+                SegmentedButton(
                     selected = model.policy == AppPermissionPolicy.FORCE_DENIED,
                     onClick = { onPolicyChange(AppPermissionPolicy.FORCE_DENIED) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
+                    shape = SegmentedButtonDefaults.itemShape(index = 2, count = 4),
                     colors = SegmentedButtonDefaults.colors(
                         activeContainerColor = MaterialTheme.colorScheme.errorContainer,
                         activeContentColor = MaterialTheme.colorScheme.onErrorContainer
@@ -412,7 +431,7 @@ private fun AppPermissionCard(
                 SegmentedButton(
                     selected = model.policy == AppPermissionPolicy.FORCE_GRANTED,
                     onClick = { onPolicyChange(AppPermissionPolicy.FORCE_GRANTED) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
+                    shape = SegmentedButtonDefaults.itemShape(index = 3, count = 4),
                     enabled = model.canForceGrant,
                     colors = SegmentedButtonDefaults.colors(
                         activeContainerColor = MaterialTheme.colorScheme.primaryContainer,

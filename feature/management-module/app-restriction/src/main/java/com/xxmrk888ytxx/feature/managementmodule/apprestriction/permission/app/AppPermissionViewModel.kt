@@ -452,6 +452,7 @@ class AppPermissionViewModel @Inject constructor(
             onlyRequested = filter.onlyRequested,
             permissions = filtered,
             totalRequestedCount = models.count { it.isRequestedByApp },
+            userControlledCount = models.count { it.policy == AppPermissionPolicy.USER_CONTROLLED },
             forceGrantedCount = models.count { it.policy == AppPermissionPolicy.FORCE_GRANTED },
             forceDeniedCount = models.count { it.policy == AppPermissionPolicy.FORCE_DENIED }
         )

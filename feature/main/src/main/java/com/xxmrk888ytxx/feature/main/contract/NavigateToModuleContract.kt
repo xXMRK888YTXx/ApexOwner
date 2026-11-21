@@ -4,4 +4,5 @@ interface NavigateToModuleContract {
     suspend fun toDeviceRestriction()
     suspend fun toWorkProfileManagement()
     suspend fun toGlobalPermissions()
+    suspend fun toLocationSpoof()
 }

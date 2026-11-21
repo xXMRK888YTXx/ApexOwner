@@ -160,19 +160,33 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
             val currentMap = _appInactivityPolicies.value.toMutableMap()
             val previousPolicy = currentMap[policy.packageName]
             val hasUnusedPolicy = policy.freezeIfUnusedEnabled || policy.wipeIfUnusedEnabled
-            val wasUnusedPolicyEnabled = previousPolicy?.freezeIfUnusedEnabled == true ||
-                previousPolicy?.wipeIfUnusedEnabled == true
-            val startsNewUnusedCycle = hasUnusedPolicy && !wasUnusedPolicyEnabled
-            val effectivePolicy = if (
-                hasUnusedPolicy && (policy.lastOpenedTimestamp == 0L || startsNewUnusedCycle)
-            ) {
+            val unusedPolicyChanged = previousPolicy != null && (
+                previousPolicy.freezeIfUnusedEnabled != policy.freezeIfUnusedEnabled ||
+                    previousPolicy.wipeIfUnusedEnabled != policy.wipeIfUnusedEnabled ||
+                    (policy.freezeIfUnusedEnabled && (
+                        previousPolicy.freezeIfUnusedMinutes != policy.freezeIfUnusedMinutes ||
+                            previousPolicy.freezeIfUnusedHours != policy.freezeIfUnusedHours ||
+                            previousPolicy.freezeIfUnusedDays != policy.freezeIfUnusedDays
+                        )) ||
+                    (policy.wipeIfUnusedEnabled &&
+                        (previousPolicy.wipeIfUnusedDays != policy.wipeIfUnusedDays ||
+                            previousPolicy.wipeIfUnusedHours != policy.wipeIfUnusedHours ||
+                            previousPolicy.wipeIfUnusedMinutes != policy.wipeIfUnusedMinutes))
+                )
+            val startsNewUnusedCycle = hasUnusedPolicy && (
+                previousPolicy == null || policy.lastOpenedTimestamp == 0L || unusedPolicyChanged
+                )
+            val effectivePolicy = if (startsNewUnusedCycle) {
                 policy.copy(
                     lastOpenedTimestamp = System.currentTimeMillis(),
-                    lastUnusedFreezeTimestamp = 0L
+                    lastUnusedFreezeTimestamp = 0L,
+                    lastUnusedWipeTimestamp = 0L
                 )
             } else if (policy.freezeIfUnusedEnabled) {
-                // Changing the timeout after a previous freeze starts a new cycle.
-                policy.copy(lastUnusedFreezeTimestamp = 0L)
+                policy.copy(
+                    lastUnusedFreezeTimestamp = 0L,
+                    lastUnusedWipeTimestamp = 0L
+                )
             } else {
                 policy
             }
@@ -193,6 +207,8 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
                     "freezeHours=${effectivePolicy.freezeIfUnusedHours}, " +
                     "wipeUnused=${effectivePolicy.wipeIfUnusedEnabled}, " +
                     "wipeDays=${effectivePolicy.wipeIfUnusedDays}, " +
+                    "wipeHours=${effectivePolicy.wipeIfUnusedHours}, " +
+                    "wipeMinutes=${effectivePolicy.wipeIfUnusedMinutes}, " +
                     "lastOpened=${effectivePolicy.lastOpenedTimestamp}"
             )
             Result.success(Unit)
@@ -209,7 +225,8 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
             if (existing != null) {
                 val updated = existing.copy(
                     lastOpenedTimestamp = System.currentTimeMillis(),
-                    lastUnusedFreezeTimestamp = 0L
+                    lastUnusedFreezeTimestamp = 0L,
+                    lastUnusedWipeTimestamp = 0L
                 )
                 currentMap[packageName] = updated
                 saveInactivityPolicies(currentMap)
@@ -532,15 +549,14 @@ internal class OneShotAppManagerOwnerComponentImpl @Inject constructor(
                     if (unusedDurationMs >= unusedThresholdMs) {
                         Logger.writeDebugLog("checkAndApplyInactivityPolicies: Wiping $pkg because unused for ${unusedDurationMs / 1000}s >= ${unusedThresholdMs / 1000}s")
                         val clearResult = clearAppData(pkg)
-                        val hideResult = if (clearResult.isSuccess) hideApp(pkg) else clearResult
-                        if (clearResult.isSuccess && hideResult.isSuccess) {
+                        if (clearResult.isSuccess) {
                             currentPolicy = currentPolicy.copy(
                                 lastOpenedTimestamp = now,
                                 lastUnusedWipeTimestamp = now
                             )
                             policyModified = true
                         } else {
-                            Logger.writeErrorLog("checkAndApplyInactivityPolicies: failed to wipe unused app $pkg: ${clearResult.exceptionOrNull()?.message ?: hideResult.exceptionOrNull()?.message}")
+                            Logger.writeErrorLog("checkAndApplyInactivityPolicies: failed to wipe unused app $pkg: ${clearResult.exceptionOrNull()?.message}")
                         }
                     }
                 }

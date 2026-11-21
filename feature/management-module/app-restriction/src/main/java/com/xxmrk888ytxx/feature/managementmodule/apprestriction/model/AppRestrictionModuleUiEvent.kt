@@ -39,4 +39,19 @@ sealed interface AppRestrictionModuleUiEvent : UiEvent {
     data object ToggleRoamingDisabled : AppRestrictionModuleUiEvent
     data object ToggleMobileDataDisabled: AppRestrictionModuleUiEvent
     data object Toggle2GNetworkDisabled : AppRestrictionModuleUiEvent
+    data class ToggleUserRestriction(val restrictionKey: String) : AppRestrictionModuleUiEvent
+}
+
+object AdditionalRestrictionKeys {
+    const val ASSIST_CONTENT = "no_assist_content"
+    const val AUTOFILL = "no_autofill"
+    const val CONFIG_CREDENTIALS = "no_config_credentials"
+    const val CROSS_PROFILE_COPY_PASTE = "no_cross_profile_copy_paste"
+    const val MODIFY_ACCOUNTS = "no_modify_accounts"
+    const val OUTGOING_BEAM = "no_outgoing_beam"
+    const val PRINTING = "no_printing"
+    const val SET_USER_ICON = "no_set_user_icon"
+    const val SHARE_INTO_MANAGED_PROFILE = "no_sharing_into_profile"
+    const val UNIFIED_PASSWORD = "no_unified_password"
+    const val VERIFY_APPS = "ensure_verify_apps"
 }

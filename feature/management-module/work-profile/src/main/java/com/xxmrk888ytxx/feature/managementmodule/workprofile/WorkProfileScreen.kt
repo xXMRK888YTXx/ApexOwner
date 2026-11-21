@@ -1304,6 +1304,8 @@ private fun AppUnusedPolicyCard(
     val isWipeEnabled = currentPolicy.wipeIfUnusedEnabled
     val isEnabled = isFreezeEnabled || isWipeEnabled
     val isFreezeMinutesMode = currentPolicy.freezeIfUnusedMinutes > 0
+    val isWipeMinutesMode = currentPolicy.wipeIfUnusedMinutes > 0
+    val isWipeHoursMode = !isWipeMinutesMode && currentPolicy.wipeIfUnusedHours > 0
 
     LaunchedEffect(isFreezeEnabled, isWipeEnabled, currentPolicy.lastOpenedTimestamp) {
         if (isEnabled && currentPolicy.lastOpenedTimestamp == 0L) {
@@ -1344,7 +1346,14 @@ private fun AppUnusedPolicyCard(
                     Text(
                         text = when {
                             isWipeEnabled ->
-                                stringResource(R.string.app_unused_enabled_desc, currentPolicy.wipeIfUnusedDays)
+                                stringResource(
+                                    R.string.app_unused_enabled_duration_desc,
+                                    when {
+                                        isWipeMinutesMode -> "${currentPolicy.wipeIfUnusedMinutes} ${stringResource(R.string.unit_minute_short)}"
+                                        isWipeHoursMode -> "${currentPolicy.wipeIfUnusedHours} ${stringResource(R.string.unit_hour_short)}"
+                                        else -> "${currentPolicy.wipeIfUnusedDays} ${stringResource(R.string.unit_day_short)}"
+                                    }
+                                )
                             else -> stringResource(R.string.app_unused_disabled_desc)
                         },
                         style = MaterialTheme.typography.bodySmall,
@@ -1393,7 +1402,17 @@ private fun AppUnusedPolicyCard(
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = stringResource(R.string.freeze_if_unused_desc),
+                        text = stringResource(
+                            R.string.unused_freeze_desc,
+                            when {
+                                currentPolicy.freezeIfUnusedMinutes > 0 ->
+                                    "${currentPolicy.freezeIfUnusedMinutes} ${stringResource(R.string.unit_minute_short)}"
+                                currentPolicy.freezeIfUnusedHours > 0 ->
+                                    "${currentPolicy.freezeIfUnusedHours} ${stringResource(R.string.unit_hour_short)}"
+                                else ->
+                                    "${currentPolicy.freezeIfUnusedDays} ${stringResource(R.string.unit_day_short)}"
+                            }
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1472,14 +1491,63 @@ private fun AppUnusedPolicyCard(
             if (isWipeEnabled) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = !isWipeMinutesMode && !isWipeHoursMode,
+                        onClick = {
+                            onUpdateInactivityPolicy(currentPolicy.copy(
+                                wipeIfUnusedDays = currentPolicy.wipeIfUnusedDays.coerceAtLeast(1),
+                                wipeIfUnusedHours = 0,
+                                wipeIfUnusedMinutes = 0
+                            ))
+                        },
+                        label = { Text(stringResource(R.string.unit_days)) }
+                    )
+                    FilterChip(
+                        selected = isWipeHoursMode,
+                        onClick = {
+                            onUpdateInactivityPolicy(currentPolicy.copy(
+                                wipeIfUnusedHours = if (currentPolicy.wipeIfUnusedHours > 0) currentPolicy.wipeIfUnusedHours else currentPolicy.wipeIfUnusedDays * 24,
+                                wipeIfUnusedMinutes = 0
+                            ))
+                        },
+                        label = { Text(stringResource(R.string.unit_hours)) }
+                    )
+                    FilterChip(
+                        selected = isWipeMinutesMode,
+                        onClick = {
+                            onUpdateInactivityPolicy(currentPolicy.copy(
+                                wipeIfUnusedHours = 0,
+                                wipeIfUnusedMinutes = if (currentPolicy.wipeIfUnusedMinutes > 0) currentPolicy.wipeIfUnusedMinutes else 1
+                            ))
+                        },
+                        label = { Text(stringResource(R.string.unit_minutes_test)) }
+                    )
+                }
                 SettingStepperRow(
                     label = stringResource(R.string.days_unused_label),
-                    value = currentPolicy.wipeIfUnusedDays,
-                    unit = stringResource(R.string.unit_day_short),
+                    value = when {
+                        isWipeMinutesMode -> currentPolicy.wipeIfUnusedMinutes
+                        isWipeHoursMode -> currentPolicy.wipeIfUnusedHours
+                        else -> currentPolicy.wipeIfUnusedDays
+                    },
+                    unit = when {
+                        isWipeMinutesMode -> stringResource(R.string.unit_minute_short)
+                        isWipeHoursMode -> stringResource(R.string.unit_hour_short)
+                        else -> stringResource(R.string.unit_day_short)
+                    },
                     minValue = 1,
-                    maxValue = 365,
-                    onValueChange = { days ->
-                        onUpdateInactivityPolicy(currentPolicy.copy(wipeIfUnusedDays = days))
+                    maxValue = when {
+                        isWipeMinutesMode -> 120
+                        isWipeHoursMode -> 720
+                        else -> 365
+                    },
+                    onValueChange = { value ->
+                        onUpdateInactivityPolicy(when {
+                            isWipeMinutesMode -> currentPolicy.copy(wipeIfUnusedMinutes = value)
+                            isWipeHoursMode -> currentPolicy.copy(wipeIfUnusedHours = value)
+                            else -> currentPolicy.copy(wipeIfUnusedDays = value)
+                        })
                     }
                 )
 
@@ -1488,7 +1556,7 @@ private fun AppUnusedPolicyCard(
                 } else {
                     remember { System.currentTimeMillis() }
                 }
-                val wipeTimestamp = baseTimestamp + (currentPolicy.wipeIfUnusedDays * 86400_000L)
+                val wipeTimestamp = baseTimestamp + currentPolicy.unusedWipeDurationMs
                 val now = System.currentTimeMillis()
                 val diffMs = wipeTimestamp - now
 
@@ -1564,59 +1632,6 @@ private fun AppUnusedPolicyCard(
                             )
                         }
 
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.countdown_from, formatTargetDateTime(baseTimestamp)),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = stringResource(R.string.countdown_refresh_note),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                )
-                            }
-
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                TextButton(
-                                    onClick = {
-                                        // Set lastOpenedTimestamp to 31 days in past to trigger immediate wipe
-                                        val pastTime = System.currentTimeMillis() - ((currentPolicy.wipeIfUnusedDays + 1) * 86400_000L)
-                                        onUpdateInactivityPolicy(
-                                            currentPolicy.copy(lastOpenedTimestamp = pastTime)
-                                        )
-                                    },
-                                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.wipe_test_button),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.error
-                                    )
-                                }
-
-                                TextButton(
-                                    onClick = {
-                                        onUpdateInactivityPolicy(
-                                            currentPolicy.copy(lastOpenedTimestamp = System.currentTimeMillis())
-                                        )
-                                    },
-                                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.reset_countdown),
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
-                            }
-                        }
                     }
                 }
             }

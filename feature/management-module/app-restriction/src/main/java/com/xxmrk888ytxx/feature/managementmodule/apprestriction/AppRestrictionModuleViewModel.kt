@@ -57,43 +57,46 @@ class AppRestrictionModuleViewModel @Inject constructor(
         restrictionManageContract.isRoamingDisabled,
         restrictionManageContract.isConfigMobileDataDisabled,
         restrictionManageContract.is2GNetworkDisabled,
+        restrictionManageContract.enabledUserRestrictions,
     ) { flowArray ->
-        val isCameraDisabled = flowArray[0]
-        val isMicrophoneDisabled = flowArray[1]
-        val isUSBDataSignalDisabled = flowArray[2]
-        val isUSBFileTransferDisabled = flowArray[3]
-        val isInstallAppsDisabled = flowArray[4]
-        val isInstallAppsFromUnknownSourcesDisabled = flowArray[5]
-        val isUninstallAppsDisabled = flowArray[6]
-        val isAppControlDisabled = flowArray[7]
-        val isScreenContentCaptureForAIDisabled = flowArray[8]
-        val isContentSuggestionDisabled = flowArray[9]
-        val isScreenshotsDisabled = flowArray[10]
-        val isDebugFeaturesDisabled = flowArray[11]
-        val isFactoryResetDisabled = flowArray[12]
-        val isSafeBootDisabled = flowArray[13]
-        val isAddUserDisabled = flowArray[14]
-        val isRemoveUserDisabled = flowArray[15]
-        val isSwitchUserDisabled = flowArray[16]
-        val isBluetoothDisabled = flowArray[17]
-        val isBluetoothConfigDisabled = flowArray[18]
-        val isMountPhysicalMediaDisabled = flowArray[19]
-        val isNFCDisabled = flowArray[20]
-        val isLocationDisabled = flowArray[21]
-        val isOutgoingCallsDisabled = flowArray[22]
-        val isSMSDisabled = flowArray[23]
-        val isWallpaperChangeDisabled = flowArray[24]
-        val isFunDisabled = flowArray[25]
-        val isWifiStateChangeDisabled = flowArray[26]
-        val isWifiConfigDisabled = flowArray[27]
-        val isHotspotDisabled = flowArray[28]
-        val isAddNewWifiNetworksDisabled = flowArray[29]
-        val isAirplaneModeDisabled = flowArray[30]
-        val isConfigVPNDisabled = flowArray[31]
-        val isConfigPrivateDNSDisabled = flowArray[32]
-        val isRoamingDisabled = flowArray[33]
-        val isConfigMobileDataDisabled = flowArray[34]
-        val is2GNetworkDisabled = flowArray[35]
+        val isCameraDisabled = flowArray[0] as Boolean
+        val isMicrophoneDisabled = flowArray[1] as Boolean
+        val isUSBDataSignalDisabled = flowArray[2] as Boolean
+        val isUSBFileTransferDisabled = flowArray[3] as Boolean
+        val isInstallAppsDisabled = flowArray[4] as Boolean
+        val isInstallAppsFromUnknownSourcesDisabled = flowArray[5] as Boolean
+        val isUninstallAppsDisabled = flowArray[6] as Boolean
+        val isAppControlDisabled = flowArray[7] as Boolean
+        val isScreenContentCaptureForAIDisabled = flowArray[8] as Boolean
+        val isContentSuggestionDisabled = flowArray[9] as Boolean
+        val isScreenshotsDisabled = flowArray[10] as Boolean
+        val isDebugFeaturesDisabled = flowArray[11] as Boolean
+        val isFactoryResetDisabled = flowArray[12] as Boolean
+        val isSafeBootDisabled = flowArray[13] as Boolean
+        val isAddUserDisabled = flowArray[14] as Boolean
+        val isRemoveUserDisabled = flowArray[15] as Boolean
+        val isSwitchUserDisabled = flowArray[16] as Boolean
+        val isBluetoothDisabled = flowArray[17] as Boolean
+        val isBluetoothConfigDisabled = flowArray[18] as Boolean
+        val isMountPhysicalMediaDisabled = flowArray[19] as Boolean
+        val isNFCDisabled = flowArray[20] as Boolean
+        val isLocationDisabled = flowArray[21] as Boolean
+        val isOutgoingCallsDisabled = flowArray[22] as Boolean
+        val isSMSDisabled = flowArray[23] as Boolean
+        val isWallpaperChangeDisabled = flowArray[24] as Boolean
+        val isFunDisabled = flowArray[25] as Boolean
+        val isWifiStateChangeDisabled = flowArray[26] as Boolean
+        val isWifiConfigDisabled = flowArray[27] as Boolean
+        val isHotspotDisabled = flowArray[28] as Boolean
+        val isAddNewWifiNetworksDisabled = flowArray[29] as Boolean
+        val isAirplaneModeDisabled = flowArray[30] as Boolean
+        val isConfigVPNDisabled = flowArray[31] as Boolean
+        val isConfigPrivateDNSDisabled = flowArray[32] as Boolean
+        val isRoamingDisabled = flowArray[33] as Boolean
+        val isConfigMobileDataDisabled = flowArray[34] as Boolean
+        val is2GNetworkDisabled = flowArray[35] as Boolean
+        @Suppress("UNCHECKED_CAST")
+        val enabledUserRestrictions = flowArray[36] as Set<String>
 
         ScreenState(
             isDeviceOwner = restrictionManageContract.isAppDeviceOwner,
@@ -138,6 +141,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
             isRoamingDisabled = isRoamingDisabled,
             isConfigMobileDataDisabled = isConfigMobileDataDisabled,
             is2GNetworkDisabled = is2GNetworkDisabled,
+            enabledUserRestrictions = enabledUserRestrictions,
             isCanDisableChangeWifiState = restrictionManageContract.isCanDisableChangeWifiState,
             isCanDisableHotspot = restrictionManageContract.isCanDisableHotspot,
             isCanDisableAddNewWifiNetworks = restrictionManageContract.isCanDisableAddNewWifiNetworks,
@@ -184,6 +188,7 @@ class AppRestrictionModuleViewModel @Inject constructor(
             AppRestrictionModuleUiEvent.ToggleRoamingDisabled -> toggleRoamingDisabled()
             AppRestrictionModuleUiEvent.ToggleWifiConfigDisabled -> toggleWifiConfigDisabled()
             AppRestrictionModuleUiEvent.ToggleWifiStateChangeDisabled -> toggleWifiStateChangeDisabled()
+            is AppRestrictionModuleUiEvent.ToggleUserRestriction -> toggleUserRestriction(event.restrictionKey)
         }
     }
 
@@ -365,6 +370,13 @@ class AppRestrictionModuleViewModel @Inject constructor(
     private fun toggleCameraDisabled() = changeRestrictionState {
         val isCameraDisabled = state.value.isCameraDisabled
         restrictionManageContract.setCameraDisabled(!isCameraDisabled)
+    }
+
+    private fun toggleUserRestriction(restrictionKey: String) = changeRestrictionState {
+        restrictionManageContract.setUserRestriction(
+            restrictionKey,
+            restrictionKey !in state.value.enabledUserRestrictions
+        )
     }
 
     private fun changeRestrictionState(

@@ -45,6 +45,7 @@ class MainViewModel @Inject constructor(
             MainScreenEvent.OnDeviveRestrictionButtonClicked -> toDeviceRestrictionModule()
             MainScreenEvent.OnWorkProfileManagementClicked -> toWorkProfileManagement()
             MainScreenEvent.OnGlobalPermissionsButtonClicked -> toGlobalPermissions()
+            MainScreenEvent.OnLocationSpoofButtonClicked -> toLocationSpoof()
             MainScreenEvent.OnHowGrantPermissionClicked -> {
                 // How to grant
             }
@@ -71,6 +72,10 @@ class MainViewModel @Inject constructor(
 
     private fun toGlobalPermissions() = viewModelScope.launch {
         navigateToModuleContract.toGlobalPermissions()
+    }
+
+    private fun toLocationSpoof() = viewModelScope.launch {
+        navigateToModuleContract.toLocationSpoof()
     }
 
     private fun toggleQuietMode(isQuiet: Boolean) = viewModelScope.launch {

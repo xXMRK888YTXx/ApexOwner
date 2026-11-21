@@ -6,6 +6,7 @@ sealed interface MainScreenEvent : UiEvent {
     data object OnDeviveRestrictionButtonClicked : MainScreenEvent
     data object OnWorkProfileManagementClicked : MainScreenEvent
     data object OnGlobalPermissionsButtonClicked : MainScreenEvent
+    data object OnLocationSpoofButtonClicked : MainScreenEvent
     data object OnWorkProfileButtonClicked : MainScreenEvent
     data object OnHowGrantPermissionClicked : MainScreenEvent
     data class OnToggleWorkProfileQuietMode(val isQuiet: Boolean) : MainScreenEvent

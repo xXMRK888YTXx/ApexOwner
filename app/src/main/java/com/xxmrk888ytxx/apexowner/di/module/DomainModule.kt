@@ -1,8 +1,10 @@
 package com.xxmrk888ytxx.apexowner.di.module
 
 import com.xxmrk888ytxx.apexowner.data.Navigation3NavigationManager
+import com.xxmrk888ytxx.apexowner.data.AppLockRepositoryImpl
 import com.xxmrk888ytxx.apexowner.data.SettingsRepositoryImpl
 import com.xxmrk888ytxx.apexowner.domain.NavigationManager
+import com.xxmrk888ytxx.apexowner.domain.AppLockRepository
 import com.xxmrk888ytxx.apexowner.domain.SettingsRepository
 import dagger.Binds
 import dagger.Module
@@ -16,6 +18,9 @@ interface DomainModule {
     @Binds
     @Singleton
     fun bindNavigationManager(navigationManager: Navigation3NavigationManager): NavigationManager
+
+    @Binds
+    fun bindAppLockRepository(appLockRepositoryImpl: AppLockRepositoryImpl): AppLockRepository
 
     @Binds
     fun bindSettingsRepository(settingsRepositoryImpl: SettingsRepositoryImpl): SettingsRepository

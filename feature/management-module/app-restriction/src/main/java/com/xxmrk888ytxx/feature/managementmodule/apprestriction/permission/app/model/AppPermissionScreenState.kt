@@ -11,6 +11,7 @@ data class AppPermissionScreenState(
     val onlyRequested: Boolean = false,
     val permissions: List<AppPermissionUiModel> = emptyList(),
     val totalRequestedCount: Int = 0,
+    val userControlledCount: Int = 0,
     val forceGrantedCount: Int = 0,
     val forceDeniedCount: Int = 0
 ) : UiState
