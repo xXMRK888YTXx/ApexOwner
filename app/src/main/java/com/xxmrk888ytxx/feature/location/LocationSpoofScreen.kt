@@ -77,6 +77,15 @@ fun LocationSpoofScreen(viewModel: LocationSpoofViewModel = hiltViewModel()) {
                 }
             }
 
+            if (state.enabled) {
+                OutlinedButton(
+                    onClick = viewModel::restoreRealLocation,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.location_restore_real))
+                }
+            }
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)

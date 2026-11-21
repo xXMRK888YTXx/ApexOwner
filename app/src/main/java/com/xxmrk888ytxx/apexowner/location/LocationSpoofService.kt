@@ -78,7 +78,7 @@ class LocationSpoofService : Service() {
             setOngoing(true)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
+            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }
@@ -86,15 +86,29 @@ class LocationSpoofService : Service() {
 
     override fun onDestroy() {
         job?.cancel()
+        cleanupProviders()
+        super.onDestroy()
+    }
+
+    private fun cleanupProviders() {
         initializedProviders.toList().forEach { provider ->
             runCatching { locationManager.removeTestProvider(provider) }
         }
         initializedProviders.clear()
-        super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            ACTION_UPDATE -> publishLocation()
+            ACTION_STOP -> {
+                cleanupProviders()
+                stopSelf()
+                return START_NOT_STICKY
+            }
+        }
+        return START_STICKY
+    }
 
     companion object {
         private const val TAG = "LocationSpoofService"
@@ -106,7 +120,18 @@ class LocationSpoofService : Service() {
         }
 
         fun stop(context: Context) {
-            context.stopService(Intent(context, LocationSpoofService::class.java))
+            context.startService(
+                Intent(context, LocationSpoofService::class.java).setAction(ACTION_STOP)
+            )
         }
+
+        fun update(context: Context) {
+            context.startService(
+                Intent(context, LocationSpoofService::class.java).setAction(ACTION_UPDATE)
+            )
+        }
+
+        private const val ACTION_UPDATE = "com.xxmrk888ytxx.apexowner.action.UPDATE_MOCK_LOCATION"
+        private const val ACTION_STOP = "com.xxmrk888ytxx.apexowner.action.STOP_MOCK_LOCATION"
     }
 }

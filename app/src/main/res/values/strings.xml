@@ -63,6 +63,7 @@
     <string name="location_spoof_current_title">Используемая локация</string>
     <string name="location_spoof_using_format">Активна: %1$s, %2$s</string>
     <string name="location_spoof_not_active">Подмена выключена — реальная геолокация не изменяется</string>
+    <string name="location_restore_real">Вернуть реальную геолокацию</string>
     <string name="location_spoof_point_title">Точка подмены</string>
     <string name="location_from_clipboard">From clipboard</string>
     <string name="location_from_clipboard_pair">From clipboard (lat, lon)</string>

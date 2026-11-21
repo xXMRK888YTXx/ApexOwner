@@ -50,8 +50,7 @@ class LocationSpoofManager @Inject constructor(
         setCoordinates(latitude, longitude)
         val updated = _state.value
         if (updated.error == null && updated.enabled) {
-            LocationSpoofService.stop(context)
-            LocationSpoofService.start(context)
+            LocationSpoofService.update(context)
         }
     }
 
@@ -83,6 +82,10 @@ class LocationSpoofManager @Inject constructor(
             LocationSpoofService.stop(context)
         }
         _state.value = readState()
+    }
+
+    fun restoreRealLocation() {
+        toggle(false)
     }
 
     fun refresh() {

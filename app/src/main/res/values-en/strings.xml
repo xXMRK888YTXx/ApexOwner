@@ -64,6 +64,7 @@
     <string name="location_spoof_current_title">Location in use</string>
     <string name="location_spoof_using_format">Active: %1$s, %2$s</string>
     <string name="location_spoof_not_active">Mock location is off — the real location is unchanged</string>
+    <string name="location_restore_real">Restore real location</string>
     <string name="location_spoof_point_title">Mock location point</string>
     <string name="location_from_clipboard">From clipboard</string>
     <string name="location_from_clipboard_pair">From clipboard (lat, lon)</string>

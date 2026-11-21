@@ -113,7 +113,11 @@
         <service
             android:name=".location.LocationSpoofService"
             android:exported="false"
-            android:foregroundServiceType="location" />
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Maintaining a user-enabled mock location provider" />
+        </service>
 
         <receiver
             android:name=".service.InactivityAlarmReceiver"

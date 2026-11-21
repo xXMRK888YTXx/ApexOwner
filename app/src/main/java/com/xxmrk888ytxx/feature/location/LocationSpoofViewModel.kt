@@ -14,6 +14,7 @@ class LocationSpoofViewModel @Inject constructor(
     fun setCoordinates(latitude: String, longitude: String) = manager.setCoordinates(latitude, longitude)
     fun applyCoordinates(latitude: String, longitude: String) = manager.applyCoordinates(latitude, longitude)
     fun setEnabled(enabled: Boolean) = manager.toggle(enabled)
+    fun restoreRealLocation() = manager.restoreRealLocation()
     fun refresh() = manager.refresh()
     fun mockLocationSettingsIntent() = manager.openMockLocationSettings()
 }
