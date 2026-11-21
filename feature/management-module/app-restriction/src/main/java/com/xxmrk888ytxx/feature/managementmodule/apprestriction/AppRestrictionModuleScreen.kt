@@ -47,6 +47,7 @@ import com.xxmrk888ytxx.core.base.compose.asString
 import com.xxmrk888ytxx.core.base.compose.extension.HandleSideEffects
 import com.xxmrk888ytxx.core.base.compose.ui.CoreTopBar
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.AppRestrictionModuleUiEvent
+import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.AdditionalRestrictionKeys
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.Restriction
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.ScreenState
 import kotlinx.coroutines.flow.Flow
@@ -58,7 +59,7 @@ fun AppRestrictionModuleScreen(
     onEvent: (AppRestrictionModuleUiEvent) -> Unit,
     sideEffect: Flow<SideEffect>
 ) {
-    val profileOwnerSupportedIds = remember { setOf<Short>(0, 10, 4, 5, 6, 7) }
+    val profileOwnerSupportedIds = remember { setOf<Short>(0, 10, 4, 5, 6, 7, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46) }
     var showUnavailable by remember(screenState.isProfileOwner) { mutableStateOf(false) }
     val rawGroupedRestrictions = remember(screenState) {
         mapOf(
@@ -164,6 +165,47 @@ fun AppRestrictionModuleScreen(
             ),
             R.string.category_security_and_system.uiText() to listOf(
                 Restriction(
+                    id = 36,
+                    iconRes = R.drawable.robot,
+                    title = R.string.disable_assist_content.uiText(),
+                    description = R.string.disable_assist_content_desc.uiText(),
+                    isEnabled = screenState.enabledUserRestrictions.contains(AdditionalRestrictionKeys.ASSIST_CONTENT),
+                    isAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM,
+                    uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUserRestriction(AdditionalRestrictionKeys.ASSIST_CONTENT)
+                ),
+                Restriction(
+                    id = 37,
+                    iconRes = R.drawable.lock_reset,
+                    title = R.string.disable_autofill.uiText(),
+                    description = R.string.disable_autofill_desc.uiText(),
+                    isEnabled = screenState.enabledUserRestrictions.contains(AdditionalRestrictionKeys.AUTOFILL),
+                    uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUserRestriction(AdditionalRestrictionKeys.AUTOFILL)
+                ),
+                Restriction(
+                    id = 38,
+                    iconRes = R.drawable.lock_reset,
+                    title = R.string.disable_credentials_configuration.uiText(),
+                    description = R.string.disable_credentials_configuration_desc.uiText(),
+                    isEnabled = screenState.enabledUserRestrictions.contains(AdditionalRestrictionKeys.CONFIG_CREDENTIALS),
+                    uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUserRestriction(AdditionalRestrictionKeys.CONFIG_CREDENTIALS)
+                ),
+                Restriction(
+                    id = 39,
+                    iconRes = R.drawable.apps,
+                    title = R.string.disable_cross_profile_copy_paste.uiText(),
+                    description = R.string.disable_cross_profile_copy_paste_desc.uiText(),
+                    isEnabled = screenState.enabledUserRestrictions.contains(AdditionalRestrictionKeys.CROSS_PROFILE_COPY_PASTE),
+                    uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUserRestriction(AdditionalRestrictionKeys.CROSS_PROFILE_COPY_PASTE)
+                ),
+                Restriction(
+                    id = 40,
+                    iconRes = R.drawable.shield_locked,
+                    title = R.string.ensure_app_verification.uiText(),
+                    description = R.string.ensure_app_verification_desc.uiText(),
+                    isEnabled = screenState.enabledUserRestrictions.contains(AdditionalRestrictionKeys.VERIFY_APPS),
+                    uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUserRestriction(AdditionalRestrictionKeys.VERIFY_APPS)
+                ),
+                Restriction(
                     id = 8,
                     iconRes = R.drawable.robot,
                     title = R.string.block_ai_screen_capture.uiText(),
@@ -224,6 +266,22 @@ fun AppRestrictionModuleScreen(
             ),
             R.string.category_users_and_accounts.uiText() to listOf(
                 Restriction(
+                    id = 41,
+                    iconRes = R.drawable.apps,
+                    title = R.string.disable_account_changes.uiText(),
+                    description = R.string.disable_account_changes_desc.uiText(),
+                    isEnabled = screenState.enabledUserRestrictions.contains(AdditionalRestrictionKeys.MODIFY_ACCOUNTS),
+                    uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUserRestriction(AdditionalRestrictionKeys.MODIFY_ACCOUNTS)
+                ),
+                Restriction(
+                    id = 42,
+                    iconRes = R.drawable.switch_user,
+                    title = R.string.disable_user_icon.uiText(),
+                    description = R.string.disable_user_icon_desc.uiText(),
+                    isEnabled = screenState.enabledUserRestrictions.contains(AdditionalRestrictionKeys.SET_USER_ICON),
+                    uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUserRestriction(AdditionalRestrictionKeys.SET_USER_ICON)
+                ),
+                Restriction(
                     id = 14,
                     iconRes = R.drawable.add,
                     title = R.string.disable_adding_new_users.uiText(),
@@ -249,6 +307,22 @@ fun AppRestrictionModuleScreen(
                 )
             ),
             R.string.category_network_and_connectivity.uiText() to listOf(
+                Restriction(
+                    id = 43,
+                    iconRes = R.drawable.nfc,
+                    title = R.string.disable_nfc_beam.uiText(),
+                    description = R.string.disable_nfc_beam_desc.uiText(),
+                    isEnabled = screenState.enabledUserRestrictions.contains(AdditionalRestrictionKeys.OUTGOING_BEAM),
+                    uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUserRestriction(AdditionalRestrictionKeys.OUTGOING_BEAM)
+                ),
+                Restriction(
+                    id = 44,
+                    iconRes = R.drawable.hard_disk,
+                    title = R.string.disable_printing.uiText(),
+                    description = R.string.disable_printing_desc.uiText(),
+                    isEnabled = screenState.enabledUserRestrictions.contains(AdditionalRestrictionKeys.PRINTING),
+                    uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUserRestriction(AdditionalRestrictionKeys.PRINTING)
+                ),
                 Restriction(
                     id = 17,
                     iconRes = R.drawable.bluetooth,
@@ -360,6 +434,22 @@ fun AppRestrictionModuleScreen(
                 ),
             ),
             R.string.category_telephony.uiText() to listOf(
+                Restriction(
+                    id = 45,
+                    iconRes = R.drawable.transform,
+                    title = R.string.disable_sharing_into_work_profile.uiText(),
+                    description = R.string.disable_sharing_into_work_profile_desc.uiText(),
+                    isEnabled = screenState.enabledUserRestrictions.contains(AdditionalRestrictionKeys.SHARE_INTO_MANAGED_PROFILE),
+                    uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUserRestriction(AdditionalRestrictionKeys.SHARE_INTO_MANAGED_PROFILE)
+                ),
+                Restriction(
+                    id = 46,
+                    iconRes = R.drawable.lock_reset,
+                    title = R.string.disable_unified_password.uiText(),
+                    description = R.string.disable_unified_password_desc.uiText(),
+                    isEnabled = screenState.enabledUserRestrictions.contains(AdditionalRestrictionKeys.UNIFIED_PASSWORD),
+                    uiEventForToggle = AppRestrictionModuleUiEvent.ToggleUserRestriction(AdditionalRestrictionKeys.UNIFIED_PASSWORD)
+                ),
                 Restriction(
                     id = 22,
                     iconRes = R.drawable.call,

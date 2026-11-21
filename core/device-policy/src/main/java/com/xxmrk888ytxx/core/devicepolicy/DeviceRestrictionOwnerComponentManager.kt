@@ -41,6 +41,8 @@ interface DeviceRestrictionOwnerComponentManager {
     val isRoamingDisabled: Flow<Boolean>
     val isConfigMobileDataDisabled: Flow<Boolean>
     val is2GNetworkDisabled: Flow<Boolean>
+    /** User restrictions that are supported by a regular Profile Owner. */
+    val enabledUserRestrictions: Flow<Set<String>>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
     val isCanDisableContentSuggestion: Boolean
@@ -86,5 +88,6 @@ interface DeviceRestrictionOwnerComponentManager {
     suspend fun setRoamingDisabled(isDisabled: Boolean)
     suspend fun setConfigMobileDataDisabled(isDisabled: Boolean)
     suspend fun set2GNetworkDisabled(isDisabled: Boolean)
+    suspend fun setUserRestriction(restrictionKey: String, isDisabled: Boolean)
     suspend fun updateRestrictionState()
 }

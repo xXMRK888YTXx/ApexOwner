@@ -41,6 +41,7 @@ interface RestrictionManageContract {
     val isRoamingDisabled: Flow<Boolean>
     val isConfigMobileDataDisabled: Flow<Boolean>
     val is2GNetworkDisabled: Flow<Boolean>
+    val enabledUserRestrictions: Flow<Set<String>>
     val isCanDisableUSBDataSignal: Boolean
     val isCanDisableScreenContentCaptureForAI: Boolean
     val isCanDisableContentSuggestion: Boolean
@@ -86,4 +87,5 @@ interface RestrictionManageContract {
     suspend fun setAirplaneModeDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun setAddNewWifiNetworksDisabled(isDisabled: Boolean): Result<Unit>
     suspend fun set2GNetworkDisabled(isDisabled: Boolean): Result<Unit>
+    suspend fun setUserRestriction(restrictionKey: String, isDisabled: Boolean): Result<Unit>
 }

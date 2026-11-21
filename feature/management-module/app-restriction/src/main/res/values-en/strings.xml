@@ -113,4 +113,26 @@
     <string name="app_perm_stats_granted">Granted</string>
     <string name="app_perm_stats_denied">Denied</string>
     <string name="sensor_grant_not_supported_profile_owner">Android prevents Profile Owner from force-granting access to sensors (camera, microphone, location)</string>
+    <string name="disable_assist_content">Block Assistant content</string>
+    <string name="disable_assist_content_desc">Prevents Assistant from receiving screenshots and app data from the work profile.</string>
+    <string name="disable_autofill">Disable Autofill</string>
+    <string name="disable_autofill_desc">Prevents Autofill services from being used in the work profile.</string>
+    <string name="disable_credentials_configuration">Block credential changes</string>
+    <string name="disable_credentials_configuration_desc">Prevents changing the work profile password and other credentials.</string>
+    <string name="disable_cross_profile_copy_paste">Block cross-profile copy and paste</string>
+    <string name="disable_cross_profile_copy_paste_desc">Prevents clipboard data from being exported from the work profile to the personal profile.</string>
+    <string name="disable_account_changes">Block account changes</string>
+    <string name="disable_account_changes_desc">Prevents adding and removing accounts in the work profile.</string>
+    <string name="disable_nfc_beam">Block NFC Beam</string>
+    <string name="disable_nfc_beam_desc">Prevents work-profile apps from sending data through NFC Beam.</string>
+    <string name="disable_printing">Disable printing</string>
+    <string name="disable_printing_desc">Prevents printing from the work profile.</string>
+    <string name="disable_user_icon">Block profile icon changes</string>
+    <string name="disable_user_icon_desc">Prevents changing the work profile user icon.</string>
+    <string name="disable_sharing_into_work_profile">Block sharing into work profile</string>
+    <string name="disable_sharing_into_work_profile_desc">Prevents files and data from being shared from the personal profile into the work profile.</string>
+    <string name="disable_unified_password">Disable unified password</string>
+    <string name="disable_unified_password_desc">Requires a separate password for the work profile.</string>
+    <string name="ensure_app_verification">Enforce app verification</string>
+    <string name="ensure_app_verification_desc">Prevents disabling system verification of installed applications.</string>
 </resources>
