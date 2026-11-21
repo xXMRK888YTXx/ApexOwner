@@ -30,6 +30,16 @@ Sensitive permissions such as camera, microphone, and location cannot be force-g
 - In `Profile Owner` mode, verify sensitive `FORCE_GRANTED` is blocked with an explanation, while the other three modes remain available.
 - Record device-specific limitations in the final task report.
 
+## Inactivity timers
+
+- `Reset when unused` and `Freeze when unused` use a persisted wall-clock `lastOpenedTimestamp`, so deadlines survive service restarts and device reboots.
+- A new timer cycle starts when either unused policy is enabled or its timeout is changed. The old timestamp must not be reused in that case.
+- Opening or launching an app resets both unused timers. Foreground detection is polled by the policy service and also refreshed by the app launch/unfreeze bridge.
+- The policy service schedules the nearest deadline with `AlarmManager` and performs an immediate check when a deadline has already passed. `Screen lock` remains a separate continuous-lock timer.
+- Verify timer behavior with a one-minute freeze test, then disable/re-enable and change the timeout; each action must start from the current time rather than applying the previous expired deadline.
+- `Reset when unused` supports minutes, hours, and days. Older policies without the hour/minute fields remain compatible and default to days.
+- `Reset when unused` only clears application data. It must not call `setApplicationHidden`; freezing is controlled separately by `Freeze when unused`.
+
 ## Latest device verification
 
 - Debug APK was installed on device `df4062bb` for personal user `0`; the app starts successfully.

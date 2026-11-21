@@ -63,6 +63,7 @@
     <string name="hours_to_wipe_label">Wipe data after:</string>
     <string name="app_unused_title">Reset when unused</string>
     <string name="app_unused_enabled_desc">Wipe data if not opened for %1$d days</string>
+    <string name="app_unused_enabled_duration_desc">Wipe data if the app is not opened for %1$s</string>
     <string name="app_unused_disabled_desc">Wipe on inactivity is disabled</string>
     <string name="days_unused_label">Inactivity period:</string>
     <string name="badge_lock_freeze">⏱ %1$d h</string>
@@ -73,6 +74,7 @@
     <string name="profile_personal_shelter">Personal profile</string>
     <string name="refresh_action">Refresh</string>
     <string name="unit_hours">Hours</string>
+    <string name="unit_days">Days</string>
     <string name="unit_minutes_test">Minutes (test)</string>
     <string name="unit_label">Units:</string>
     <string name="unit_hour_short">h</string>
@@ -98,10 +100,6 @@
     <string name="wipe_date_time">🗑️ Wipe date and time:</string>
     <string name="wipe_remaining">⏳ Time until data wipe:</string>
     <string name="last_wipe_time">🗑️ Last data wipe: %1$s</string>
-    <string name="countdown_from">Countdown from: %1$s</string>
-    <string name="countdown_refresh_note">Updated every time the app is launched</string>
-    <string name="wipe_test_button">Test (30+ days)</string>
-    <string name="reset_countdown">Reset countdown</string>
     <string name="apps_count">Apps: %1$d</string>
     <string name="ok_action">OK</string>
 </resources>

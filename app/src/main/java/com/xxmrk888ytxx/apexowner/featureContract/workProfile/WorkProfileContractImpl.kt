@@ -348,6 +348,8 @@ class WorkProfileContractImpl @Inject constructor(
                         freezeIfUnusedMinutes = it.freezeIfUnusedMinutes,
                         wipeIfUnusedEnabled = it.wipeIfUnusedEnabled,
                         wipeIfUnusedDays = it.wipeIfUnusedDays,
+                        wipeIfUnusedHours = it.wipeIfUnusedHours,
+                        wipeIfUnusedMinutes = it.wipeIfUnusedMinutes,
                         lastOpenedTimestamp = it.lastOpenedTimestamp,
                         lockFreezeMinutes = it.lockFreezeMinutes,
                         lockWipeMinutes = it.lockWipeMinutes,
@@ -373,7 +375,7 @@ class WorkProfileContractImpl @Inject constructor(
                     inactivityPolicy = policyUi
                 )
             }
-            .sortedBy { it.name.lowercase() }
+            .sortedWith(compareBy<WorkProfileApp> { it.isFrozen }.thenBy { it.name.lowercase() })
     }
 
     private fun queryPersonalProfileApps(): List<WorkProfileApp> {
@@ -421,6 +423,8 @@ class WorkProfileContractImpl @Inject constructor(
                         freezeIfUnusedMinutes = it.freezeIfUnusedMinutes,
                         wipeIfUnusedEnabled = it.wipeIfUnusedEnabled,
                         wipeIfUnusedDays = it.wipeIfUnusedDays,
+                        wipeIfUnusedHours = it.wipeIfUnusedHours,
+                        wipeIfUnusedMinutes = it.wipeIfUnusedMinutes,
                         lastOpenedTimestamp = it.lastOpenedTimestamp,
                         lockFreezeMinutes = it.lockFreezeMinutes,
                         lockWipeMinutes = it.lockWipeMinutes,
@@ -446,7 +450,7 @@ class WorkProfileContractImpl @Inject constructor(
                     inactivityPolicy = policyUi
                 )
             }
-            .sortedBy { it.name.lowercase() }
+            .sortedWith(compareBy<WorkProfileApp> { it.isFrozen }.thenBy { it.name.lowercase() })
     }
 
     override suspend fun openAppPermissions(packageName: String, appName: String) {
@@ -547,6 +551,8 @@ class WorkProfileContractImpl @Inject constructor(
             freezeIfUnusedMinutes = policy.freezeIfUnusedMinutes,
             wipeIfUnusedEnabled = policy.wipeIfUnusedEnabled,
             wipeIfUnusedDays = policy.wipeIfUnusedDays,
+            wipeIfUnusedHours = policy.wipeIfUnusedHours,
+            wipeIfUnusedMinutes = policy.wipeIfUnusedMinutes,
             lastOpenedTimestamp = policy.lastOpenedTimestamp,
             lockFreezeMinutes = policy.lockFreezeMinutes,
             lockWipeMinutes = policy.lockWipeMinutes,

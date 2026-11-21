@@ -63,6 +63,7 @@
     <string name="hours_to_wipe_label">Сброс данных через:</string>
     <string name="app_unused_title">Сброс при неиспользовании</string>
     <string name="app_unused_enabled_desc">Очистка данных, если не открывалось %1$d дн.</string>
+    <string name="app_unused_enabled_duration_desc">Очистка данных, если приложение не открывалось %1$s</string>
     <string name="app_unused_disabled_desc">Очистка данных при неиспользовании отключена</string>
     <string name="days_unused_label">Срок неактивности:</string>
     <string name="badge_lock_freeze">⏱ %1$d ч</string>
@@ -73,6 +74,7 @@
     <string name="profile_personal_shelter">Личный профиль</string>
     <string name="refresh_action">Обновить</string>
     <string name="unit_hours">Часы</string>
+    <string name="unit_days">Дни</string>
     <string name="unit_minutes_test">Минуты (тест)</string>
     <string name="unit_label">Единицы:</string>
     <string name="unit_hour_short">ч</string>
@@ -98,10 +100,6 @@
     <string name="wipe_date_time">🗑️ Дата и время сброса:</string>
     <string name="wipe_remaining">⏳ До сброса данных:</string>
     <string name="last_wipe_time">🗑️ Последний сброс данных: %1$s</string>
-    <string name="countdown_from">Отсчёт с: %1$s</string>
-    <string name="countdown_refresh_note">Обновляется при каждом запуске приложения</string>
-    <string name="wipe_test_button">Тест (30+ дн)</string>
-    <string name="reset_countdown">Сбросить отсчёт</string>
     <string name="apps_count">Приложений: %1$d</string>
     <string name="ok_action">OK</string>
 </resources>
