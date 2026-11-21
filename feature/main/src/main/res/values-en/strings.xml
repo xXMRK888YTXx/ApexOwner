@@ -36,4 +36,6 @@
     <string name="global_permissions_title_work_profile">Global profile permissions</string>
     <string name="global_permissions_desc_device">Force-disable permissions (camera, microphone, location, and more) for all apps</string>
     <string name="global_permissions_desc_work_profile">Force-disable permissions for work profile apps</string>
+    <string name="location_spoof_title">Mock location</string>
+    <string name="location_spoof_main_desc">Set and use a fixed location</string>
 </resources>

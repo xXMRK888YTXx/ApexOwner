@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.androidx.material3.adaptive.navigation3)
     implementation(libs.androidx.splashScreen)
     implementation(libs.androidx.fragment.ktx)
+    implementation(libs.androidx.biometric)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
 

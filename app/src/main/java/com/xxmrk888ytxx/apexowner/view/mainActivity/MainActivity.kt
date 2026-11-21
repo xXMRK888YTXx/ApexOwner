@@ -1,7 +1,9 @@
 package com.xxmrk888ytxx.apexowner.view.mainActivity
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
@@ -29,6 +31,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.xxmrk888ytxx.apexowner.core.extension.ScreenContent
+import com.xxmrk888ytxx.apexowner.R
 import com.xxmrk888ytxx.apexowner.core.navigation.BottomBarScreen
 import com.xxmrk888ytxx.apexowner.core.navigation.Screen
 import com.xxmrk888ytxx.apexowner.view.mainActivity.model.ApexOwnerBottomBarItem
@@ -57,13 +60,16 @@ import com.xxmrk888ytxx.feature.managementmodule.workprofile.WorkProfileViewMode
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileScreenState
 import com.xxmrk888ytxx.feature.managementmodule.workprofile.model.WorkProfileUiEvent
 import com.xxmrk888ytxx.feature.settings.SettingsScreen
+import com.xxmrk888ytxx.feature.location.LocationSpoofScreen
+import com.xxmrk888ytxx.apexowner.feature.auth.AuthScreen
+import com.xxmrk888ytxx.apexowner.feature.auth.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 import com.xxmrk888ytxx.feature.managementmodule.apprestriction.model.ScreenState as AppRestrictionScreenState
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     @Inject
     lateinit var toastManager: ToastManager
@@ -72,6 +78,7 @@ class MainActivity : ComponentActivity() {
     lateinit var profileOwnerManager: ProfileOwnerManager
 
     private val viewModel: MainActivityViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -87,10 +94,29 @@ class MainActivity : ComponentActivity() {
             viewModel.navigator.navigate(Screen.GlobalPermissionModuleScreen)
         }
         setContentWithThemeAndProviders(
+            useDarkTheme = true,
             navigator = viewModel.navigator,
             toastManager = toastManager,
             themeColor = MutableStateFlow(MustardYellow),
         ) {
+            val authState by authViewModel.state.collectAsState()
+            val biometricAvailable = BiometricManager.from(this@MainActivity).canAuthenticate(
+                BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK
+            ) == BiometricManager.BIOMETRIC_SUCCESS
+            LaunchedEffect(authState.isLocked, authState.biometricEnabled, biometricAvailable) {
+                if (authState.isLocked && authState.biometricEnabled && biometricAvailable) {
+                    authenticateWithBiometric()
+                }
+            }
+            if (!authState.isReady || authState.isLocked) {
+                AuthScreen(
+                    state = authState,
+                    onUnlock = authViewModel::unlock,
+                    onBiometric = ::authenticateWithBiometric,
+                    biometricAvailable = biometricAvailable
+                )
+                return@setContentWithThemeAndProviders
+            }
             val backStack by viewModel.backStack.collectAsState()
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
@@ -160,6 +186,10 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        entry<Screen.LocationSpoofScreen> {
+                            LocationSpoofScreen()
+                        }
+
                         entry<Screen.AppPermissionsModuleScreen> { navKey ->
                             val viewModel = hiltViewModel<AppPermissionViewModel>()
                             LaunchedEffect(navKey.packageName) {
@@ -206,6 +236,29 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         profileOwnerManager.setupCrossProfileFilters()
         viewModel.onEvent(MainActivityEvent.OnResume)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        authViewModel.lock()
+    }
+
+    private fun authenticateWithBiometric() {
+        val prompt = BiometricPrompt(
+            this,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    authViewModel.unlockWithBiometric()
+                }
+            }
+        )
+        prompt.authenticate(
+            BiometricPrompt.PromptInfo.Builder()
+                .setTitle(getString(R.string.app_lock_title))
+                .setSubtitle(getString(R.string.app_lock_message))
+                .setNegativeButtonText(getString(R.string.app_lock_password))
+                .build()
+        )
     }
 
     @Composable

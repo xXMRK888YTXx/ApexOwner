@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.xxmrk888ytxx.core.base.android.logs.Logger
+import com.xxmrk888ytxx.apexowner.location.LocationSpoofService
 
 class BootCompletedReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -15,6 +16,9 @@ class BootCompletedReceiver : BroadcastReceiver() {
             action == Intent.ACTION_USER_UNLOCKED
         ) {
             ApexPolicyService.start(context)
+            if (context.getSharedPreferences("location_spoof", Context.MODE_PRIVATE).getBoolean("enabled", false)) {
+                LocationSpoofService.start(context)
+            }
         }
     }
 }
